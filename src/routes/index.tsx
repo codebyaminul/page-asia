@@ -202,14 +202,17 @@ function Home() {
         </div>
       </section>
 
-      {/* Final CTA — oversized wordmark band */}
-      <section className="border-t border-border bg-background py-20 lg:py-28">
-        <div className="container-page">
+      {/* Final CTA — oversized one-line wordmark band */}
+      <section className="overflow-hidden border-t border-border bg-background py-20 lg:py-28">
+        <div className="px-5 sm:px-8">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">PAGE International Ltd.</p>
-          <h2 className="mt-6 font-display font-bold uppercase leading-[0.85] tracking-tight text-foreground" style={{ fontSize: "clamp(3.5rem, 12.5vw, 13rem)" }}>
-            Keep your<br />vehicle moving<span className="text-primary">.</span>
+          <h2
+            className="mt-5 whitespace-nowrap font-display font-black uppercase leading-[0.82] tracking-[-0.03em] text-foreground"
+            style={{ fontSize: "clamp(2.6rem, 15.2vw, 17rem)" }}
+          >
+            THINK NEXT<span className="text-primary">.</span>
           </h2>
-          <div className="mt-12 flex flex-wrap items-center gap-3">
+          <div className="container-page mt-12 flex flex-wrap items-center gap-3">
             <Link to="/shop" className="btn btn-primary">Shop Parts</Link>
             <Link to="/services/book" className="btn btn-outline">Book Service</Link>
           </div>
