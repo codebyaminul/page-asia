@@ -52,7 +52,7 @@ export function HeroStory() {
           <p className="eyebrow">PAGE International</p>
           <h1 className="display-xl mt-5 max-w-4xl">Everything your vehicle needs.</h1>
           <p className="mt-6 h-6 text-lg text-ink-foreground/85 transition-opacity" key={active}>
-            <span className="animate-in fade-in slide-in-from-bottom-2 duration-500 inline-block">{frames[active].line}</span>
+            <span className="animate-in fade-in slide-in-from-bottom-2 duration-500 inline-block">{frames[active]!.line}</span>
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/shop" className="btn btn-primary">Shop Parts</Link>
@@ -61,7 +61,7 @@ export function HeroStory() {
         </div>
 
         <div className="absolute bottom-8 right-[clamp(1rem,4vw,3rem)] hidden w-64 md:block" aria-hidden>
-          <p className="mb-3 text-xs uppercase tracking-[0.2em] text-ink-muted">{frames[active].label}</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.2em] text-ink-muted">{frames[active]!.label}</p>
           <div className="flex gap-1.5">
             {frames.map((_, i) => (
               <span key={i} className="h-0.5 flex-1 bg-ink-border">

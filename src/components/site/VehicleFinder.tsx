@@ -11,8 +11,8 @@ export function VehicleFinder({ dark = true }: { dark?: boolean }) {
   const [engine, setEngine] = useState(vehicle?.engine ?? "");
   const navigate = useNavigate();
   const f = dark ? "field-dark" : "field";
-  const models = make ? Object.keys(vehicleData[make]) : [];
-  const engines = make && model ? vehicleData[make][model] : [];
+  const models = make ? Object.keys(vehicleData[make] ?? {}) : [];
+  const engines = make && model ? (vehicleData[make]?.[model] ?? []) : [];
   const ready = make && model && year;
 
   return (

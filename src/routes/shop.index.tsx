@@ -5,13 +5,13 @@ import { PageHeader } from "@/components/site/PageHeader";
 import { ProductCard } from "@/components/site/ProductCard";
 import { categories, products } from "@/lib/data";
 
-type S = { q?: string; cat?: string; vehicle?: string };
+type S = { q?: string | undefined; cat?: string | undefined; vehicle?: string | undefined };
 
 export const Route = createFileRoute("/shop/")({
   validateSearch: (s: Record<string, unknown>): S => ({
-    q: typeof s.q === "string" ? s.q : undefined,
-    cat: typeof s.cat === "string" ? s.cat : undefined,
-    vehicle: typeof s.vehicle === "string" ? s.vehicle : undefined,
+    q: typeof s["q"] === "string" ? s["q"] as string : undefined,
+    cat: typeof s["cat"] === "string" ? s["cat"] as string : undefined,
+    vehicle: typeof s["vehicle"] === "string" ? s["vehicle"] as string : undefined,
   }),
   head: () => ({
     meta: [

@@ -4,9 +4,9 @@ import { useState } from "react";
 import { centers, services, taka, vehicleData, years } from "@/lib/data";
 import { useCart } from "@/lib/cart";
 
-type S = { service?: string; center?: string };
+type S = { service?: string | undefined; center?: string | undefined };
 export const Route = createFileRoute("/services/book")({
-  validateSearch: (s: Record<string, unknown>): S => ({ service: typeof s.service === "string" ? s.service : undefined, center: typeof s.center === "string" ? s.center : undefined }),
+  validateSearch: (s: Record<string, unknown>): S => ({ service: typeof s["service"] === "string" ? s["service"] as string : undefined, center: typeof s["center"] === "string" ? s["center"] as string : undefined }),
   head: () => ({
     meta: [
       { title: "Book a Vehicle Service — PAGE" },
@@ -43,7 +43,7 @@ function Book() {
     <div className="container-page flex min-h-screen flex-col items-center justify-center py-32 text-center">
       <CheckCircle2 className="h-14 w-14 text-success" strokeWidth={1.5} />
       <h1 className="display-lg mt-6">Booking requested</h1>
-      <p className="mt-4 max-w-md text-muted-foreground">{chosen.map((s) => s.name).join(", ")} at {c?.name} on {day !== null && days[day].toDateString()} at {slot}. We'll confirm by SMS. (Demo — no booking was sent.)</p>
+      <p className="mt-4 max-w-md text-muted-foreground">{chosen.map((s) => s.name).join(", ")} at {c?.name} on {day !== null && days[day]!.toDateString()} at {slot}. We'll confirm by SMS. (Demo — no booking was sent.)</p>
       <div className="mt-8 flex gap-3"><Link to="/garage" className="btn btn-dark">View my bookings</Link><Link to="/" className="btn btn-outline">Home</Link></div>
     </div>
   );
@@ -78,7 +78,7 @@ function Book() {
             {step === 1 && (
               <div className="grid gap-3 sm:grid-cols-3">
                 <select aria-label="Make" className="field" value={v.make} onChange={(e) => setV({ make: e.target.value, model: "", year: v.year })}><option value="">Make</option>{Object.keys(vehicleData).map((m) => <option key={m}>{m}</option>)}</select>
-                <select aria-label="Model" className="field" value={v.model} disabled={!v.make} onChange={(e) => setV({ ...v, model: e.target.value })}><option value="">Model</option>{v.make && Object.keys(vehicleData[v.make]).map((m) => <option key={m}>{m}</option>)}</select>
+                <select aria-label="Model" className="field" value={v.model} disabled={!v.make} onChange={(e) => setV({ ...v, model: e.target.value })}><option value="">Model</option>{v.make && Object.keys(vehicleData[v.make] ?? {}).map((m) => <option key={m}>{m}</option>)}</select>
                 <select aria-label="Year" className="field" value={v.year} onChange={(e) => setV({ ...v, year: e.target.value })}><option value="">Year</option>{years.map((y) => <option key={y}>{y}</option>)}</select>
               </div>
             )}
@@ -127,7 +127,7 @@ function Book() {
               <div><dt className="text-ink-muted">Services</dt><dd>{chosen.length ? chosen.map((s) => s.name).join(", ") : "—"}</dd></div>
               <div><dt className="text-ink-muted">Vehicle</dt><dd>{v.make ? `${v.make} ${v.model} ${v.year}` : "—"}</dd></div>
               <div><dt className="text-ink-muted">Location</dt><dd>{c?.name ?? "—"}</dd></div>
-              <div><dt className="text-ink-muted">Time</dt><dd>{day !== null && slot ? `${days[day].toDateString()}, ${slot}` : "—"}</dd></div>
+              <div><dt className="text-ink-muted">Time</dt><dd>{day !== null && slot ? `${days[day]!.toDateString()}, ${slot}` : "—"}</dd></div>
             </dl>
             <div className="mt-6 flex items-baseline justify-between border-t border-ink-border pt-4"><span className="text-sm text-ink-muted">Estimated from</span><span className="font-display text-3xl font-bold">{taka(est)}</span></div>
             <p className="mt-2 text-xs text-ink-muted">Final price confirmed after inspection.</p>

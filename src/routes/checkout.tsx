@@ -39,7 +39,7 @@ function Checkout() {
             <div className="grid gap-3 sm:grid-cols-3">
               {[["cod", "Cash on delivery"], ["card", "Card"], ["mobile", "Mobile wallet"]].map(([k, l]) => (
                 <label key={k} className={`flex cursor-pointer items-center gap-3 border p-4 text-sm font-medium ${pay === k ? "border-primary" : "border-border"}`}>
-                  <input type="radio" name="pay" checked={pay === k} onChange={() => setPay(k)} className="accent-[var(--color-primary)]" />{l}
+                  <input type="radio" name="pay" checked={pay === k} onChange={() => setPay(k!)} className="accent-[var(--color-primary)]" />{l}
                 </label>
               ))}
             </div>
