@@ -67,31 +67,161 @@ export const categories = [
 
 export const mobilitySegments = [
   {
-    id: "4w",
-    name: "Four-Wheeler",
+    id: "4-Wheeler" as MobilityType,
+    label: "Four-Wheeler",
     desc: "Passenger cars, SUVs, commercial vans & light commercial fleet vehicles",
     badge: "Cars & Commercial",
-    link: "/shop?mobility=4-Wheeler",
+    types: [
+      "Passenger Sedans & Hatchbacks",
+      "SUVs & 4x4 Off-Road",
+      "Commercial Cargo Vans",
+      "Fleet Transport Platforms",
+    ],
   },
   {
-    id: "2w",
-    name: "Two-Wheeler",
+    id: "2-Wheeler" as MobilityType,
+    label: "Two-Wheeler",
     desc: "Motorcycles, scooters, electric bikes & workshop scissor lift benches",
-    badge: "Motorcycles & Scooters",
-    link: "/shop?mobility=2-Wheeler",
+    badge: "Bikes & Scooters",
+    types: [
+      "Commuter 100-160cc",
+      "Sport & Performance",
+      "Automatic Scooters",
+      "Electric Two-Wheelers",
+    ],
   },
   {
-    id: "3w",
-    name: "Three-Wheeler",
+    id: "3-Wheeler" as MobilityType,
+    label: "Three-Wheeler",
     desc: "Auto rickshaws, commercial cargo 3W & electric 3W service tooling",
     badge: "Commercial 3W",
-    link: "/shop?mobility=3-Wheeler",
+    types: [
+      "CNG Auto-Rickshaws",
+      "Electric E-Rickshaws",
+      "Commercial Cargo 3W",
+      "Passenger Three-Wheelers",
+    ],
   },
   {
-    id: "ev",
-    name: "Electric Mobility (EV)",
+    id: "EV" as MobilityType,
+    label: "Electric Mobility (EV)",
     desc: "1000V high-voltage tools, battery analyzers, cell balancers & charging stations",
     badge: "2W / 3W / 4W EV",
+    types: [
+      "EV Battery Diagnostics",
+      "High-Voltage VDE Tools",
+      "Traction Pack Tables",
+      "EV Powertrain Scanners",
+    ],
+  },
+];
+
+export const shopVisualCategories = [
+  {
+    name: "Garage Equipment",
+    desc: "2-Post & scissor lifts, tyre changers, wheel balancers",
+    link: "/shop?cat=Garage+Equipment",
+    img: lift,
+    badge: "Commercial Machinery",
+  },
+  {
+    name: "Diagnostics & Testing",
+    desc: "Multi-brand OBD2 tablets, battery analyzers & oscilloscopes",
+    link: "/shop?cat=Diagnostic+Equipment",
+    img: scanner,
+    badge: "Electronic Diagnostics",
+  },
+  {
+    name: "EV Workshop Equipment",
+    desc: "1000V VDE safety tools, traction battery cell balancers",
+    link: "/shop?mobility=EV",
+    img: evTools,
+    badge: "Next-Gen Tooling",
+  },
+  {
+    name: "Brake Systems & Spares",
+    desc: "Low-dust ceramic brake pads, vented disc rotors, fluid bleeders",
+    link: "/shop?cat=Brakes",
+    img: brakepads,
+    badge: "Certified Spares",
+  },
+  {
+    name: "Tyre & Wheel Service",
+    desc: "Automatic tyre changers, digital laser wheel balancers",
+    link: "/shop?cat=Tyre+%26+Wheel",
+    img: tyreChanger,
+    badge: "Tyre Bay",
+  },
+  {
+    name: "Rotary Air Compressors",
+    desc: "Continuous rotary screw compressors, dryers & tanks",
+    link: "/shop?cat=Garage+Equipment",
+    img: compressor,
+    badge: "Pneumatics",
+  },
+  {
+    name: "Commercial Batteries",
+    desc: "AGM and EFB heavy-duty batteries for start-stop & fleets",
+    link: "/shop?cat=Batteries",
+    img: battery,
+    badge: "Power & Electrical",
+  },
+  {
+    name: "Lubricants & Fluids",
+    desc: "Full synthetic engine oils, transmission fluids, brake fluids",
+    link: "/shop?cat=Lubricants+%26+Fluids",
+    img: oil,
+    badge: "Lubrication",
+  },
+];
+
+export const garageEquipmentCategories = [
+  {
+    id: "lifts",
+    name: "Vehicle Lifts",
+    desc: "2-post, 4-post and low-profile scissor lifts up to 5.5T",
+    count: "12 Models",
+    img: lift,
+    link: "/shop?cat=Garage+Equipment",
+  },
+  {
+    id: "tyre",
+    name: "Tyre Equipment",
+    desc: "Automatic tyre changers with pneumatic assist arms",
+    count: "8 Models",
+    img: tyreChanger,
+    link: "/shop?cat=Tyre+%26+Wheel",
+  },
+  {
+    id: "balancing",
+    name: "Wheel Balancers",
+    desc: "Microprocessor balancers with laser line positioning",
+    count: "6 Models",
+    img: wheelBalancer,
+    link: "/shop?cat=Tyre+%26+Wheel",
+  },
+  {
+    id: "diagnostics",
+    name: "Diagnostic Platforms",
+    desc: "OE-level vehicle diagnostic tablets and code readers",
+    count: "14 Models",
+    img: scanner,
+    link: "/shop?cat=Diagnostic+Equipment",
+  },
+  {
+    id: "compressors",
+    name: "Air Compressors",
+    desc: "Rotary screw and silent piston workshop compressors",
+    count: "9 Models",
+    img: compressor,
+    link: "/shop?cat=Garage+Equipment",
+  },
+  {
+    id: "ev-tools",
+    name: "EV Safety Tooling",
+    desc: "1000V insulated hand tools, battery cell balancers & tables",
+    count: "Complete Kits",
+    img: evTools,
     link: "/shop?mobility=EV",
   },
 ];
@@ -101,39 +231,251 @@ export const whoWeServe = [
     title: "Automotive Workshops",
     subtitle: "Garages & Independent Repair Bays",
     desc: "Heavy-duty 2-post lifts, compressed air lines, wheel balancers, and replacement parts to maximize workshop bay turnover.",
-    deliverables: ["2-Post & Scissor Lifts", "Tyre Changers & Balancers", "Turnkey Bay Layouts", "Operator Safety Training"],
+    supplies: [
+      "2-Post & Scissor Lifts",
+      "Tyre Changers & Balancers",
+      "Turnkey Bay Layouts",
+      "Operator Safety Training",
+    ],
+    deliverables: [
+      "2-Post & Scissor Lifts",
+      "Tyre Changers & Balancers",
+      "Turnkey Bay Layouts",
+      "Operator Safety Training",
+    ],
   },
   {
     title: "Service Centers",
     subtitle: "Multi-Brand Service Hubs",
     desc: "Supplying the specialized diagnostic scanners, fluid exchange machinery, and certified OEM parts that your technicians rely on.",
-    deliverables: ["OE Diagnostic Tablets", "AC Recovery & Flush Machines", "Laser 4-Wheel Alignment", "Wholesale Spares Supply"],
+    supplies: [
+      "OE Diagnostic Tablets",
+      "AC Recovery & Flush Machines",
+      "Laser 4-Wheel Alignment",
+      "Wholesale Spares Supply",
+    ],
+    deliverables: [
+      "OE Diagnostic Tablets",
+      "AC Recovery & Flush Machines",
+      "Laser 4-Wheel Alignment",
+      "Wholesale Spares Supply",
+    ],
   },
   {
     title: "Dealerships",
     subtitle: "Authorized Automotive Dealers",
     desc: "Standardized equipment and tooling complying with vehicle manufacturer service mandates and warranty compliance standards.",
-    deliverables: ["OEM Mandated Tooling", "Diagnostic Software Updates", "B2B Volume Procurement", "Turnkey Workshop Installation"],
+    supplies: [
+      "OEM Mandated Tooling",
+      "Diagnostic Software Updates",
+      "B2B Volume Procurement",
+      "Turnkey Workshop Installation",
+    ],
+    deliverables: [
+      "OEM Mandated Tooling",
+      "Diagnostic Software Updates",
+      "B2B Volume Procurement",
+      "Turnkey Workshop Installation",
+    ],
   },
   {
     title: "Automotive Distributors",
     subtitle: "Regional Parts & Tooling Wholesalers",
     desc: "Reliable bulk import and distribution supply chain with direct manufacturer warranties, registered VAT invoicing, and credit terms.",
-    deliverables: ["Container & Pallet Supply", "Official Warranty Backing", "Exclusive Territorial Lines", "Technical Sales Training"],
+    supplies: [
+      "Container & Pallet Supply",
+      "Official Warranty Backing",
+      "Exclusive Territorial Lines",
+      "Technical Sales Training",
+    ],
+    deliverables: [
+      "Container & Pallet Supply",
+      "Official Warranty Backing",
+      "Exclusive Territorial Lines",
+      "Technical Sales Training",
+    ],
   },
   {
     title: "Commercial Fleets",
     subtitle: "Bus, Truck, Van & Ride-Hail Fleets",
     desc: "Equipping in-house fleet maintenance depots with heavy-duty lifting equipment, diagnostic tools, and high-wear consumable reserves.",
-    deliverables: ["Depot Workshop Setup", "Heavy Lifts & Air Lines", "Brake & Battery Supply", "Scheduled Fleet Spares"],
+    supplies: [
+      "Depot Workshop Setup",
+      "Heavy Lifts & Air Lines",
+      "Brake & Battery Supply",
+      "Scheduled Fleet Spares",
+    ],
+    deliverables: [
+      "Depot Workshop Setup",
+      "Heavy Lifts & Air Lines",
+      "Brake & Battery Supply",
+      "Scheduled Fleet Spares",
+    ],
   },
   {
     title: "EV Workshops",
     subtitle: "Next-Gen Electric Vehicle Specialists",
     desc: "Everything required to safely service 2W, 3W, and 4W electric mobility: 1000V VDE safety tools, battery cell balancers, and chargers.",
-    deliverables: ["1000V Insulated Tool Kits", "EV Battery Pack Analyzers", "Safety Isolation PPE", "High-Voltage Enclosures"],
+    supplies: [
+      "1000V Insulated Tool Kits",
+      "EV Battery Pack Analyzers",
+      "Safety Isolation PPE",
+      "High-Voltage Enclosures",
+    ],
+    deliverables: [
+      "1000V Insulated Tool Kits",
+      "EV Battery Pack Analyzers",
+      "Safety Isolation PPE",
+      "High-Voltage Enclosures",
+    ],
   },
 ];
+
+export type Center = {
+  id: string;
+  name: string;
+  area: string;
+  address: string;
+  rating: number;
+  hours: string;
+  services: string[];
+  x: number;
+  y: number;
+};
+
+export const centers: Center[] = [
+  {
+    id: "dhaka-tejgaon",
+    name: "PAGE Equipment Hub — Tejgaon",
+    area: "Dhaka",
+    address: "Tejgaon Industrial Area, Dhaka",
+    rating: 4.9,
+    hours: "Sat–Thu 9:00–19:00",
+    services: [
+      "Vehicle Lifts Demo",
+      "Tyre Bay Machinery",
+      "EV Tooling Benches",
+      "Spare Parts Pickup",
+    ],
+    x: 48,
+    y: 42,
+  },
+  {
+    id: "chattogram-port",
+    name: "PAGE Regional Hub — Chattogram",
+    area: "Chattogram",
+    address: "Agrabad Commercial Area, Chattogram",
+    rating: 4.8,
+    hours: "Sat–Thu 9:00–19:00",
+    services: [
+      "Heavy Machinery Stock",
+      "Diagnostic Scanner Demo",
+      "Wholesale Spares",
+      "Field Engineer Dispatch",
+    ],
+    x: 76,
+    y: 74,
+  },
+  {
+    id: "bogura-north",
+    name: "PAGE North Hub — Bogura",
+    area: "Bogura",
+    address: "Sherpur Road Industrial Belt, Bogura",
+    rating: 4.7,
+    hours: "Sat–Thu 9:00–18:00",
+    services: [
+      "Tyre Changers & Balancers",
+      "Commercial Fleet Spares",
+      "Lift Anchoring Support",
+    ],
+    x: 38,
+    y: 32,
+  },
+];
+
+export type Service = {
+  slug: string;
+  name: string;
+  desc: string;
+  from?: number;
+  duration: string;
+};
+
+export const services: Service[] = [
+  {
+    slug: "general-service",
+    name: "Turnkey Bay Planning",
+    desc: "2D/3D workshop layout modeling, electrical load, and equipment placement.",
+    duration: "3–5 days",
+  },
+  {
+    slug: "diagnostics",
+    name: "Lift Anchoring & Rigging",
+    desc: "Chemical torque anchoring, hydraulic synchronization, and load testing.",
+    duration: "1–2 days",
+  },
+  {
+    slug: "ac-service",
+    name: "Machinery Calibration",
+    desc: "3D aligner, digital balancer, and diagnostic tablet calibration.",
+    duration: "Half day",
+  },
+  {
+    slug: "brake-service",
+    name: "Air Line Installation",
+    desc: "Aluminum pipe ring-main line, dryer, and drop installation.",
+    duration: "2–3 days",
+  },
+  {
+    slug: "wheel-alignment",
+    name: "Technician Training",
+    desc: "Hands-on operator training for automated changers and lifts.",
+    duration: "1 day",
+  },
+  {
+    slug: "battery-service",
+    name: "Annual Maintenance (AMC)",
+    desc: "Scheduled preventive maintenance contracts for workshop machinery.",
+    duration: "Quarterly",
+  },
+  {
+    slug: "ev-service",
+    name: "EV Workshop Audit",
+    desc: "High-voltage safety zone setup, rescue hook, and PPE compliance.",
+    duration: "1–2 days",
+  },
+  {
+    slug: "adas-calibration",
+    name: "Diagnostic Subscriptions",
+    desc: "Cloud protocol updates and ECU software renewals.",
+    duration: "Immediate",
+  },
+];
+
+export const guides = [
+  {
+    slug: "choosing-workshop-lift",
+    title: "Selecting the Right 2-Post vs Scissor Lift for Your Workshop",
+    cat: "Equipment Guide",
+    mins: 5,
+    img: engine,
+  },
+  {
+    slug: "ev-workshop-readiness",
+    title: "How to Safely Equip Your Bays for EV & Hybrid Servicing",
+    cat: "EV Transition",
+    mins: 6,
+    img: brakes,
+  },
+  {
+    slug: "air-compressor-piping",
+    title: "Rotary Screw Compressors & Pneumatic Ring-Main Sizing",
+    cat: "Workshop Setup",
+    mins: 4,
+    img: workshop,
+  },
+];
+
 
 export const products: Product[] = [
   // Commercial Garage Equipment & Lifts
