@@ -208,7 +208,7 @@ function Home() {
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">PAGE International Ltd.</p>
           <h2
             className="mt-5 whitespace-nowrap font-display font-black uppercase leading-[0.82] tracking-[-0.03em] text-foreground"
-            style={{ fontSize: "clamp(2.6rem, 15.2vw, 17rem)" }}
+            style={{ fontSize: "clamp(3.2rem, 22.2vw, 26rem)" }}
           >
             THINK NEXT<span className="text-primary">.</span>
           </h2>
