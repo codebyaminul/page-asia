@@ -1,18 +1,6 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { images } from "@/lib/data";
-
-// Cubic bezier evaluator for smooth physical slide
-function cubicBezier(p1x: number, p1y: number, p2x: number, p2y: number) {
-  return function (t: number): number {
-    const u = 1 - t;
-    const tt = t * t;
-    const uu = u * u;
-    const ttt = tt * t;
-    return 3 * uu * t * p1y + 3 * u * tt * p2y + ttt;
-  };
-}
-const easeSlide = cubicBezier(0.22, 1, 0.36, 1);
 
 export interface MobilityScene {
   id: string;
@@ -24,41 +12,40 @@ export interface MobilityScene {
 }
 
 export function MobilityScrollStack() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const [activeScene, setActiveScene] = useState<number>(0);
   const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false);
+  const scene1Ref = useRef<HTMLDivElement>(null);
+  const scene2Ref = useRef<HTMLDivElement>(null);
+  const scene3Ref = useRef<HTMLDivElement>(null);
 
   // Exactly THREE Scenes: 4-Wheeler, 2-Wheeler, 3-Wheeler
-  // Full-bleed cards covering the whole page (100vw x 100vh)
-  const scenes: MobilityScene[] = useMemo(
-    () => [
-      {
-        id: "4-wheeler",
-        num: "01",
-        title: "4-WHEELER",
-        image: images.heroWorkshop,
-        link: "/shop",
-        mobilityKey: "4-Wheeler",
-      },
-      {
-        id: "2-wheeler",
-        num: "02",
-        title: "2-WHEELER",
-        image: images.motoLift,
-        link: "/shop",
-        mobilityKey: "2-Wheeler",
-      },
-      {
-        id: "3-wheeler",
-        num: "03",
-        title: "3-WHEELER",
-        image: images.commercial3wHub,
-        link: "/shop",
-        mobilityKey: "3-Wheeler",
-      },
-    ],
-    []
-  );
+  // Each card covers the whole page (100vw x 100vh) edge-to-edge
+  const scenes: MobilityScene[] = [
+    {
+      id: "4-wheeler",
+      num: "01",
+      title: "4-WHEELER",
+      image: images.heroWorkshop,
+      link: "/shop",
+      mobilityKey: "4-Wheeler",
+    },
+    {
+      id: "2-wheeler",
+      num: "02",
+      title: "2-WHEELER",
+      image: images.motoLift,
+      link: "/shop",
+      mobilityKey: "2-Wheeler",
+    },
+    {
+      id: "3-wheeler",
+      num: "03",
+      title: "3-WHEELER",
+      image: images.commercial3wHub,
+      link: "/shop",
+      mobilityKey: "3-Wheeler",
+    },
+  ];
 
   // Detect prefers-reduced-motion
   useEffect(() => {
@@ -69,126 +56,42 @@ export function MobilityScrollStack() {
     return () => media.removeEventListener("change", handler);
   }, []);
 
-  // Track scroll progress within the container using requestAnimationFrame
+  // Update active HUD counter (01/03, 02/03, 03/03) using IntersectionObserver
   useEffect(() => {
-    let rafId: number;
-    const calculateProgress = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const scrollableDistance = containerRef.current.offsetHeight - window.innerHeight;
-      if (scrollableDistance <= 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = Number(entry.target.getAttribute("data-index"));
+            if (!isNaN(index)) {
+              setActiveScene(index);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+      }
+    );
 
-      const scrolled = -rect.top;
-      const progress = Math.max(0, Math.min(1, scrolled / scrollableDistance));
-      setScrollProgress(progress);
-    };
+    const refs = [scene1Ref.current, scene2Ref.current, scene3Ref.current];
+    refs.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
 
-    const onScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(calculateProgress);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    calculateProgress();
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", onScroll);
-    };
+    return () => observer.disconnect();
   }, []);
-
-  // Compute active scene number indicator
-  const activeSceneIndex = useMemo(() => {
-    if (scrollProgress < 0.45) return 0;
-    if (scrollProgress < 0.88) return 1;
-    return 2;
-  }, [scrollProgress]);
-
-  // Compute scene slide-up transitions
-  // Scene 01: starts at translateY(0). When Scene 02 rises (0.05 -> 0.45), Scene 01 scales to 0.97 and darkens.
-  // Scene 02: starts below (translateY(100%)). Rises from 0.05 to 0.45 to translateY(0%).
-  //           When Scene 03 rises (0.50 -> 0.88), Scene 02 scales to 0.97 and darkens.
-  // Scene 03: starts below (translateY(100%)). Rises from 0.50 to 0.88 to translateY(0%).
-  //           Held from 0.88 to 1.00, then container releases into next section!
-  const getSceneTransform = (index: number) => {
-    if (isReducedMotion) {
-      return {
-        transform: "none",
-        opacity: 1,
-        zIndex: index + 1,
-        darkenOpacity: 0,
-      };
-    }
-
-    if (index === 0) {
-      const enterPhase = Math.max(0, Math.min(1, (scrollProgress - 0.05) / 0.4));
-      const eased = easeSlide(enterPhase);
-      const scale = 1 - 0.03 * eased;
-      const darkenOpacity = 0.45 * eased;
-      return {
-        transform: `translate3d(0, 0, 0) scale(${scale})`,
-        opacity: 1,
-        zIndex: 1,
-        darkenOpacity,
-      };
-    }
-
-    if (index === 1) {
-      // Scene 02 rising phase: 0.05 -> 0.45
-      const enterPhase = Math.max(0, Math.min(1, (scrollProgress - 0.05) / 0.4));
-      const easedEnter = easeSlide(enterPhase);
-      const translateY = (1 - easedEnter) * 100;
-
-      // Scene 02 exit/cover phase as Scene 03 enters: 0.50 -> 0.88
-      const exitPhase = Math.max(0, Math.min(1, (scrollProgress - 0.5) / 0.38));
-      const easedExit = easeSlide(exitPhase);
-      const scale = 1 - 0.03 * easedExit;
-      const darkenOpacity = 0.45 * easedExit;
-
-      return {
-        transform: `translate3d(0, ${translateY}%, 0) scale(${scale})`,
-        opacity: enterPhase > 0 ? 1 : 0,
-        zIndex: 2,
-        darkenOpacity,
-      };
-    }
-
-    // Scene 03 (index === 2)
-    // Rising phase: 0.50 -> 0.88
-    const enterPhase = Math.max(0, Math.min(1, (scrollProgress - 0.5) / 0.38));
-    const easedEnter = easeSlide(enterPhase);
-    const translateY = (1 - easedEnter) * 100;
-
-    return {
-      transform: `translate3d(0, ${translateY}%, 0) scale(1)`,
-      opacity: enterPhase > 0 ? 1 : 0,
-      zIndex: 3,
-      darkenOpacity: 0,
-    };
-  };
 
   return (
     <section
-      ref={containerRef}
       id="mobility-ecosystem"
-      className="relative bg-black text-white border-b border-zinc-900 overflow-hidden"
-      style={{
-        // 270vh provides a comfortable, natural scroll distance per scene (~85vh) before clean release
-        height: isReducedMotion ? "auto" : "270vh",
-      }}
+      className="relative w-full bg-black text-white border-b border-zinc-900"
     >
       {/* ======================================================== */}
-      {/* PINNED FULL-SCREEN STICKY VIEWPORT CONTAINER (100% SCREEN)*/}
+      {/* STICKY TOP HUD OVERLAY (FLOATS AT TOP FOR ALL 3 SCENES)   */}
       {/* ======================================================== */}
-      <div
-        className={`${
-          isReducedMotion
-            ? "relative"
-            : "sticky top-0 h-screen h-[100svh] w-full overflow-hidden"
-        }`}
-      >
-        {/* Subtle Top Sticky Ambient Bar */}
-        <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none flex items-center justify-between px-6 sm:px-12 py-5 bg-gradient-to-b from-black/85 via-black/40 to-transparent">
+      <div className="sticky top-0 z-40 h-0 overflow-visible pointer-events-none">
+        <div className="flex items-center justify-between px-6 sm:px-12 py-5 bg-gradient-to-b from-black/90 via-black/40 to-transparent">
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] uppercase text-zinc-300">
@@ -199,7 +102,7 @@ export function MobilityScrollStack() {
           {/* Minimal 01 / 03 Step Counter */}
           <div className="flex items-center gap-3 font-mono text-xs font-bold">
             <span className="text-white text-sm font-display tracking-wider">
-              0{activeSceneIndex + 1}
+              0{activeScene + 1}
             </span>
             <span className="text-zinc-600">/ 03</span>
             <div className="flex items-center gap-1.5 ml-2">
@@ -207,7 +110,7 @@ export function MobilityScrollStack() {
                 <div
                   key={idx}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    activeSceneIndex === idx
+                    activeScene === idx
                       ? "w-6 bg-primary shadow-[0_0_8px_rgba(224,36,36,0.7)]"
                       : "w-2 bg-zinc-800"
                   }`}
@@ -216,52 +119,84 @@ export function MobilityScrollStack() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* ======================================================== */}
-        {/* 3 FULL-SCREEN SLIDING CARDS (COVER THE WHOLE PAGE)        */}
-        {/* ======================================================== */}
-        <div className="relative h-full w-full">
-          {scenes.map((scene, index) => {
-            const transformStyle = getSceneTransform(index);
+      {/* ======================================================== */}
+      {/* SCENE 01: 4-WHEELER (STICKY BASE LAYER)                   */}
+      {/* ======================================================== */}
+      <div
+        ref={scene1Ref}
+        data-index="0"
+        className={`${
+          isReducedMotion
+            ? "relative min-h-screen"
+            : "sticky top-0 h-screen h-[100svh]"
+        } w-full z-10 overflow-hidden bg-black`}
+      >
+        <Link
+          to={scenes[0].link}
+          search={{ mobility: scenes[0].mobilityKey }}
+          className="relative w-full h-full block cursor-pointer overflow-hidden group"
+        >
+          {/* Whole Image Covers Whole Page */}
+          <img
+            src={scenes[0].image}
+            alt="01 - 4-WHEELER"
+            className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
+          />
+        </Link>
+      </div>
 
-            return (
-              <div
-                key={scene.num}
-                className={`${
-                  isReducedMotion
-                    ? "relative min-h-screen min-h-[100svh]"
-                    : "absolute inset-0 h-full w-full"
-                } bg-black will-change-transform overflow-hidden`}
-                style={{
-                  transform: transformStyle.transform,
-                  opacity: transformStyle.opacity,
-                  zIndex: transformStyle.zIndex,
-                }}
-              >
-                {/* Darkening overlay when this card is pushed behind */}
-                <div
-                  className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300 z-30"
-                  style={{ opacity: transformStyle.darkenOpacity }}
-                />
+      {/* ======================================================== */}
+      {/* SCENE 02: 2-WHEELER (SLIDES UP AND OVERLAPS SCENE 01)     */}
+      {/* ======================================================== */}
+      <div
+        ref={scene2Ref}
+        data-index="1"
+        className={`${
+          isReducedMotion
+            ? "relative min-h-screen"
+            : "sticky top-0 h-screen h-[100svh]"
+        } w-full z-20 overflow-hidden bg-black shadow-[0_-35px_80px_rgba(0,0,0,0.95)]`}
+      >
+        <Link
+          to={scenes[1].link}
+          search={{ mobility: scenes[1].mobilityKey }}
+          className="relative w-full h-full block cursor-pointer overflow-hidden group"
+        >
+          {/* Whole Image Covers Whole Page */}
+          <img
+            src={scenes[1].image}
+            alt="02 - 2-WHEELER"
+            className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
+          />
+        </Link>
+      </div>
 
-                {/* ======================================================== */}
-                {/* FULL-PAGE CARD IMAGE: COVERS THE WHOLE PAGE (100% W x H) */}
-                {/* ======================================================== */}
-                <Link
-                  to={scene.link}
-                  search={{ mobility: scene.mobilityKey }}
-                  className="relative w-full h-full block overflow-hidden group cursor-pointer"
-                >
-                  <img
-                    src={scene.image}
-                    alt={scene.title}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
-                  />
-                </Link>
-              </div>
-            );
-          })}
-        </div>
+      {/* ======================================================== */}
+      {/* SCENE 03: 3-WHEELER (SLIDES UP AND OVERLAPS SCENE 02)     */}
+      {/* ======================================================== */}
+      <div
+        ref={scene3Ref}
+        data-index="2"
+        className={`${
+          isReducedMotion
+            ? "relative min-h-screen"
+            : "sticky top-0 h-screen h-[100svh]"
+        } w-full z-30 overflow-hidden bg-black shadow-[0_-35px_80px_rgba(0,0,0,0.95)]`}
+      >
+        <Link
+          to={scenes[2].link}
+          search={{ mobility: scenes[2].mobilityKey }}
+          className="relative w-full h-full block cursor-pointer overflow-hidden group"
+        >
+          {/* Whole Image Covers Whole Page */}
+          <img
+            src={scenes[2].image}
+            alt="03 - 3-WHEELER"
+            className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
+          />
+        </Link>
       </div>
     </section>
   );
