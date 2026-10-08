@@ -29,7 +29,7 @@ export function MobilityScrollStack() {
   const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false);
 
   // Exactly THREE Scenes: 4-Wheeler, 2-Wheeler, 3-Wheeler
-  // Cards are kept completely clean & empty of text so a whole image can fill the card
+  // Full-bleed cards covering the whole page (100vw x 100vh)
   const scenes: MobilityScene[] = useMemo(
     () => [
       {
@@ -124,7 +124,7 @@ export function MobilityScrollStack() {
       const enterPhase = Math.max(0, Math.min(1, (scrollProgress - 0.05) / 0.4));
       const eased = easeSlide(enterPhase);
       const scale = 1 - 0.03 * eased;
-      const darkenOpacity = 0.4 * eased;
+      const darkenOpacity = 0.45 * eased;
       return {
         transform: `translate3d(0, 0, 0) scale(${scale})`,
         opacity: 1,
@@ -143,7 +143,7 @@ export function MobilityScrollStack() {
       const exitPhase = Math.max(0, Math.min(1, (scrollProgress - 0.5) / 0.38));
       const easedExit = easeSlide(exitPhase);
       const scale = 1 - 0.03 * easedExit;
-      const darkenOpacity = 0.4 * easedExit;
+      const darkenOpacity = 0.45 * easedExit;
 
       return {
         transform: `translate3d(0, ${translateY}%, 0) scale(${scale})`,
@@ -171,24 +171,24 @@ export function MobilityScrollStack() {
     <section
       ref={containerRef}
       id="mobility-ecosystem"
-      className="relative bg-[#08090B] text-white border-b border-zinc-900"
+      className="relative bg-black text-white border-b border-zinc-900 overflow-hidden"
       style={{
         // 270vh provides a comfortable, natural scroll distance per scene (~85vh) before clean release
         height: isReducedMotion ? "auto" : "270vh",
       }}
     >
       {/* ======================================================== */}
-      {/* PINNED FULL-SCREEN STICKY VIEWPORT CONTAINER              */}
+      {/* PINNED FULL-SCREEN STICKY VIEWPORT CONTAINER (100% SCREEN)*/}
       {/* ======================================================== */}
       <div
         className={`${
           isReducedMotion
-            ? "relative py-12"
+            ? "relative"
             : "sticky top-0 h-screen h-[100svh] w-full overflow-hidden"
         }`}
       >
         {/* Subtle Top Sticky Ambient Bar */}
-        <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none flex items-center justify-between px-6 sm:px-12 py-5 bg-gradient-to-b from-black/80 via-black/30 to-transparent">
+        <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none flex items-center justify-between px-6 sm:px-12 py-5 bg-gradient-to-b from-black/85 via-black/40 to-transparent">
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] uppercase text-zinc-300">
@@ -218,7 +218,7 @@ export function MobilityScrollStack() {
         </div>
 
         {/* ======================================================== */}
-        {/* 3 FULL-SCREEN SLIDING SCENES (EMPTY CARDS FOR WHOLE IMAGE)*/}
+        {/* 3 FULL-SCREEN SLIDING CARDS (COVER THE WHOLE PAGE)        */}
         {/* ======================================================== */}
         <div className="relative h-full w-full">
           {scenes.map((scene, index) => {
@@ -229,44 +229,35 @@ export function MobilityScrollStack() {
                 key={scene.num}
                 className={`${
                   isReducedMotion
-                    ? "relative min-h-[85vh] py-12"
+                    ? "relative min-h-screen min-h-[100svh]"
                     : "absolute inset-0 h-full w-full"
-                } flex items-center justify-center bg-[#08090B] will-change-transform overflow-hidden px-4 sm:px-8`}
+                } bg-black will-change-transform overflow-hidden`}
                 style={{
                   transform: transformStyle.transform,
                   opacity: transformStyle.opacity,
                   zIndex: transformStyle.zIndex,
                 }}
               >
-                {/* Darkening overlay when this scene is pushed behind */}
+                {/* Darkening overlay when this card is pushed behind */}
                 <div
                   className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300 z-30"
                   style={{ opacity: transformStyle.darkenOpacity }}
                 />
 
-                {/* Subtle Showroom Ambient Lighting */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-primary/[0.04] blur-[160px] rounded-full" />
-                  <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:36px_36px] opacity-30" />
-                </div>
-
                 {/* ======================================================== */}
-                {/* THE EMPTY CARD CONTAINER: READY FOR WHOLE IMAGE          */}
+                {/* FULL-PAGE CARD IMAGE: COVERS THE WHOLE PAGE (100% W x H) */}
                 {/* ======================================================== */}
-                <div className="relative z-20 w-full max-w-6xl h-[78vh] sm:h-[82vh] max-h-[820px] rounded-2xl sm:rounded-3xl overflow-hidden border border-zinc-800/80 bg-zinc-950 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.85)] flex items-center justify-center group">
-                  <Link
-                    to={scene.link}
-                    search={{ mobility: scene.mobilityKey }}
-                    className="relative w-full h-full block overflow-hidden"
-                  >
-                    {/* The Whole Image fills the entire card edge-to-edge */}
-                    <img
-                      src={scene.image}
-                      alt={scene.title}
-                      className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
-                    />
-                  </Link>
-                </div>
+                <Link
+                  to={scene.link}
+                  search={{ mobility: scene.mobilityKey }}
+                  className="relative w-full h-full block overflow-hidden group cursor-pointer"
+                >
+                  <img
+                    src={scene.image}
+                    alt={scene.title}
+                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
+                  />
+                </Link>
               </div>
             );
           })}
