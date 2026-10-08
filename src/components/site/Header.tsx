@@ -6,6 +6,7 @@ import {
   ChevronRight,
   FileText,
   Mail,
+  MapPin,
   Menu,
   Phone,
   Search,
@@ -21,10 +22,10 @@ import { useCart } from "@/lib/cart";
 const navLinks = [
   { to: "/shop", label: "Products" },
   { to: "/shop", search: { cat: "Garage Equipment" }, label: "Garage Equipment" },
-  { to: "/shop", search: { cat: "EV Equipment" }, label: "EV Equipment" },
+  { to: "/shop", search: { mobility: "EV" }, label: "EV" },
   { to: "/solutions", label: "Solutions" },
-  { to: "/vehicles", label: "By Vehicle (4W/2W/3W/EV)" },
-  { to: "/support", label: "Support & Catalogues" },
+  { to: "/#brands", label: "Brands" },
+  { to: "/support", label: "Support" },
   { to: "/about", label: "About" },
 ] as const;
 
@@ -72,18 +73,22 @@ export function Header() {
         {/* Top B2B Commercial Utility Bar */}
         <div className="hidden border-b border-ink-border/60 bg-black/45 text-[11px] font-medium text-ink-muted lg:block">
           <div className="container-page flex h-8 items-center justify-between">
-            <div className="flex items-center gap-6">
-              <span className="flex items-center gap-1.5 text-ink-foreground">
+            <div className="flex items-center gap-5">
+              <span className="flex items-center gap-1.5 text-ink-foreground font-semibold">
                 <Building2 className="h-3 w-3 text-primary" />
-                <span>B2B Supplier of Automotive Equipment & Spare Parts</span>
+                <span>B2B Automotive Equipment & Parts</span>
               </span>
               <span className="flex items-center gap-1.5 hover:text-ink-foreground transition-colors">
                 <Phone className="h-3 w-3 text-primary" />
-                <span>Commercial Sales: +880 9612-PAGE-INTL</span>
+                <span>+880 9612-PAGE-INTL</span>
               </span>
               <span className="flex items-center gap-1.5 hover:text-ink-foreground transition-colors">
                 <Mail className="h-3 w-3 text-primary" />
                 <span>b2b@page-intl.com</span>
+              </span>
+              <span className="hidden xl:flex items-center gap-1.5 text-ink-muted">
+                <MapPin className="h-3 w-3 text-primary" />
+                <span>Tejgaon Industrial Area, Dhaka</span>
               </span>
             </div>
 

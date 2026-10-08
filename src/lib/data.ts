@@ -14,6 +14,8 @@ import compressor from "@/assets/p-compressor.jpg";
 import evTools from "@/assets/p-ev-tools.jpg";
 import evBatteryAnalyzer from "@/assets/p-ev-battery-analyzer.jpg";
 import motoLift from "@/assets/p-moto-lift.jpg";
+import evWorkshopBay from "@/assets/ev-workshop-bay.jpg";
+import commercial3wHub from "@/assets/commercial-3w-hub.jpg";
 
 export const images = {
   brakes,
@@ -28,6 +30,8 @@ export const images = {
   evTools,
   evBatteryAnalyzer,
   motoLift,
+  evWorkshopBay,
+  commercial3wHub,
 };
 
 export type MobilityType = "4-Wheeler" | "2-Wheeler" | "3-Wheeler" | "EV";
