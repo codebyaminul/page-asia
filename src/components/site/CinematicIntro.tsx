@@ -29,7 +29,7 @@ export function CinematicIntro() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] overflow-hidden bg-ink text-ink-foreground transition-opacity duration-700 ${state === "out" ? "opacity-0" : "opacity-100"}`}
+      className={`intro-root fixed inset-0 z-[100] overflow-hidden text-ink-foreground transition-opacity duration-700 ${state === "out" ? "opacity-0" : "opacity-100"}`}
       role="presentation"
       aria-hidden
     >
@@ -37,10 +37,11 @@ export function CinematicIntro() {
       <div className="intro-floor absolute inset-x-0 bottom-0 h-[38%]" />
 
       {/* vehicle */}
-      <div className="intro-car absolute inset-x-0 bottom-[6%] mx-auto w-[min(1200px,120vw)]">
+      <div className="intro-car absolute inset-x-0 bottom-[6%] left-1/2 w-[min(1400px,140vw)] -translate-x-[62%]">
         <img src={images.heroCar} alt="" className="block w-full" width={1920} height={1088} />
-        <span className="intro-headlight absolute left-[22%] top-[52%]" />
-        <span className="intro-headlight absolute left-[44%] top-[54%]" />
+        <span className="intro-headlight absolute left-[41%] top-[44%]" />
+        <span className="intro-headlight absolute left-[64%] top-[44%]" />
+        <span className="intro-vignette absolute inset-0" />
         <span className="intro-sweep absolute inset-0" />
       </div>
 
