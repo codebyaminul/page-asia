@@ -313,20 +313,28 @@ function RequestQuoteContent() {
                       Quotation Request Received
                     </h3>
                     <p className="text-sm text-page-midgray leading-relaxed">
-                      Thank you, <strong className="text-page-nearblack">{formData.fullName}</strong>. Your quotation request for <strong className="text-page-nearblack">{formData.productName || formData.inquiryType}</strong> ({formData.quantity} unit{parseInt(formData.quantity) > 1 ? 's' : ''}) has been logged in our demonstration system.
+                      Thank you. Your request has been submitted successfully. Our team will contact you shortly.
                     </p>
-                    <p className="text-sm font-semibold text-page-red pt-1">
-                      Our commercial sales engineers will contact you shortly with formal specs.
-                    </p>
+                    {formData.productName && (
+                      <p className="text-xs text-page-midgray/80 pt-1 font-mono">
+                        Referenced scope: <span className="text-page-nearblack font-semibold">{formData.productName}</span> ({formData.quantity} unit{parseInt(formData.quantity) > 1 ? 's' : ''})
+                      </p>
+                    )}
                   </div>
 
                   <div className="p-5 bg-page-offwhite rounded-md border border-page-lightgray text-left text-xs max-w-md mx-auto space-y-2.5 font-technical">
                     <div className="flex justify-between border-b border-page-lightgray/80 pb-1.5">
-                      <span className="text-page-midgray">Organization:</span>
-                      <span className="text-page-nearblack font-semibold">{formData.companyName || 'Not specified'}</span>
+                      <span className="text-page-midgray">Contact Person:</span>
+                      <span className="text-page-nearblack font-semibold">{formData.fullName}</span>
                     </div>
+                    {formData.companyName && (
+                      <div className="flex justify-between border-b border-page-lightgray/80 pb-1.5">
+                        <span className="text-page-midgray">Organization:</span>
+                        <span className="text-page-nearblack font-semibold">{formData.companyName}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between border-b border-page-lightgray/80 pb-1.5">
-                      <span className="text-page-midgray">Category:</span>
+                      <span className="text-page-midgray">Inquiry Type:</span>
                       <span className="text-page-nearblack font-semibold">{formData.inquiryType}</span>
                     </div>
                     {formData.vehicleType && (
@@ -345,13 +353,23 @@ function RequestQuoteContent() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-page-midgray">Status:</span>
-                      <span className="text-emerald-700 font-bold">QUEUED FOR TECHNICAL REVIEW</span>
+                      <span className="text-emerald-700 font-bold">LOGGED IN DEMO SYSTEM</span>
                     </div>
                   </div>
 
                   <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <Link href="/" className="w-full sm:w-auto">
+                      <Button variant="outline" size="sm" className="font-mono text-xs w-full sm:w-auto">
+                        Back to Home
+                      </Button>
+                    </Link>
+                    <Link href="/garage-equipment" className="w-full sm:w-auto">
+                      <Button variant="primary" size="sm" className="font-mono text-xs w-full sm:w-auto">
+                        Continue Browsing
+                      </Button>
+                    </Link>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => {
                         setIsSubmitted(false);
@@ -367,15 +385,10 @@ function RequestQuoteContent() {
                           message: '',
                         });
                       }}
-                      className="font-mono text-xs w-full sm:w-auto"
+                      className="font-mono text-xs w-full sm:w-auto text-page-midgray hover:text-page-nearblack"
                     >
-                      Submit Another Inquiry
+                      New Inquiry
                     </Button>
-                    <Link href="/garage-equipment" className="w-full sm:w-auto">
-                      <Button variant="primary" size="sm" className="font-mono text-xs w-full sm:w-auto">
-                        Return to Catalog
-                      </Button>
-                    </Link>
                   </div>
                 </div>
               )}

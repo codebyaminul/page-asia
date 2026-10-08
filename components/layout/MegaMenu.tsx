@@ -80,7 +80,7 @@ export function MegaMenu({ item, isOpen, onClose }: MegaMenuProps) {
                 </div>
 
                 <div className="pt-2 text-[11px] text-page-midgray font-mono border-t border-page-darkgray flex items-center justify-between">
-                  <span>Authorized: LAUNCH · ATS Elgi · SmartSafe · WIPRO</span>
+                  <span>Featured Brands: LAUNCH · ATS Elgi · SmartSafe · WIPRO</span>
                   <Link href="/garage-equipment/all" onClick={onClose} className="text-white hover:underline">
                     View 17 Models →
                   </Link>

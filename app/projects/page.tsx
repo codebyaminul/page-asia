@@ -121,7 +121,7 @@ export default function ProjectsPage() {
                           {project.projectType}
                         </span>
                         <Badge variant="red" className="text-[10px]">
-                          Case Study
+                          Prototype Case Study
                         </Badge>
                       </div>
 

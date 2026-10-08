@@ -92,7 +92,7 @@ export function GarageHero({ onOpenQuote }: GarageHeroProps) {
           {/* Authorized Partners Ribbon */}
           <div className="pt-6">
             <span className="text-[11px] font-mono uppercase tracking-widest text-page-midgray block mb-3">
-              Authorized Distribution Partners:
+              Featured Equipment Brands:
             </span>
             <div className="flex flex-wrap items-center justify-center gap-2.5">
               {brands.map((b) => (

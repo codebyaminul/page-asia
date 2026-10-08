@@ -123,7 +123,12 @@ export function Navbar({ onOpenQuoteModal, onOpenQuote }: NavbarProps) {
                 <Button
                   variant="primary"
                   size="md"
-                  onClick={triggerQuote}
+                  onClick={(e) => {
+                    if (triggerQuote) {
+                      e.preventDefault();
+                      triggerQuote();
+                    }
+                  }}
                   className="font-bold uppercase tracking-wider text-xs gap-1.5 px-5 h-10 shadow-sm"
                 >
                   <span>Get a Quote</span>

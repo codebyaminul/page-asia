@@ -19,7 +19,7 @@ export function Footer() {
             </p>
             <div className="pt-2">
               <span className="text-[11px] font-mono uppercase tracking-wider text-page-midgray block mb-2">
-                Authorized Distribution Partners
+                Selected Technology Brands
               </span>
               <div className="flex flex-wrap gap-2">
                 {brands.map((b) => (

@@ -341,24 +341,31 @@ export default function ContactPage() {
                       </div>
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsSubmitted(false);
-                        setFormData({
-                          fullName: '',
-                          companyName: '',
-                          phone: '',
-                          email: '',
-                          inquiryType: 'Garage Equipment',
-                          message: '',
-                        });
-                      }}
-                      className="font-mono text-xs"
-                    >
-                      Send Another Inquiry
-                    </Button>
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <Link href="/" className="w-full sm:w-auto">
+                        <Button variant="outline" size="sm" className="font-mono text-xs w-full sm:w-auto">
+                          Back to Home
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                          setIsSubmitted(false);
+                          setFormData({
+                            fullName: '',
+                            companyName: '',
+                            phone: '',
+                            email: '',
+                            inquiryType: 'Garage Equipment',
+                            message: '',
+                          });
+                        }}
+                        className="font-mono text-xs w-full sm:w-auto"
+                      >
+                        Send Another Inquiry
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
