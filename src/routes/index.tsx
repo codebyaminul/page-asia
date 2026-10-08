@@ -154,8 +154,8 @@ function Home() {
             fetchPriority="high"
             className="h-full w-full object-cover object-center opacity-45 brightness-90 contrast-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
         </div>
 
         {/* Hero Content: Bold Typography & Essential CTAs */}
