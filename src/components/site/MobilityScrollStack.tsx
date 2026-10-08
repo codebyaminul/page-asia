@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { images } from "@/lib/data";
 
 // Cubic bezier evaluator for smooth physical slide
@@ -16,12 +15,9 @@ function cubicBezier(p1x: number, p1y: number, p2x: number, p2y: number) {
 const easeSlide = cubicBezier(0.22, 1, 0.36, 1);
 
 export interface MobilityScene {
+  id: string;
   num: string;
-  category: string;
   title: string;
-  subtitle: string;
-  description: string;
-  specs: string[];
   image: string;
   link: string;
   mobilityKey: "4-Wheeler" | "2-Wheeler" | "3-Wheeler";
@@ -32,56 +28,30 @@ export function MobilityScrollStack() {
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false);
 
-  // Exactly THREE Scenes: 4-Wheeler, 2-Wheeler, 3-Wheeler (strictly adhering to prompt)
+  // Exactly THREE Scenes: 4-Wheeler, 2-Wheeler, 3-Wheeler
+  // Cards are kept completely clean & empty of text so a whole image can fill the card
   const scenes: MobilityScene[] = useMemo(
     () => [
       {
+        id: "4-wheeler",
         num: "01",
-        category: "MOBILITY ECOSYSTEM",
         title: "4-WHEELER",
-        subtitle: "Passenger Cars · SUVs · Fleet Vans",
-        description:
-          "Equipment and solutions for automotive workshops, service centers and businesses working with cars.",
-        specs: [
-          "2-Post & Scissor Lifts",
-          "Ceramic Brake Friction",
-          "OE Diagnostic Tablets",
-          "High-Pressure Fluid Tools",
-        ],
         image: images.heroWorkshop,
         link: "/shop",
         mobilityKey: "4-Wheeler",
       },
       {
+        id: "2-wheeler",
         num: "02",
-        category: "MOBILITY ECOSYSTEM",
         title: "2-WHEELER",
-        subtitle: "Motorcycles · Scooters · Fleet 2W",
-        description:
-          "Equipment and solutions for motorcycle and scooter workshops and businesses.",
-        specs: [
-          "Hydraulic Scissor Benches",
-          "Pneumatic Tyre Machines",
-          "ECU Scan & Tuning Consoles",
-          "Specialized Service Bays",
-        ],
         image: images.motoLift,
         link: "/shop",
         mobilityKey: "2-Wheeler",
       },
       {
+        id: "3-wheeler",
         num: "03",
-        category: "MOBILITY ECOSYSTEM",
         title: "3-WHEELER",
-        subtitle: "Commercial 3W · Cargo · Auto-Rickshaw Hubs",
-        description:
-          "Equipment and solutions for three-wheeler workshops and mobility businesses.",
-        specs: [
-          "Heavy 3W Hydraulic Lifts",
-          "Depot Spares Reserves",
-          "Commercial Fleet Turnkey Setup",
-          "High-Wear Replacement Spares",
-        ],
         image: images.commercial3wHub,
         link: "/shop",
         mobilityKey: "3-Wheeler",
@@ -218,7 +188,7 @@ export function MobilityScrollStack() {
         }`}
       >
         {/* Subtle Top Sticky Ambient Bar */}
-        <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none flex items-center justify-between px-6 sm:px-12 py-6 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+        <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none flex items-center justify-between px-6 sm:px-12 py-5 bg-gradient-to-b from-black/80 via-black/30 to-transparent">
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] uppercase text-zinc-300">
@@ -248,24 +218,20 @@ export function MobilityScrollStack() {
         </div>
 
         {/* ======================================================== */}
-        {/* 3 FULL-SCREEN SLIDING SCENES                              */}
+        {/* 3 FULL-SCREEN SLIDING SCENES (EMPTY CARDS FOR WHOLE IMAGE)*/}
         {/* ======================================================== */}
         <div className="relative h-full w-full">
           {scenes.map((scene, index) => {
             const transformStyle = getSceneTransform(index);
 
-            // Composition Variations:
-            // Scene 01: Image on RIGHT, Typography on LEFT
-            // Scene 02: Image on LEFT, Typography on RIGHT
-            // Scene 03: Asymmetric layout with large visual & bold staggered typography
             return (
               <div
                 key={scene.num}
                 className={`${
                   isReducedMotion
-                    ? "relative min-h-[85vh] py-16"
+                    ? "relative min-h-[85vh] py-12"
                     : "absolute inset-0 h-full w-full"
-                } flex items-center justify-center bg-[#090A0D] will-change-transform overflow-hidden`}
+                } flex items-center justify-center bg-[#08090B] will-change-transform overflow-hidden px-4 sm:px-8`}
                 style={{
                   transform: transformStyle.transform,
                   opacity: transformStyle.opacity,
@@ -278,224 +244,28 @@ export function MobilityScrollStack() {
                   style={{ opacity: transformStyle.darkenOpacity }}
                 />
 
-                {/* Subtle Showroom Spotlight & Engineering Grid */}
+                {/* Subtle Showroom Ambient Lighting */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <div
-                    className={`absolute w-[700px] h-[500px] bg-primary/[0.05] blur-[150px] rounded-full ${
-                      index === 1 ? "top-[30%] left-[10%]" : "top-[30%] right-[10%]"
-                    }`}
-                  />
-                  <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:36px_36px] opacity-35" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-primary/[0.04] blur-[160px] rounded-full" />
+                  <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:36px_36px] opacity-30" />
                 </div>
 
-                {/* SCENE CONTENT CONTAINER */}
-                <div className="container-page relative z-20 w-full h-full flex flex-col justify-center py-16 sm:py-20 lg:py-24">
-                  {/* SCENE 01: IMAGE ON RIGHT, TYPOGRAPHY ON LEFT */}
-                  {index === 0 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center h-full">
-                      {/* Left: Typography */}
-                      <div className="lg:col-span-6 flex flex-col justify-center">
-                        <div className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-[0.2em] text-primary mb-3">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          <span>{scene.num} · {scene.category}</span>
-                        </div>
-
-                        <h2 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold uppercase tracking-tight text-white leading-[0.88]">
-                          {scene.title}
-                        </h2>
-
-                        <p className="mt-3 text-sm sm:text-base font-mono font-semibold uppercase tracking-wider text-zinc-400">
-                          {scene.subtitle}
-                        </p>
-
-                        <p className="mt-4 text-base sm:text-lg text-zinc-300 leading-relaxed font-sans max-w-xl">
-                          {scene.description}
-                        </p>
-
-                        <div className="mt-6 flex flex-wrap gap-2">
-                          {scene.specs.map((sp, i) => (
-                            <span
-                              key={i}
-                              className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-300 bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 rounded"
-                            >
-                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                              <span>{sp}</span>
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="mt-8 flex items-center gap-4">
-                          <Link
-                            to="/shop"
-                            search={{ mobility: scene.mobilityKey }}
-                            className="btn btn-primary h-12 px-7 text-xs font-bold uppercase tracking-wider rounded-sm shadow-xl shadow-primary/25"
-                          >
-                            <span>Explore 4-Wheeler Equipment</span>
-                            <ArrowRight className="h-4 w-4" />
-                          </Link>
-                          <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest hidden sm:inline-block">
-                            SCROLL DOWN FOR 2-WHEELER ↓
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Right: High-Impact Visual Panel */}
-                      <div className="lg:col-span-6 relative aspect-[16/10] sm:aspect-[16/11] lg:aspect-[4/3] rounded-xl overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-950 group">
-                        <img
-                          src={scene.image}
-                          alt={scene.title}
-                          className="h-full w-full object-cover brightness-90 contrast-115 transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                        <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between text-xs font-mono">
-                          <span className="text-white font-bold uppercase tracking-wider">
-                            Turnkey Hydraulic Lifting Bays
-                          </span>
-                          <span className="text-primary font-semibold">
-                            Commercial Grade →
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* SCENE 02: IMAGE ON LEFT, TYPOGRAPHY ON RIGHT */}
-                  {index === 1 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center h-full">
-                      {/* Left: High-Impact Motorcycle Workshop Panel */}
-                      <div className="lg:col-span-6 relative aspect-[16/10] sm:aspect-[16/11] lg:aspect-[4/3] rounded-xl overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-950 order-2 lg:order-1 group">
-                        <img
-                          src={scene.image}
-                          alt={scene.title}
-                          className="h-full w-full object-cover brightness-90 contrast-115 transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                        <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between text-xs font-mono">
-                          <span className="text-white font-bold uppercase tracking-wider">
-                            Hydraulic Scissor Lift Platforms
-                          </span>
-                          <span className="text-primary font-semibold">
-                            Motorcycle Specialists →
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Right: Typography */}
-                      <div className="lg:col-span-6 flex flex-col justify-center order-1 lg:order-2">
-                        <div className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-[0.2em] text-primary mb-3">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          <span>{scene.num} · {scene.category}</span>
-                        </div>
-
-                        <h2 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold uppercase tracking-tight text-white leading-[0.88]">
-                          {scene.title}
-                        </h2>
-
-                        <p className="mt-3 text-sm sm:text-base font-mono font-semibold uppercase tracking-wider text-zinc-400">
-                          {scene.subtitle}
-                        </p>
-
-                        <p className="mt-4 text-base sm:text-lg text-zinc-300 leading-relaxed font-sans max-w-xl">
-                          {scene.description}
-                        </p>
-
-                        <div className="mt-6 flex flex-wrap gap-2">
-                          {scene.specs.map((sp, i) => (
-                            <span
-                              key={i}
-                              className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-300 bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 rounded"
-                            >
-                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                              <span>{sp}</span>
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="mt-8 flex items-center gap-4">
-                          <Link
-                            to="/shop"
-                            search={{ mobility: scene.mobilityKey }}
-                            className="btn btn-primary h-12 px-7 text-xs font-bold uppercase tracking-wider rounded-sm shadow-xl shadow-primary/25"
-                          >
-                            <span>Explore 2-Wheeler Equipment</span>
-                            <ArrowRight className="h-4 w-4" />
-                          </Link>
-                          <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest hidden sm:inline-block">
-                            SCROLL DOWN FOR 3-WHEELER ↓
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* SCENE 03: ASYMMETRIC COMMERCIAL 3W COMPOSITION */}
-                  {index === 2 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center h-full">
-                      {/* Left: Asymmetric Typography & Technical Scope */}
-                      <div className="lg:col-span-6 flex flex-col justify-center">
-                        <div className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-[0.2em] text-primary mb-3">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          <span>{scene.num} · {scene.category}</span>
-                        </div>
-
-                        <h2 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold uppercase tracking-tight text-white leading-[0.88]">
-                          {scene.title}
-                        </h2>
-
-                        <p className="mt-3 text-sm sm:text-base font-mono font-semibold uppercase tracking-wider text-zinc-400">
-                          {scene.subtitle}
-                        </p>
-
-                        <p className="mt-4 text-base sm:text-lg text-zinc-300 leading-relaxed font-sans max-w-xl">
-                          {scene.description}
-                        </p>
-
-                        <div className="mt-6 flex flex-wrap gap-2">
-                          {scene.specs.map((sp, i) => (
-                            <span
-                              key={i}
-                              className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-300 bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 rounded"
-                            >
-                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                              <span>{sp}</span>
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="mt-8 flex items-center gap-4">
-                          <Link
-                            to="/shop"
-                            search={{ mobility: scene.mobilityKey }}
-                            className="btn btn-primary h-12 px-7 text-xs font-bold uppercase tracking-wider rounded-sm shadow-xl shadow-primary/25"
-                          >
-                            <span>Explore 3-Wheeler Equipment</span>
-                            <ArrowRight className="h-4 w-4" />
-                          </Link>
-                          <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest hidden sm:inline-block">
-                            FINAL MOBILITY SCENE · SCROLL TO EXPLORE CATALOGUE ↓
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Right: Commercial 3-Wheeler Hub Imagery */}
-                      <div className="lg:col-span-6 relative aspect-[16/10] sm:aspect-[16/11] lg:aspect-[4/3] rounded-xl overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-950 group">
-                        <img
-                          src={scene.image}
-                          alt={scene.title}
-                          className="h-full w-full object-cover brightness-90 contrast-115 transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                        <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between text-xs font-mono">
-                          <span className="text-white font-bold uppercase tracking-wider">
-                            Commercial Cargo & Passenger Hubs
-                          </span>
-                          <span className="text-primary font-semibold">
-                            Heavy Duty Infrastructure →
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                {/* ======================================================== */}
+                {/* THE EMPTY CARD CONTAINER: READY FOR WHOLE IMAGE          */}
+                {/* ======================================================== */}
+                <div className="relative z-20 w-full max-w-6xl h-[78vh] sm:h-[82vh] max-h-[820px] rounded-2xl sm:rounded-3xl overflow-hidden border border-zinc-800/80 bg-zinc-950 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.85)] flex items-center justify-center group">
+                  <Link
+                    to={scene.link}
+                    search={{ mobility: scene.mobilityKey }}
+                    className="relative w-full h-full block overflow-hidden"
+                  >
+                    {/* The Whole Image fills the entire card edge-to-edge */}
+                    <img
+                      src={scene.image}
+                      alt={scene.title}
+                      className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
+                    />
+                  </Link>
                 </div>
               </div>
             );
