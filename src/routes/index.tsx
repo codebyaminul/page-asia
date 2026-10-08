@@ -12,6 +12,7 @@ import { useState } from "react";
 import { CinematicIntro } from "@/components/site/CinematicIntro";
 import { CatalogueFanStack } from "@/components/site/CatalogueFanStack";
 import { ScrollSolutionsStack } from "@/components/site/ScrollSolutionsStack";
+import { MobilityScrollStack } from "@/components/site/MobilityScrollStack";
 import {
   brands,
   images,
@@ -201,146 +202,9 @@ function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 02 — WHAT WE SUPPLY: VISUAL COMPOSITION                  */}
+      {/* 02 — MOBILITY ECOSYSTEM / WHAT WE SUPPLY (SCROLL STACK)  */}
       {/* ======================================================== */}
-      <section className="py-20 lg:py-28 bg-white border-b border-border">
-        <div className="container-page">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
-            <div>
-              <span className="eyebrow text-primary">Mobility Ecosystem</span>
-              <h2 className="display-giant mt-1 text-foreground">
-                WHAT WE SUPPLY
-              </h2>
-            </div>
-            <Link
-              to="/shop"
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:text-foreground transition-colors group"
-            >
-              <span>Full B2B Product Catalog</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-
-          {/* Asymmetric Visual Composition: Large 4W + Paired 2W/3W + Large EV */}
-          <div className="grid gap-6">
-            {/* Dominant Large 4-Wheeler Visual Panel */}
-            <Link
-              to="/shop"
-              search={{ mobility: "4-Wheeler" }}
-              className="group relative block overflow-hidden rounded bg-black min-h-[380px] lg:min-h-[460px] text-white shadow-md"
-            >
-              <img
-                src={images.heroWorkshop}
-                alt="Four-Wheeler workshop equipment and vehicle lifts"
-                className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-              
-              <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-10">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                  Passenger Cars · SUVs · Fleet Vans
-                </span>
-                <div className="flex items-baseline justify-between mt-1">
-                  <h3 className="font-display text-4xl sm:text-6xl font-bold uppercase tracking-wide text-white">
-                    FOUR-WHEELER
-                  </h3>
-                  <ArrowUpRight className="h-6 w-6 text-primary transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                </div>
-                <p className="mt-2 text-sm text-zinc-300 max-w-lg">
-                  2-Post & scissor lifts, ceramic brake friction, diagnostic tablets, and fluid machinery.
-                </p>
-              </div>
-            </Link>
-
-            {/* Paired Two-Wheeler and Three-Wheeler Panels */}
-            <div className="grid gap-6 sm:grid-cols-2">
-              {/* Two-Wheeler Panel */}
-              <Link
-                to="/shop"
-                search={{ mobility: "2-Wheeler" }}
-                className="group relative block overflow-hidden rounded bg-black min-h-[280px] text-white shadow-md"
-              >
-                <img
-                  src={images.motoLift}
-                  alt="Two-Wheeler motorcycle lift and workshop equipment"
-                  className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                <div className="relative z-10 flex h-full flex-col justify-end p-6">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                    Bikes & Scooters
-                  </span>
-                  <div className="flex items-baseline justify-between mt-0.5">
-                    <h3 className="font-display text-3xl font-bold uppercase text-white">
-                      TWO-WHEELER
-                    </h3>
-                    <ArrowUpRight className="h-5 w-5 text-primary transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                  </div>
-                  <p className="mt-1 text-xs text-zinc-300">
-                    Hydraulic scissor lift benches, tyre machines & tuning tools.
-                  </p>
-                </div>
-              </Link>
-
-              {/* Three-Wheeler Panel */}
-              <Link
-                to="/shop"
-                search={{ mobility: "3-Wheeler" }}
-                className="group relative block overflow-hidden rounded bg-black min-h-[280px] text-white shadow-md"
-              >
-                <img
-                  src={images.commercial3wHub}
-                  alt="Three-Wheeler commercial service bay and lifts"
-                  className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                <div className="relative z-10 flex h-full flex-col justify-end p-6">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                    Commercial 3W & Cargo
-                  </span>
-                  <div className="flex items-baseline justify-between mt-0.5">
-                    <h3 className="font-display text-3xl font-bold uppercase text-white">
-                      THREE-WHEELER
-                    </h3>
-                    <ArrowUpRight className="h-5 w-5 text-primary transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                  </div>
-                  <p className="mt-1 text-xs text-zinc-300">
-                    Commercial 3W hydraulic lift platforms & heavy spare reserves.
-                  </p>
-                </div>
-              </Link>
-            </div>
-
-            {/* Large EV Visual Panel */}
-            <Link
-              to="/shop"
-              search={{ mobility: "EV" }}
-              className="group relative block overflow-hidden rounded bg-black min-h-[300px] lg:min-h-[360px] text-white shadow-md"
-            >
-              <img
-                src={images.evWorkshopBay}
-                alt="Electric vehicle workshop facility with 1000V tools"
-                className="absolute inset-0 h-full w-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent" />
-              <div className="relative z-10 flex h-full flex-col justify-end p-6 sm:p-10">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">
-                  Strategic Growth · 2W / 3W / 4W EV
-                </span>
-                <div className="flex items-baseline justify-between mt-1">
-                  <h3 className="font-display text-4xl sm:text-5xl font-bold uppercase text-white">
-                    ELECTRIC MOBILITY (EV)
-                  </h3>
-                  <ArrowUpRight className="h-6 w-6 text-primary transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                </div>
-                <p className="mt-2 text-sm text-zinc-300 max-w-lg">
-                  1000V VDE safety tools, high-voltage battery pack analyzers, cell balancers & charging stations.
-                </p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <MobilityScrollStack />
 
       {/* ======================================================== */}
       {/* 03 — INTERACTIVE CATALOGUE SHOWCASE (FAN STACK MOTION)   */}
