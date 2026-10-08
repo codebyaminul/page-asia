@@ -7,17 +7,238 @@ const KEY = "page-intro-seen";
 const DURATION_DISSOLVE = 4100;
 const DURATION_TOTAL = 4800;
 
-/**
- * ORIGINAL "FROM THE ROAD TO THE WORKSHOP" PAGE Brand Intro
- *
- * Sequence:
- * 0.0 - 0.8s: Dark environment + distant faint red horizon glow
- * 0.8 - 1.8s: Vehicle enters from bottom center moving forward into the scene
- * 1.8 - 3.4s: Vehicle travels upward into 3D technical floor grid; red light trails;
- *             twin workshop 2-post lift posts and equipment framework emerge from darkness
- * 3.4 - 4.2s: Sequential minimal typography appears ("PAGE INTERNATIONAL" -> "AUTOMOTIVE EQUIPMENT. PARTS. WORKSHOP SOLUTIONS.")
- * 4.2 - 4.8s: PAGE logo resolves, scene smoothly dissolves directly into the homepage hero section
- */
+function VectorCar({ className = "" }: { className?: string }) {
+  return (
+    <div className={`relative mx-auto ${className}`}>
+      {/* Floor Contact Shadow */}
+      <div className="absolute -bottom-4 inset-x-4 h-6 bg-black/90 blur-md rounded-full pointer-events-none" />
+      {/* Red Floor Neon Glow Shimmer below tail lights */}
+      <div className="absolute -bottom-3 inset-x-8 h-5 bg-primary/45 blur-md rounded-full pointer-events-none animate-pulse" />
+
+      {/* Pure SVG Vector Car (Rear 3/4 Elevation) */}
+      <svg
+        viewBox="0 0 380 190"
+        className="w-full h-auto drop-shadow-[0_20px_35px_rgba(0,0,0,0.95)]"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          {/* Metallic Body Gradient */}
+          <linearGradient id="car-body" x1="190" y1="18" x2="190" y2="170" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#333842" />
+            <stop offset="30%" stopColor="#1e2128" />
+            <stop offset="65%" stopColor="#131519" />
+            <stop offset="100%" stopColor="#0a0b0d" />
+          </linearGradient>
+
+          {/* Tinted Rear Glass with Specular Glint */}
+          <linearGradient id="rear-glass" x1="110" y1="24" x2="270" y2="72" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#0c0e12" />
+            <stop offset="40%" stopColor="#161c24" />
+            <stop offset="48%" stopColor="#3d4d62" />
+            <stop offset="56%" stopColor="#161c24" />
+            <stop offset="100%" stopColor="#0a0b0e" />
+          </linearGradient>
+
+          {/* Red LED Tail Lamp Bloom */}
+          <filter id="neon-tail-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="blur1" />
+            <feGaussianBlur stdDeviation="1.5" result="blur2" />
+            <feMerge>
+              <feMergeNode in="blur1" />
+              <feMergeNode in="blur2" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {/* Diffuser Carbon Mesh Gradient */}
+          <linearGradient id="diffuser-grad" x1="190" y1="130" x2="190" y2="175" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#181a20" />
+            <stop offset="100%" stopColor="#08080a" />
+          </linearGradient>
+
+          {/* Shoulder Highlight Line */}
+          <linearGradient id="shoulder-spec" x1="50" y1="88" x2="330" y2="88" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
+            <stop offset="25%" stopColor="rgba(255,255,255,0.35)" />
+            <stop offset="50%" stopColor="rgba(255,255,255,0.65)" />
+            <stop offset="75%" stopColor="rgba(255,255,255,0.35)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0.05)" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. WIDE REAR PERFORMANCE TIRES (Left & Right) */}
+        {/* Left Rear Tire */}
+        <path
+          d="M 52 108 C 48 108 44 116 42 130 L 40 156 C 40 160 44 162 50 162 L 76 162 C 82 162 84 158 84 154 L 82 130 C 80 116 76 108 70 108 Z"
+          fill="#0c0d0f"
+          stroke="#1c1f24"
+          strokeWidth="1.5"
+        />
+        <line x1="48" y1="134" x2="78" y2="134" stroke="#1f2329" strokeWidth="1.5" />
+        <line x1="46" y1="144" x2="78" y2="144" stroke="#1f2329" strokeWidth="1.5" />
+        <line x1="45" y1="154" x2="77" y2="154" stroke="#1f2329" strokeWidth="1.5" />
+
+        {/* Right Rear Tire */}
+        <path
+          d="M 310 108 C 304 108 300 116 298 130 L 296 154 C 296 158 298 162 304 162 L 330 162 C 336 162 340 160 340 156 L 338 130 C 336 116 332 108 328 108 Z"
+          fill="#0c0d0f"
+          stroke="#1c1f24"
+          strokeWidth="1.5"
+        />
+        <line x1="302" y1="134" x2="332" y2="134" stroke="#1f2329" strokeWidth="1.5" />
+        <line x1="302" y1="144" x2="334" y2="144" stroke="#1f2329" strokeWidth="1.5" />
+        <line x1="303" y1="154" x2="335" y2="154" stroke="#1f2329" strokeWidth="1.5" />
+
+        {/* 2. REAR BODY & FENDERS (Muscular Aerodynamic Silhouette) */}
+        <path
+          d="M 135 18 
+             C 152 16 228 16 245 18 
+             C 260 20 286 40 296 60 
+             C 304 70 324 84 334 100 
+             C 344 114 346 132 344 142 
+             C 342 148 338 152 330 152 
+             L 302 152 
+             C 294 152 290 144 288 138 
+             L 282 120 
+             C 278 114 268 110 252 110 
+             L 128 110 
+             C 112 110 102 114 98 120 
+             L 92 138 
+             C 90 144 86 152 78 152 
+             L 50 152 
+             C 42 148 36 142 36 132 
+             C 38 114 56 100 66 90 
+             C 76 80 94 40 104 28 
+             C 114 20 122 18 135 18 Z"
+          fill="url(#car-body)"
+          stroke="#3d4450"
+          strokeWidth="1.2"
+        />
+
+        {/* 3. GREENHOUSE / REAR WINDSHIELD */}
+        <path
+          d="M 142 22 
+             C 158 20 222 20 238 22 
+             C 252 24 274 50 278 68 
+             C 264 70 208 72 190 72 
+             C 172 72 116 70 102 68 
+             C 106 50 128 24 142 22 Z"
+          fill="url(#rear-glass)"
+          stroke="#262b35"
+          strokeWidth="1.5"
+        />
+        {/* Windshield Defroster Lines */}
+        <line x1="126" y1="36" x2="254" y2="36" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
+        <line x1="118" y1="46" x2="262" y2="46" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
+        <line x1="110" y1="56" x2="270" y2="56" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
+
+        {/* Third Brake Light (High Mounted Centered) */}
+        <rect x="174" y="23" width="32" height="3" rx="1.5" fill="#e02424" filter="url(#neon-tail-glow)" />
+
+        {/* Aerodynamic Side Mirrors (Left & Right) */}
+        <path d="M 94 50 C 88 50 82 46 74 44 C 72 42 76 38 82 40 C 88 42 94 46 96 50 Z" fill="#1d2026" stroke="#3d4450" strokeWidth="1" />
+        <path d="M 286 50 C 292 50 298 46 306 44 C 308 42 304 38 298 40 C 292 42 286 46 284 50 Z" fill="#1d2026" stroke="#3d4450" strokeWidth="1" />
+
+        {/* 4. INTEGRATED REAR SPOILER / DUCKTAIL LIP */}
+        <path
+          d="M 92 72 C 120 68 190 67 288 72 C 296 76 292 82 284 82 C 210 78 170 78 96 82 C 88 82 84 76 92 72 Z"
+          fill="#272b35"
+          stroke="#495261"
+          strokeWidth="1"
+        />
+
+        {/* Muscular Shoulder Highlight Crease */}
+        <path d="M 68 90 C 110 82 190 81 312 90" stroke="url(#shoulder-spec)" strokeWidth="1.2" />
+
+        {/* 5. FULL-WIDTH CONTINUOUS RED LED LIGHT BAR */}
+        {/* Background Dark Lens Housing */}
+        <path
+          d="M 72 90 
+             C 100 86 190 85 308 90 
+             C 316 96 312 104 304 104 
+             C 214 100 166 100 76 104 
+             C 68 104 64 96 72 90 Z"
+          fill="#140608"
+          stroke="#420f16"
+          strokeWidth="1"
+        />
+
+        {/* Outer Red Ambient Halo */}
+        <path
+          d="M 74 92 C 104 88 190 87 306 92 C 312 96 308 102 302 102 C 214 98 166 98 78 102 C 72 102 68 96 74 92 Z"
+          fill="#941313"
+          opacity="0.85"
+        />
+
+        {/* Primary Glowing Red LED Blade */}
+        <path
+          d="M 76 94 
+             C 106 90 190 89 304 94 
+             C 309 97 306 100 300 100 
+             C 212 96 168 96 80 100 
+             C 74 100 71 97 76 94 Z"
+          fill="#ff2a2a"
+          filter="url(#neon-tail-glow)"
+        />
+
+        {/* Ultra-Intense Core Filament (White/Hot-Red Beam) */}
+        <path
+          d="M 86 96 C 114 93 190 92 294 96"
+          stroke="#ffffff"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          opacity="0.95"
+        />
+
+        {/* Left & Right Signature Wraparound Tail Blades */}
+        <path d="M 74 92 L 68 100 L 76 106" stroke="#ff2a2a" strokeWidth="2.5" strokeLinecap="round" filter="url(#neon-tail-glow)" />
+        <path d="M 306 92 L 312 100 L 304 106" stroke="#ff2a2a" strokeWidth="2.5" strokeLinecap="round" filter="url(#neon-tail-glow)" />
+
+        {/* 6. CENTER TRUNK FASCIA & BRAND BADGE INSET */}
+        <polygon points="144,110 236,110 228,130 152,130" fill="#0d0e12" stroke="#1f232b" strokeWidth="1" />
+        <text
+          x="190"
+          y="124"
+          textAnchor="middle"
+          fill="#ffffff"
+          fontSize="9"
+          fontFamily="system-ui, sans-serif"
+          fontWeight="900"
+          letterSpacing="0.25em"
+          opacity="0.9"
+        >
+          PAGE
+        </text>
+
+        {/* 7. LOWER BUMPER & REAR DIFFUSER */}
+        <path
+          d="M 94 134 
+             C 120 132 260 132 286 134 
+             L 282 164 
+             C 250 166 130 166 98 164 Z"
+          fill="url(#diffuser-grad)"
+          stroke="#292d37"
+          strokeWidth="1"
+        />
+
+        {/* Vertical Aerodynamic Diffuser Strakes / Fins */}
+        <line x1="140" y1="138" x2="138" y2="162" stroke="#3d4452" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="165" y1="138" x2="164" y2="162" stroke="#3d4452" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="190" y1="138" x2="190" y2="162" stroke="#e02424" strokeWidth="2.5" strokeLinecap="round" /> {/* Red center strake */}
+        <line x1="215" y1="138" x2="216" y2="162" stroke="#3d4452" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="240" y1="138" x2="242" y2="162" stroke="#3d4452" strokeWidth="2.5" strokeLinecap="round" />
+
+        {/* Dual Performance Exhaust Tailpipes */}
+        <rect x="106" y="146" width="16" height="8" rx="2" fill="#050608" stroke="#4a5363" strokeWidth="1.2" />
+        <ellipse cx="114" cy="150" rx="5" ry="2.5" fill="#000000" stroke="#ff4d4d" strokeWidth="0.6" />
+        <rect x="258" y="146" width="16" height="8" rx="2" fill="#050608" stroke="#4a5363" strokeWidth="1.2" />
+        <ellipse cx="266" cy="150" rx="5" ry="2.5" fill="#000000" stroke="#ff4d4d" strokeWidth="0.6" />
+      </svg>
+    </div>
+  );
+}
+
 export function CinematicIntro() {
   const [state, setState] = useState<"idle" | "play" | "out" | "done">("idle");
 
@@ -317,40 +538,24 @@ export function CinematicIntro() {
         </div>
       </div>
 
-      {/* 5. MOVING REALISTIC REAR 3/4 VEHICLE + DUAL RED LIGHT TRAILS */}
+      {/* 5. MOVING CSS / VECTOR VEHICLE + DUAL RED LIGHT TRAILS */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
         {/* Container moving forward vertically */}
-        <div className="intro-vehicle-animate absolute left-1/2 top-1/2 w-[min(900px,88vw)] sm:w-[min(1080px,82vw)]">
+        <div className="intro-vehicle-animate absolute left-1/2 top-1/2 w-[min(380px,88vw)] sm:w-[460px]">
           {/* DUAL RED LIGHT TRAILS (Stream downward from vehicle tail lamps) */}
-          <div className="absolute left-[36%] bottom-[28%] w-1.5 pointer-events-none">
+          <div className="absolute left-[20%] top-[48%] w-2 pointer-events-none">
             <div
-              className="intro-trail-animate w-full bg-gradient-to-b from-primary via-primary/60 to-transparent blur-[2px] shadow-[0_0_12px_rgba(224,36,36,1)]"
+              className="intro-trail-animate w-full bg-gradient-to-b from-primary via-primary/60 to-transparent blur-[2px] shadow-[0_0_16px_rgba(224,36,36,1)]"
             />
           </div>
-          <div className="absolute right-[36%] bottom-[28%] w-1.5 pointer-events-none">
+          <div className="absolute right-[20%] top-[48%] w-2 pointer-events-none">
             <div
-              className="intro-trail-animate w-full bg-gradient-to-b from-primary via-primary/60 to-transparent blur-[2px] shadow-[0_0_12px_rgba(224,36,36,1)]"
+              className="intro-trail-animate w-full bg-gradient-to-b from-primary via-primary/60 to-transparent blur-[2px] shadow-[0_0_16px_rgba(224,36,36,1)]"
             />
           </div>
 
-          {/* Vehicle Real Image (elevated rear 3/4 perspective) */}
-          <div
-            className="relative w-full"
-            style={{
-              maskImage: "radial-gradient(ellipse 90% 85% at 50% 50%, black 65%, transparent 100%)",
-              WebkitMaskImage: "radial-gradient(ellipse 90% 85% at 50% 50%, black 65%, transparent 100%)",
-            }}
-          >
-            <img
-              src="/intro-vehicle.jpg"
-              alt="Automotive vehicle entering workshop bay"
-              className="w-full h-auto block select-none pointer-events-none filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)]"
-              draggable={false}
-            />
-
-            {/* Red LED Tail Light Intensifier */}
-            <div className="absolute top-[38%] inset-x-[26%] h-6 bg-primary/40 blur-md rounded-full pointer-events-none" />
-          </div>
+          {/* Pure CSS/SVG Vector Car */}
+          <VectorCar />
         </div>
       </div>
 
