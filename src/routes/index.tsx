@@ -9,6 +9,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useState } from "react";
+import { CinematicIntro } from "@/components/site/CinematicIntro";
 import {
   brands,
   images,
@@ -142,6 +143,9 @@ function Home() {
 
   return (
     <div className="bg-background text-foreground selection:bg-primary selection:text-white">
+      {/* 00 — SIGNATURE WEBSITE OPENING ANIMATION: FROM THE ROAD TO THE WORKSHOP */}
+      <CinematicIntro />
+
       {/* ======================================================== */}
       {/* 01 — HERO: FULL-WIDTH CINEMATIC WORKSHOP ENVIRONMENT     */}
       {/* ======================================================== */}
