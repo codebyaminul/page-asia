@@ -12,6 +12,9 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CartProvider, useCart } from "../lib/cart";
+import { Header } from "../components/site/Header";
+import { Footer } from "../components/site/Footer";
 
 function NotFoundComponent() {
   return (
@@ -78,20 +81,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "PAGE International — Parts, Service & Automotive Technology" },
+      { name: "description", content: "Shop automotive parts, book vehicle service and find PAGE service centers." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
@@ -115,13 +114,30 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function Toast() {
+  const { toast } = useCart();
+  if (!toast) return null;
+  return (
+    <div role="status" className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 border-l-2 border-primary bg-ink px-5 py-3 text-sm text-ink-foreground animate-in fade-in slide-in-from-bottom-2">
+      {toast}
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <CartProvider>
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">Skip to content</a>
+        <Header />
+        <main id="main">
+          <Outlet />
+        </main>
+        <Footer />
+        <Toast />
+      </CartProvider>
     </QueryClientProvider>
   );
 }

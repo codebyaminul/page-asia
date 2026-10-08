@@ -10,33 +10,193 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as CartRouteImport } from './routes/cart'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as GarageRouteImport } from './routes/garage'
+import { Route as ServiceCentersRouteImport } from './routes/service-centers'
+import { Route as SolutionsRouteImport } from './routes/solutions'
+import { Route as SupportRouteImport } from './routes/support'
+import { Route as VehiclesRouteImport } from './routes/vehicles'
+import { Route as ServicesIndexRouteImport } from './routes/services.index'
+import { Route as ServicesBookRouteImport } from './routes/services.book'
+import { Route as ShopIndexRouteImport } from './routes/shop.index'
+import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GarageRoute = GarageRouteImport.update({
+  id: '/garage',
+  path: '/garage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceCentersRoute = ServiceCentersRouteImport.update({
+  id: '/service-centers',
+  path: '/service-centers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SolutionsRoute = SolutionsRouteImport.update({
+  id: '/solutions',
+  path: '/solutions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VehiclesRoute = VehiclesRouteImport.update({
+  id: '/vehicles',
+  path: '/vehicles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesBookRoute = ServicesBookRouteImport.update({
+  id: '/services/book',
+  path: '/services/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/shop/',
+  path: '/shop/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopSlugRoute = ShopSlugRouteImport.update({
+  id: '/shop/$slug',
+  path: '/shop/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
+  '/garage': typeof GarageRoute
+  '/service-centers': typeof ServiceCentersRoute
+  '/solutions': typeof SolutionsRoute
+  '/support': typeof SupportRoute
+  '/vehicles': typeof VehiclesRoute
+  '/services/book': typeof ServicesBookRoute
+  '/shop/$slug': typeof ShopSlugRoute
+  '/services/': typeof ServicesIndexRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
+  '/garage': typeof GarageRoute
+  '/service-centers': typeof ServiceCentersRoute
+  '/solutions': typeof SolutionsRoute
+  '/support': typeof SupportRoute
+  '/vehicles': typeof VehiclesRoute
+  '/services/book': typeof ServicesBookRoute
+  '/shop/$slug': typeof ShopSlugRoute
+  '/services': typeof ServicesIndexRoute
+  '/shop': typeof ShopIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
+  '/garage': typeof GarageRoute
+  '/service-centers': typeof ServiceCentersRoute
+  '/solutions': typeof SolutionsRoute
+  '/support': typeof SupportRoute
+  '/vehicles': typeof VehiclesRoute
+  '/services/book': typeof ServicesBookRoute
+  '/shop/$slug': typeof ShopSlugRoute
+  '/services/': typeof ServicesIndexRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/cart'
+    | '/checkout'
+    | '/garage'
+    | '/service-centers'
+    | '/solutions'
+    | '/support'
+    | '/vehicles'
+    | '/services/book'
+    | '/shop/$slug'
+    | '/services/'
+    | '/shop/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/cart'
+    | '/checkout'
+    | '/garage'
+    | '/service-centers'
+    | '/solutions'
+    | '/support'
+    | '/vehicles'
+    | '/services/book'
+    | '/shop/$slug'
+    | '/services'
+    | '/shop'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/cart'
+    | '/checkout'
+    | '/garage'
+    | '/service-centers'
+    | '/solutions'
+    | '/support'
+    | '/vehicles'
+    | '/services/book'
+    | '/shop/$slug'
+    | '/services/'
+    | '/shop/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CartRoute: typeof CartRoute
+  CheckoutRoute: typeof CheckoutRoute
+  GarageRoute: typeof GarageRoute
+  ServiceCentersRoute: typeof ServiceCentersRoute
+  SolutionsRoute: typeof SolutionsRoute
+  SupportRoute: typeof SupportRoute
+  VehiclesRoute: typeof VehiclesRoute
+  ServicesBookRoute: typeof ServicesBookRoute
+  ShopSlugRoute: typeof ShopSlugRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
+  ShopIndexRoute: typeof ShopIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +208,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/garage': {
+      id: '/garage'
+      path: '/garage'
+      fullPath: '/garage'
+      preLoaderRoute: typeof GarageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service-centers': {
+      id: '/service-centers'
+      path: '/service-centers'
+      fullPath: '/service-centers'
+      preLoaderRoute: typeof ServiceCentersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/solutions': {
+      id: '/solutions'
+      path: '/solutions'
+      fullPath: '/solutions'
+      preLoaderRoute: typeof SolutionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vehicles': {
+      id: '/vehicles'
+      path: '/vehicles'
+      fullPath: '/vehicles'
+      preLoaderRoute: typeof VehiclesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/': {
+      id: '/services/'
+      path: '/services'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/book': {
+      id: '/services/book'
+      path: '/services/book'
+      fullPath: '/services/book'
+      preLoaderRoute: typeof ServicesBookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/': {
+      id: '/shop/'
+      path: '/shop'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/$slug': {
+      id: '/shop/$slug'
+      path: '/shop/$slug'
+      fullPath: '/shop/$slug'
+      preLoaderRoute: typeof ShopSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  CartRoute: CartRoute,
+  CheckoutRoute: CheckoutRoute,
+  GarageRoute: GarageRoute,
+  ServiceCentersRoute: ServiceCentersRoute,
+  SolutionsRoute: SolutionsRoute,
+  SupportRoute: SupportRoute,
+  VehiclesRoute: VehiclesRoute,
+  ServicesBookRoute: ServicesBookRoute,
+  ShopSlugRoute: ShopSlugRoute,
+  ServicesIndexRoute: ServicesIndexRoute,
+  ShopIndexRoute: ShopIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
