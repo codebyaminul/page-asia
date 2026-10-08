@@ -23,7 +23,7 @@ export function HeroStory() {
         const el = ref.current; if (!el) return;
         const r = el.getBoundingClientRect();
         const total = el.offsetHeight - window.innerHeight;
-        setP(Math.min(1, Math.max(0, -r.top / total)));
+        setP(total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 0);
       });
     };
     on(); window.addEventListener("scroll", on, { passive: true });
@@ -31,7 +31,7 @@ export function HeroStory() {
   }, []);
 
   const pos = p * (frames.length - 1);
-  const active = Math.round(pos);
+  const active = Math.min(frames.length - 1, Math.max(0, Math.round(pos) || 0));
 
   return (
     <section ref={ref} className="relative h-[100svh] bg-ink text-ink-foreground md:h-[320vh]" aria-label="Introduction">
