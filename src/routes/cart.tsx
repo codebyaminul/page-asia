@@ -8,8 +8,8 @@ export const Route = createFileRoute("/cart")({
   component: Cart,
 });
 
-export const SHIPPING_FLAT = 150;
-export const FREE_SHIPPING_OVER = 10000;
+const SHIPPING_FLAT = 150;
+const FREE_SHIPPING_OVER = 10000;
 
 function Cart() {
   const { lines, subtotal, setQty, remove } = useCart();
