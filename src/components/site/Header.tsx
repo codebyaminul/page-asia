@@ -1,32 +1,36 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
+  Building2,
   Car,
+  ChevronDown,
   ChevronRight,
-  Headphones,
-  MapPin,
+  FileText,
+  Mail,
   Menu,
   Phone,
   Search,
+  ShieldCheck,
   ShoppingBag,
   Wrench,
   X,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 
-const nav = [
+const navLinks = [
   { to: "/shop", label: "Products" },
-  { to: "/shop", search: { cat: "Equipment" }, label: "Garage Equipment" },
-  { to: "/services", label: "Services" },
+  { to: "/shop", search: { cat: "Garage Equipment" }, label: "Garage Equipment" },
+  { to: "/shop", search: { cat: "EV Equipment" }, label: "EV Equipment" },
   { to: "/solutions", label: "Solutions" },
-  { to: "/vehicles", label: "Vehicles" },
-  { to: "/support", label: "Support" },
+  { to: "/vehicles", label: "By Vehicle (4W/2W/3W/EV)" },
+  { to: "/support", label: "Support & Catalogues" },
   { to: "/about", label: "About" },
 ] as const;
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <Link to="/" aria-label="PAGE International — Home" className={`group flex items-center gap-2.5 ${className}`}>
+    <Link to="/" aria-label="PAGE International Ltd." className={`group flex items-center gap-2.5 ${className}`}>
       <span className="grid h-9 w-9 place-items-center bg-primary font-display text-xl font-bold text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
         P
       </span>
@@ -34,7 +38,7 @@ export function Logo({ className = "" }: { className?: string }) {
         <span className="font-display text-2xl font-bold tracking-[0.14em] text-ink-foreground leading-none">
           PAGE<span className="text-primary">.</span>
         </span>
-        <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-ink-muted">
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-ink-muted">
           International Ltd
         </span>
       </div>
@@ -48,7 +52,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-  const { count, vehicle } = useCart();
+  const { count } = useCart();
 
   useEffect(() => {
     setOpen(false);
@@ -64,72 +68,71 @@ export function Header() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 bg-ink border-b border-ink-border text-ink-foreground shadow-lg">
-        {/* Top utility bar */}
-        <div className="hidden border-b border-ink-border/60 bg-black/40 text-[11px] font-medium text-ink-muted lg:block">
+      <header className="fixed inset-x-0 top-0 z-50 bg-ink border-b border-ink-border text-ink-foreground shadow-md">
+        {/* Top B2B Commercial Utility Bar */}
+        <div className="hidden border-b border-ink-border/60 bg-black/45 text-[11px] font-medium text-ink-muted lg:block">
           <div className="container-page flex h-8 items-center justify-between">
             <div className="flex items-center gap-6">
+              <span className="flex items-center gap-1.5 text-ink-foreground">
+                <Building2 className="h-3 w-3 text-primary" />
+                <span>B2B Supplier of Automotive Equipment & Spare Parts</span>
+              </span>
               <span className="flex items-center gap-1.5 hover:text-ink-foreground transition-colors">
                 <Phone className="h-3 w-3 text-primary" />
-                <span>Hotline: +880 9612-PAGE-INTL (8:00 - 20:00)</span>
+                <span>Commercial Sales: +880 9612-PAGE-INTL</span>
               </span>
               <span className="flex items-center gap-1.5 hover:text-ink-foreground transition-colors">
-                <Wrench className="h-3 w-3 text-primary" />
-                <span>B2B Workshop Equipment Desk</span>
+                <Mail className="h-3 w-3 text-primary" />
+                <span>b2b@page-intl.com</span>
               </span>
             </div>
+
             <div className="flex items-center gap-6">
-              <Link to="/service-centers" className="flex items-center gap-1 hover:text-ink-foreground transition-colors">
-                <MapPin className="h-3 w-3" /> Find Service Center
+              <Link to="/solutions" className="hover:text-ink-foreground transition-colors flex items-center gap-1">
+                <Wrench className="h-3 w-3 text-primary" /> Workshop Setup & Upgrades
               </Link>
-              <Link to="/support" className="flex items-center gap-1 hover:text-ink-foreground transition-colors">
-                <Headphones className="h-3 w-3" /> Technical Support & Quote
+              <Link to="/support" className="hover:text-ink-foreground transition-colors flex items-center gap-1">
+                <FileText className="h-3 w-3" /> Technical Catalogues & Warranty
               </Link>
-              <Link to="/garage" className="hover:text-ink-foreground transition-colors">
-                {vehicle ? (
-                  <span className="text-ink-foreground font-semibold flex items-center gap-1">
-                    <Car className="h-3 w-3 text-primary" /> My Garage: {vehicle.make} {vehicle.model}
-                  </span>
-                ) : (
-                  <span>My Garage</span>
-                )}
+              <Link to="/support" className="text-primary font-bold hover:underline">
+                Request a Quote →
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Main Header */}
+        {/* Main Commercial Header */}
         <div className="container-page flex h-16 items-center justify-between gap-4 lg:h-[4.25rem]">
           <Logo />
 
-          {/* Search bar in center */}
+          {/* Central Catalog Search Bar */}
           <form onSubmit={handleSearch} className="hidden flex-1 max-w-md mx-4 md:flex items-center">
             <div className="relative w-full">
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search automotive parts, garage equipment, SKU..."
-                className="h-10 w-full rounded-[var(--radius)] bg-ink-2 pl-9 pr-16 text-xs text-ink-foreground placeholder:text-ink-muted border border-ink-border focus:border-primary focus:outline-none transition-colors"
+                placeholder="Search equipment, 4W/2W/3W/EV parts, diagnostics, SKU..."
+                className="h-9.5 w-full rounded bg-ink-2 pl-9 pr-16 text-xs text-ink-foreground placeholder:text-ink-muted border border-ink-border focus:border-primary focus:outline-none transition-colors"
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-ink-muted" />
               <button
                 type="submit"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 rounded-[var(--radius)] bg-primary text-[10px] font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7.5 px-2.5 rounded bg-primary text-[10px] font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90"
               >
                 Search
               </button>
             </div>
           </form>
 
-          {/* Navigation links */}
-          <nav aria-label="Primary" className="hidden items-center gap-5 xl:gap-7 lg:flex">
-            {nav.map((n) => (
+          {/* Primary B2B Navigation */}
+          <nav aria-label="Primary" className="hidden items-center gap-4 xl:gap-6 lg:flex">
+            {navLinks.map((n) => (
               <Link
                 key={n.label}
                 to={n.to}
                 search={"search" in n ? n.search : undefined}
-                className="relative py-2 text-xs xl:text-sm font-semibold uppercase tracking-wider text-ink-foreground/80 transition-colors hover:text-ink-foreground"
+                className="relative py-2 text-xs xl:text-[13px] font-bold uppercase tracking-wider text-ink-foreground/80 transition-colors hover:text-ink-foreground"
                 activeProps={{
                   className: "!text-primary after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:bg-primary",
                 }}
@@ -139,8 +142,8 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Action icons */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Action CTAs */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               aria-label="Toggle mobile search"
@@ -148,15 +151,6 @@ export function Header() {
             >
               <Search className="h-4.5 w-4.5" />
             </button>
-
-            <Link
-              to="/garage"
-              aria-label="My vehicle garage"
-              className="hidden sm:flex items-center gap-1.5 h-9 px-2.5 rounded border border-ink-border hover:border-primary text-xs font-semibold text-ink-foreground transition-colors"
-            >
-              <Car className="h-4 w-4 text-primary" />
-              <span className="hidden xl:inline">{vehicle ? `${vehicle.make} ${vehicle.model}` : "My Garage"}</span>
-            </Link>
 
             <Link
               to="/cart"
@@ -172,10 +166,10 @@ export function Header() {
             </Link>
 
             <Link
-              to="/services/book"
-              className="btn btn-primary h-9 px-3.5 text-xs hidden lg:inline-flex"
+              to="/support"
+              className="btn btn-primary h-9 px-4 text-xs font-bold uppercase tracking-wider hidden sm:inline-flex"
             >
-              Book Service
+              Request a Quote
             </Link>
 
             <button
@@ -197,7 +191,7 @@ export function Header() {
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search automotive parts, garage equipment, SKU..."
+                placeholder="Search equipment, 4W/2W/3W/EV parts, diagnostics..."
                 className="h-10 w-full rounded bg-ink px-4 pl-9 text-xs text-ink-foreground border border-ink-border focus:border-primary focus:outline-none"
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
@@ -232,7 +226,7 @@ export function Header() {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search parts, equipment, SKU..."
+                  placeholder="Search equipment, parts, tools..."
                   className="h-10 w-full rounded bg-ink px-3 pl-9 text-xs text-ink-foreground border border-ink-border"
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted" />
@@ -242,12 +236,12 @@ export function Header() {
 
           <nav className="container-page flex-1 overflow-y-auto py-4">
             <ul className="divide-y divide-ink-border/50">
-              {nav.map((n) => (
+              {navLinks.map((n) => (
                 <li key={n.label}>
                   <Link
                     to={n.to}
                     search={"search" in n ? n.search : undefined}
-                    className="flex items-center justify-between py-3.5 font-display text-2xl font-bold uppercase tracking-wider text-ink-foreground hover:text-primary"
+                    className="flex items-center justify-between py-3 font-display text-2xl font-bold uppercase tracking-wider text-ink-foreground hover:text-primary"
                   >
                     <span>{n.label}</span>
                     <ChevronRight className="h-4 w-4 text-ink-muted" />
@@ -258,31 +252,31 @@ export function Header() {
 
             <div className="mt-6 rounded border border-ink-border bg-ink-2 p-4">
               <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                Quick Portal Access
+                B2B Commercial Portals
               </p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-medium text-ink-muted">
-                <Link to="/garage" className="p-2 rounded bg-ink hover:text-ink-foreground">
-                  My Garage
+                <Link to="/solutions" className="p-2.5 rounded bg-ink hover:text-ink-foreground">
+                  Workshop Setup
                 </Link>
-                <Link to="/service-centers" className="p-2 rounded bg-ink hover:text-ink-foreground">
-                  Service Centers
+                <Link to="/vehicles" className="p-2.5 rounded bg-ink hover:text-ink-foreground">
+                  4W/2W/3W Directory
                 </Link>
-                <Link to="/cart" className="p-2 rounded bg-ink hover:text-ink-foreground">
-                  Cart ({count})
+                <Link to="/support" className="p-2.5 rounded bg-ink hover:text-ink-foreground">
+                  Download Catalogues
                 </Link>
-                <Link to="/support" className="p-2 rounded bg-ink hover:text-ink-foreground">
-                  B2B Quote / Support
+                <Link to="/about" className="p-2.5 rounded bg-ink hover:text-ink-foreground">
+                  About PAGE
                 </Link>
               </div>
             </div>
           </nav>
 
           <div className="container-page grid grid-cols-2 gap-3 pb-8 pt-4 border-t border-ink-border bg-ink">
-            <Link to="/shop" className="btn btn-ghost-light h-11 text-xs">
-              Shop Parts
+            <Link to="/shop" className="btn btn-ghost-light h-11 text-xs font-bold uppercase">
+              All Products
             </Link>
-            <Link to="/services/book" className="btn btn-primary h-11 text-xs">
-              Book Service
+            <Link to="/support" className="btn btn-primary h-11 text-xs font-bold uppercase">
+              Request a Quote
             </Link>
           </div>
         </div>

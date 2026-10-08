@@ -10,6 +10,7 @@ import {
   Truck,
   Wrench,
   Youtube,
+  Zap,
 } from "lucide-react";
 import { Logo } from "./Header";
 
@@ -17,44 +18,44 @@ const cols = [
   {
     title: "Automotive Parts",
     links: [
-      { l: "Brake Systems & Pads", to: "/shop?cat=Brakes" },
-      { l: "AGM & EFB Batteries", to: "/shop?cat=Batteries" },
-      { l: "Engine Oils & Lubricants", to: "/shop?cat=Lubricants" },
-      { l: "Diagnostic Scanners", to: "/shop?cat=Diagnostics" },
-      { l: "Filters & Maintenance", to: "/shop?cat=Filters" },
-      { l: "EV Spares & Components", to: "/shop?cat=EV" },
+      { l: "Brake Systems & Rotors", to: "/shop", search: { cat: "Brakes" } },
+      { l: "Commercial Batteries", to: "/shop", search: { cat: "Batteries" } },
+      { l: "Synthetic Lubricants & Fluids", to: "/shop", search: { cat: "Lubricants" } },
+      { l: "Air, Oil & Fuel Filters", to: "/shop", search: { cat: "Filters" } },
+      { l: "EV Spares & Components", to: "/shop", search: { mobility: "EV" } },
+      { l: "Suspension & Steering", to: "/shop", search: { cat: "Suspension" } },
     ],
   },
   {
     title: "Garage Equipment",
     links: [
-      { l: "2-Post & Scissor Lifts", to: "/shop?cat=Equipment" },
-      { l: "Automatic Tyre Changers", to: "/shop?cat=Equipment" },
-      { l: "Digital Wheel Balancers", to: "/shop?cat=Equipment" },
-      { l: "Rotary Air Compressors", to: "/shop?cat=Equipment" },
-      { l: "Workshop Tools & Presses", to: "/shop?cat=Equipment" },
-      { l: "Turnkey Bay Setup", to: "/solutions" },
+      { l: "2-Post & Scissor Lifts", to: "/shop", search: { cat: "Equipment" } },
+      { l: "Automatic Tyre Changers", to: "/shop", search: { cat: "Equipment" } },
+      { l: "Digital Wheel Balancers", to: "/shop", search: { cat: "Equipment" } },
+      { l: "Rotary Screw Compressors", to: "/shop", search: { cat: "Equipment" } },
+      { l: "ECU Diagnostic Tablets", to: "/shop", search: { cat: "Diagnostics" } },
+      { l: "EV High-Voltage Tooling", to: "/shop", search: { mobility: "EV" } },
     ],
   },
   {
-    title: "Workshop Services",
+    title: "B2B Solutions",
     links: [
-      { l: "Scheduled Vehicle Service", to: "/services" },
-      { l: "Computerised Diagnostics", to: "/services" },
-      { l: "Air Conditioning Service", to: "/services" },
-      { l: "Brake Overhaul & Bleeding", to: "/services" },
-      { l: "4-Wheel Laser Alignment", to: "/services" },
-      { l: "Book Service Online", to: "/services/book" },
+      { l: "Turnkey Workshop Setup", to: "/solutions" },
+      { l: "Workshop Modernization", to: "/solutions" },
+      { l: "EV Workshop Transition", to: "/solutions" },
+      { l: "Service Center Supply", to: "/solutions" },
+      { l: "Commercial Fleet Depots", to: "/solutions" },
+      { l: "Distributor & Wholesale", to: "/solutions" },
     ],
   },
   {
-    title: "Customer Support",
+    title: "Support & Quote",
     links: [
-      { l: "Service Center Locator", to: "/service-centers" },
-      { l: "Request B2B Quotation", to: "/support" },
-      { l: "Warranty & Fitment Support", to: "/support" },
-      { l: "Shop by Vehicle", to: "/vehicles" },
-      { l: "My Garage Portal", to: "/garage" },
+      { l: "Request Commercial Quote", to: "/support" },
+      { l: "Product Catalogues & Specs", to: "/support" },
+      { l: "Machinery Warranty & Service", to: "/support" },
+      { l: "Shop by Vehicle Platform", to: "/vehicles" },
+      { l: "Equip Your Service Center", to: "/service-centers" },
       { l: "About PAGE International", to: "/about" },
     ],
   },
@@ -72,9 +73,9 @@ export function Footer() {
             </span>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
-                100% Genuine Quality
+                Genuine Supply Guarantee
               </p>
-              <p className="text-[11px] text-ink-muted">Certified OEM & Aftermarket Spares</p>
+              <p className="text-[11px] text-ink-muted">Authorized B2B parts provenance</p>
             </div>
           </div>
 
@@ -84,9 +85,21 @@ export function Footer() {
             </span>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
-                Commercial Equipment
+                Workshop Engineering
               </p>
-              <p className="text-[11px] text-ink-muted">Installation & Technician Training</p>
+              <p className="text-[11px] text-ink-muted">Installation, calibration & training</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-primary/10 text-primary">
+              <Zap className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
+                EV Readiness
+              </p>
+              <p className="text-[11px] text-ink-muted">2W, 3W & 4W EV workshop solutions</p>
             </div>
           </div>
 
@@ -96,21 +109,9 @@ export function Footer() {
             </span>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
-                Nationwide Logistics
+                Nationwide B2B Logistics
               </p>
-              <p className="text-[11px] text-ink-muted">Fast distribution across hubs</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-primary/10 text-primary">
-              <Phone className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
-                Direct Technical Hotline
-              </p>
-              <p className="text-[11px] text-ink-muted">+880 9612-PAGE-INTL</p>
+              <p className="text-[11px] text-ink-muted">Express hub dispatch to garages</p>
             </div>
           </div>
         </div>
@@ -123,7 +124,10 @@ export function Footer() {
           <div>
             <Logo />
             <p className="mt-4 text-xs leading-relaxed text-ink-muted max-w-sm">
-              PAGE International Ltd. is a premier distributor and provider of automotive spare parts, commercial garage workshop equipment, electronic diagnostics, and vehicle servicing solutions.
+              PAGE International Ltd. is a specialized B2B supplier and distributor of automotive garage machinery, replacement spare parts, diagnostics, and workshop solutions to professional service centers, workshops, dealerships, fleets, and EV businesses.
+            </p>
+            <p className="mt-2 text-xs font-bold uppercase tracking-wider text-primary">
+              The Company Behind The Workshop.
             </p>
 
             <div className="mt-6 space-y-2 text-xs text-ink-muted">
@@ -133,11 +137,11 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
-                <span>sales@page-intl.com / b2b@page-intl.com</span>
+                <span>b2b@page-intl.com / sales@page-intl.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-                <span>+880 9612-724346</span>
+                <span>+880 9612-PAGE-INTL (+880 9612-724346)</span>
               </div>
             </div>
 
@@ -166,6 +170,7 @@ export function Footer() {
                   <li key={link.l}>
                     <Link
                       to={link.to}
+                      search={link.search}
                       className="text-ink-muted transition-colors hover:text-primary"
                     >
                       {link.l}
@@ -182,7 +187,7 @@ export function Footer() {
       <div className="border-t border-ink-border/70 bg-black/40">
         <div className="container-page flex flex-col gap-4 py-6 text-xs text-ink-muted sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {new Date().getFullYear()} PAGE International Ltd. All rights reserved. Registered automotive supplier & workshop service platform.
+            © {new Date().getFullYear()} PAGE International Ltd. All rights reserved. B2B Automotive Equipment & Spare Parts Distributor.
           </p>
           <div className="flex flex-wrap items-center gap-5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
@@ -192,10 +197,10 @@ export function Footer() {
               Privacy Policy
             </Link>
             <Link to="/support" className="hover:text-ink-foreground">
-              Terms of Supply
+              Commercial Terms of Supply
             </Link>
             <Link to="/support" className="hover:text-ink-foreground">
-              Warranty & Returns
+              Equipment Warranty Policy
             </Link>
           </div>
         </div>

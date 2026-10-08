@@ -164,7 +164,7 @@ export function Cart() {
                 </div>
                 <div className="flex items-center gap-2 col-span-2 sm:col-span-1">
                   <Wrench className="h-4 w-4 text-primary shrink-0" />
-                  <span>Workshop Fitting Option</span>
+                  <span>Equipment Anchoring & Rigging Available</span>
                 </div>
               </div>
             </div>

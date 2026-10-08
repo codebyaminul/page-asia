@@ -109,7 +109,7 @@ export function Checkout() {
                       : "border-border text-foreground hover:bg-secondary"
                   }`}
                 >
-                  <User className="h-4 w-4" /> Personal Vehicle Owner
+                  <User className="h-4 w-4" /> Professional Automotive Buyer
                 </button>
                 <button
                   type="button"

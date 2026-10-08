@@ -1,8 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, CheckCircle2, Clock, MapPin, ShieldCheck, Wrench } from "lucide-react";
+import {
+  Building2,
+  Calendar,
+  Check,
+  CheckCircle2,
+  Clock,
+  FileSpreadsheet,
+  MapPin,
+  ShieldCheck,
+  Wrench,
+  Zap,
+} from "lucide-react";
 import { useState } from "react";
-import { centers, services, taka, vehicleData, years } from "@/lib/data";
-import { useCart } from "@/lib/cart";
+import { centers } from "@/lib/data";
 
 type S = { service?: string | undefined; center?: string | undefined };
 
@@ -13,74 +23,156 @@ export const Route = createFileRoute("/services/book")({
   }),
   head: () => ({
     meta: [
-      { title: "Book a Workshop Service Appointment — PAGE International" },
+      {
+        title:
+          "Book Equipment Demonstration & Engineering Consultation — PAGE International",
+      },
       {
         name: "description",
-        content: "Schedule certified vehicle servicing, electronic diagnostics, brake repairs and AC maintenance at PAGE service hubs.",
+        content:
+          "Schedule a live machinery demonstration, turnkey bay planning consultation, or lift anchoring service with PAGE International engineers.",
       },
-      { property: "og:title", content: "Book a Service — PAGE" },
-      { property: "og:description", content: "Schedule your vehicle service appointment online." },
+      {
+        property: "og:title",
+        content: "Book Equipment Consultation — PAGE International",
+      },
+      {
+        property: "og:description",
+        content: "Schedule live machinery demonstration or workshop engineering consultation.",
+      },
     ],
   }),
-  component: Book,
+  component: BookConsultation,
 });
 
-const steps = ["1. Service", "2. Vehicle", "3. Hub Location", "4. Date & Time", "5. Contact Info"];
-const slots = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
+const b2bServiceOptions = [
+  {
+    id: "bay-planning",
+    name: "Turnkey Workshop Bay Planning & 2D/3D Layout",
+    desc: "Architectural consultation for new workshop investments or bay expansions.",
+  },
+  {
+    id: "lift-demo",
+    name: "Vehicle Lift Machinery Demonstration",
+    desc: "Live demonstration of 2-post, 4-post, or scissor lifts under load.",
+  },
+  {
+    id: "tyre-demo",
+    name: "Tyre Changer & 3D Wheel Alignment Demo",
+    desc: "Testing run-flat tyre mounting and computerized 4-wheel alignment cameras.",
+  },
+  {
+    id: "diag-demo",
+    name: "Diagnostic Tablet & ADAS Calibration Live Trial",
+    desc: "Live ECU scanning, bidirectional tests, and radar/camera target calibration.",
+  },
+  {
+    id: "ev-audit",
+    name: "EV Workshop Transition & 1000V Tooling Consultation",
+    desc: "High-voltage safety auditing, battery balancer inspection, and PPE setup.",
+  },
+  {
+    id: "installation",
+    name: "Machinery Foundation Anchoring & Rigging Service",
+    desc: "Deployment of certified engineers to install and anchor workshop lifts on site.",
+  },
+];
+
+const steps = [
+  "1. Engineering Need",
+  "2. Business Profile",
+  "3. Hub / On-Site",
+  "4. Date & Time",
+  "5. Contact Info",
+];
+
+const slots = ["10:00 AM", "11:30 AM", "02:00 PM", "03:30 PM", "05:00 PM"];
+
 const days = Array.from({ length: 7 }, (_, i) => {
   const d = new Date();
   d.setDate(d.getDate() + i + 1);
   return d;
 });
 
-export function Book() {
+export function BookConsultation() {
   const search = Route.useSearch();
-  const { vehicle } = useCart();
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
-  const [sel, setSel] = useState<string[]>(search.service ? [search.service] : []);
-  const [v, setV] = useState({
-    make: vehicle?.make ?? "",
-    model: vehicle?.model ?? "",
-    year: vehicle?.year ?? "",
+  const [sel, setSel] = useState<string[]>(
+    search.service ? [search.service] : ["lift-demo"]
+  );
+
+  const [biz, setBiz] = useState({
+    businessName: "",
+    businessType: "Workshop",
+    bays: "2-4 Bays",
+    equipmentInterest: "",
   });
-  const [center, setCenter] = useState(search.center ?? "tejgaon");
+
+  const [locationType, setLocationType] = useState<"hub" | "onsite">("hub");
+  const [center, setCenter] = useState(search.center ?? "dhaka-tejgaon");
+  const [onsiteAddress, setOnsiteAddress] = useState("");
+
   const [day, setDay] = useState<number | null>(0);
-  const [slot, setSlot] = useState("10:30");
-  const [info, setInfo] = useState({ name: "", phone: "", notes: "" });
+  const [slot, setSlot] = useState("11:30 AM");
+
+  const [info, setInfo] = useState({
+    contactPerson: "",
+    phone: "",
+    email: "",
+    notes: "",
+  });
 
   const canNext = [
     sel.length > 0,
-    !!(v.make && v.model && v.year),
-    !!center,
+    !!biz.businessName,
+    locationType === "hub" ? !!center : onsiteAddress.length > 5,
     day !== null && !!slot,
-    !!(info.name && info.phone.length >= 6),
+    !!(info.contactPerson && info.phone.length >= 6),
   ][step];
 
-  const chosen = services.filter((s) => sel.includes(s.slug));
-  const est = chosen.reduce((a, s) => a + (s.from ?? 0), 0);
+  const chosenServices = b2bServiceOptions.filter((s) => sel.includes(s.id));
   const c = centers.find((x) => x.id === center);
 
   if (done) {
     return (
       <div className="container-page flex min-h-screen flex-col items-center justify-center py-32 text-center bg-background">
-        <div className="rounded-full bg-success/15 p-4 text-success mb-2">
+        <div className="rounded-full bg-emerald-500/15 p-4 text-emerald-600 mb-2">
           <CheckCircle2 className="h-16 w-16" strokeWidth={1.75} />
         </div>
         <h1 className="display-lg mt-4 text-foreground font-bold">
-          Service Appointment Requested
+          Equipment Consultation Scheduled
         </h1>
         <p className="mt-3 max-w-lg text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Your booking for <strong>{chosen.map((s) => s.name).join(", ")}</strong> at{" "}
-          <strong>{c?.name}</strong> on{" "}
-          <strong>{day !== null && days[day]!.toDateString()} at {slot}</strong> has been logged. Our service advisor will call you to confirm bay arrival instructions.
+          Your appointment for{" "}
+          <strong>
+            {chosenServices.map((s) => s.name).join(", ") || "Machinery Consultation"}
+          </strong>{" "}
+          at{" "}
+          <strong>
+            {locationType === "hub"
+              ? `${c?.name} (${c?.area})`
+              : `On-site at ${biz.businessName}`}
+          </strong>{" "}
+          on{" "}
+          <strong>
+            {day !== null && days[day]!.toDateString()} at {slot}
+          </strong>{" "}
+          has been booked. A PAGE commercial application engineer will call you to confirm demonstration preparations.
         </p>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/garage" className="btn btn-primary h-11 px-6 text-xs font-bold uppercase">
-            View in My Garage
+          <Link
+            to="/shop"
+            search={{ cat: "Garage Equipment" }}
+            className="btn btn-primary h-11 px-6 text-xs font-bold uppercase tracking-wider"
+          >
+            Explore Equipment Catalogue
           </Link>
-          <Link to="/" className="btn btn-outline h-11 px-6 text-xs font-bold uppercase">
+          <Link
+            to="/"
+            className="btn btn-outline h-11 px-6 text-xs font-bold uppercase tracking-wider"
+          >
             Back to Home
           </Link>
         </div>
@@ -92,23 +184,34 @@ export function Book() {
     <div className="bg-background text-foreground min-h-screen pt-24 lg:pt-32 pb-20">
       {/* Breadcrumb */}
       <div className="border-b border-border bg-secondary/40 py-3">
-        <nav aria-label="Breadcrumb" className="container-page text-xs text-muted-foreground flex items-center gap-1.5">
-          <Link to="/" className="hover:text-foreground">Home</Link>
+        <nav
+          aria-label="Breadcrumb"
+          className="container-page text-xs text-muted-foreground flex items-center gap-1.5"
+        >
+          <Link to="/" className="hover:text-foreground">
+            Home
+          </Link>
           <span>/</span>
-          <Link to="/services" className="hover:text-foreground">Services</Link>
+          <Link to="/services" className="hover:text-foreground">
+            Services
+          </Link>
           <span>/</span>
-          <span className="font-semibold text-foreground">Book Appointment</span>
+          <span className="font-semibold text-foreground">
+            Book Equipment Consultation
+          </span>
         </nav>
       </div>
 
       <div className="container-page py-10 lg:py-14">
         <div>
-          <p className="eyebrow">Workshop Booking Portal</p>
+          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-primary block">
+            B2B Commercial Engineering Desk
+          </span>
           <h1 className="display-lg mt-1 text-foreground font-bold">
-            Schedule a Workshop Service
+            Schedule Equipment Demonstration or Bay Consultation
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
-            Complete the 5 quick steps below to reserve your dedicated workshop service bay.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl">
+            Book a demonstration of workshop lifts, tyre changers, and diagnostic computers at our regional equipment hubs, or schedule an on-site engineer visit to your garage facility.
           </p>
         </div>
 
@@ -121,7 +224,11 @@ export function Book() {
                   i <= step ? "bg-primary" : "bg-border"
                 }`}
               />
-              <span className={`hidden sm:inline ${i === step ? "text-primary font-bold" : "text-muted-foreground"}`}>
+              <span
+                className={`hidden sm:inline ${
+                  i === step ? "text-primary font-bold" : "text-muted-foreground"
+                }`}
+              >
                 {s}
               </span>
             </li>
@@ -135,22 +242,22 @@ export function Book() {
               Step {step + 1}: {steps[step]?.split(". ")[1]}
             </h2>
 
-            {/* STEP 0: SELECT SERVICES */}
+            {/* STEP 0: SELECT CONSULTATION NEED */}
             {step === 0 && (
               <div className="space-y-4">
                 <p className="text-xs text-muted-foreground">
-                  Select one or more workshop services for your visit:
+                  Select the equipment or engineering service you would like to discuss:
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {services.map((s) => {
-                    const on = sel.includes(s.slug);
+                  {b2bServiceOptions.map((s) => {
+                    const on = sel.includes(s.id);
                     return (
                       <button
-                        key={s.slug}
+                        key={s.id}
                         type="button"
                         aria-pressed={on}
                         onClick={() =>
-                          setSel(on ? sel.filter((x) => x !== s.slug) : [...sel, s.slug])
+                          setSel(on ? sel.filter((x) => x !== s.id) : [...sel, s.id])
                         }
                         className={`flex items-start justify-between gap-3 rounded border p-4 text-left transition-all ${
                           on
@@ -159,22 +266,22 @@ export function Book() {
                         }`}
                       >
                         <div>
-                          <span className="block font-bold text-xs uppercase text-foreground">
+                          <p className="font-bold text-sm text-foreground">
                             {s.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground mt-0.5 block">
-                            {s.from ? `From ${taka(s.from)}` : "Quote"} • {s.duration}
-                          </span>
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                            {s.desc}
+                          </p>
                         </div>
-                        <span
+                        <div
                           className={`grid h-5 w-5 shrink-0 place-items-center rounded border ${
                             on
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-input bg-card"
+                              ? "border-primary bg-primary text-white"
+                              : "border-muted-foreground/40"
                           }`}
                         >
-                          {on && <Check className="h-3.5 w-3.5" />}
-                        </span>
+                          {on && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                        </div>
                       </button>
                     );
                   })}
@@ -182,246 +289,334 @@ export function Book() {
               </div>
             )}
 
-            {/* STEP 1: VEHICLE DETAILS */}
+            {/* STEP 1: BUSINESS PROFILE */}
             {step === 1 && (
               <div className="space-y-4">
                 <p className="text-xs text-muted-foreground">
-                  Specify what you drive so our technicians can pre-stage the required filters and diagnostic software:
+                  Provide your business details so our engineering desk can tailor the demonstration:
                 </p>
-                <div className="grid gap-4 sm:grid-cols-3">
+
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                      Make *
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                      Business / Workshop Name *
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="e.g. Paramount Auto Center Ltd."
+                      className="field"
+                      value={biz.businessName}
+                      onChange={(e) =>
+                        setBiz({ ...biz, businessName: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                      Business Type
                     </label>
                     <select
                       className="field"
-                      value={v.make}
-                      onChange={(e) => setV({ make: e.target.value, model: "", year: v.year })}
+                      value={biz.businessType}
+                      onChange={(e) =>
+                        setBiz({ ...biz, businessType: e.target.value })
+                      }
                     >
-                      <option value="">Select Make</option>
-                      {Object.keys(vehicleData).map((m) => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
+                      <option value="Workshop">Independent Workshop</option>
+                      <option value="Service Center">Multi-Bay Service Center</option>
+                      <option value="Dealer">Authorized Dealership</option>
+                      <option value="Fleet">Commercial Fleet Depot</option>
+                      <option value="EV Business">EV Specialty Garage</option>
+                      <option value="Distributor">Wholesale Distributor</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                      Existing or Planned Service Bays
+                    </label>
+                    <select
+                      className="field"
+                      value={biz.bays}
+                      onChange={(e) =>
+                        setBiz({ ...biz, bays: e.target.value })
+                      }
+                    >
+                      <option value="1-2 Bays">1–2 Bays (Small Garage)</option>
+                      <option value="3-5 Bays">3–5 Bays (Medium Workshop)</option>
+                      <option value="6-10 Bays">6–10 Bays (Large Service Center)</option>
+                      <option value="10+ Bays">10+ Bays (Industrial Depot / Dealership)</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                      Model *
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                      Target Machinery of Interest
                     </label>
-                    <select
+                    <input
+                      type="text"
+                      placeholder="e.g. Torq 2-Post Lift 4.0T, TC-820 Tyre Changer"
                       className="field"
-                      value={v.model}
-                      disabled={!v.make}
-                      onChange={(e) => setV({ ...v, model: e.target.value })}
-                    >
-                      <option value="">Select Model</option>
-                      {v.make &&
-                        Object.keys(vehicleData[v.make] ?? {}).map((m) => (
-                          <option key={m} value={m}>{m}</option>
-                        ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                      Year *
-                    </label>
-                    <select
-                      className="field"
-                      value={v.year}
-                      onChange={(e) => setV({ ...v, year: e.target.value })}
-                    >
-                      <option value="">Select Year</option>
-                      {years.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
+                      value={biz.equipmentInterest}
+                      onChange={(e) =>
+                        setBiz({ ...biz, equipmentInterest: e.target.value })
+                      }
+                    />
                   </div>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: LOCATION */}
+            {/* STEP 2: DEMONSTRATION LOCATION */}
             {step === 2 && (
-              <div className="space-y-3">
-                <p className="text-xs text-muted-foreground mb-3">
-                  Choose your preferred PAGE Service Center or Partner Hub:
+              <div className="space-y-5">
+                <p className="text-xs text-muted-foreground">
+                  Where would you like to conduct the demonstration or consultation?
                 </p>
-                {centers.map((x) => (
-                  <label
-                    key={x.id}
-                    className={`flex cursor-pointer items-start gap-3.5 rounded border p-4 transition-colors ${
-                      center === x.id
-                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLocationType("hub")}
+                    className={`rounded border p-4 text-left transition-all ${
+                      locationType === "hub"
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/40 font-bold"
                         : "border-border hover:border-foreground/30 bg-card"
                     }`}
                   >
-                    <input
-                      type="radio"
-                      name="center"
-                      className="mt-1 accent-[var(--color-primary)]"
-                      checked={center === x.id}
-                      onChange={() => setCenter(x.id)}
-                    />
-                    <div>
-                      <span className="block font-bold text-sm text-foreground">{x.name}</span>
-                      <span className="text-xs text-muted-foreground block mt-0.5">
-                        {x.address} • Operating: {x.hours}
-                      </span>
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {x.services.map((sv) => (
-                          <span key={sv} className="rounded bg-secondary px-2 py-0.5 text-[10px] font-medium text-foreground">
-                            {sv}
+                    <span className="block text-sm text-foreground">
+                      Visit PAGE Regional Equipment Hub
+                    </span>
+                    <span className="text-xs text-muted-foreground mt-1 block">
+                      Inspect running machinery at our demo showroom.
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setLocationType("onsite")}
+                    className={`rounded border p-4 text-left transition-all ${
+                      locationType === "onsite"
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/40 font-bold"
+                        : "border-border hover:border-foreground/30 bg-card"
+                    }`}
+                  >
+                    <span className="block text-sm text-foreground">
+                      On-Site Engineer Visit (Your Facility)
+                    </span>
+                    <span className="text-xs text-muted-foreground mt-1 block">
+                      Our engineer audits your bays and foundation on site.
+                    </span>
+                  </button>
+                </div>
+
+                {locationType === "hub" ? (
+                  <div className="space-y-3 pt-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Select Regional Demonstration Center:
+                    </label>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      {centers.map((cnt) => (
+                        <button
+                          key={cnt.id}
+                          type="button"
+                          onClick={() => setCenter(cnt.id)}
+                          className={`rounded border p-3 text-left transition-all ${
+                            center === cnt.id
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/40"
+                              : "border-border bg-card hover:border-foreground/30"
+                          }`}
+                        >
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-primary block">
+                            {cnt.area}
                           </span>
-                        ))}
-                      </div>
+                          <span className="text-xs font-bold text-foreground block mt-0.5">
+                            {cnt.name}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground block mt-1">
+                            {cnt.address}
+                          </span>
+                        </button>
+                      ))}
                     </div>
-                  </label>
-                ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2 pt-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Workshop Facility Street Address & City *
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="e.g. Plot 14, Mohakhali Industrial Area, Dhaka. Building floor or bay details..."
+                      className="field"
+                      value={onsiteAddress}
+                      onChange={(e) => setOnsiteAddress(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
-            {/* STEP 3: DATE & TIME SLOT */}
+            {/* STEP 3: DATE & TIME */}
             {step === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                    Select Appointment Day
+                    Select Demonstration Date
                   </p>
-                  <div className="flex gap-2.5 overflow-x-auto pb-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
                     {days.map((d, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => setDay(i)}
-                        className={`min-w-20 rounded border px-3 py-3 text-center transition-colors ${
+                        className={`rounded border p-3 text-center transition-all ${
                           day === i
-                            ? "border-primary bg-primary text-primary-foreground font-bold"
-                            : "border-border hover:border-foreground bg-card text-foreground"
+                            ? "border-primary bg-primary text-white font-bold"
+                            : "border-border bg-card hover:border-foreground/30 text-foreground"
                         }`}
                       >
-                        <span className="block text-[11px] uppercase tracking-wider">
-                          {d.toLocaleDateString("en", { weekday: "short" })}
+                        <span className="block text-[10px] uppercase tracking-wider">
+                          {d.toLocaleDateString("en-US", { weekday: "short" })}
                         </span>
-                        <span className="font-display text-2xl font-bold block mt-0.5">
+                        <span className="mt-1 block font-display text-xl">
                           {d.getDate()}
                         </span>
-                        <span className="text-[10px] uppercase opacity-75">
-                          {d.toLocaleDateString("en", { month: "short" })}
+                        <span className="block text-[10px]">
+                          {d.toLocaleDateString("en-US", { month: "short" })}
                         </span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div>
+                <div className="pt-3 border-t border-border">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                    Select Arrival Time Slot
+                    Select Time Window
                   </p>
-                  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
-                    {slots.map((s, i) => {
-                      const isFull = i === 2;
-                      return (
-                        <button
-                          key={s}
-                          type="button"
-                          disabled={isFull || day === null}
-                          onClick={() => setSlot(s)}
-                          className={`rounded border py-3 text-xs font-bold transition-colors ${
-                            isFull
-                              ? "opacity-50 line-through bg-muted cursor-not-allowed border-border text-muted-foreground"
-                              : slot === s
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border hover:border-foreground bg-card text-foreground"
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      );
-                    })}
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                    {slots.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setSlot(s)}
+                        className={`rounded border py-2 text-xs font-semibold transition-all ${
+                          slot === s
+                            ? "border-primary bg-primary text-white"
+                            : "border-border bg-card hover:border-foreground/30 text-foreground"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* STEP 4: CONTACT DETAILS */}
+            {/* STEP 4: CONTACT INFO */}
             {step === 4 && (
               <div className="space-y-4">
                 <p className="text-xs text-muted-foreground">
-                  Provide your contact details for appointment SMS confirmation and job card generation:
+                  Enter primary contact information for appointment confirmation:
                 </p>
-                <div className="grid gap-4">
+
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
-                      Full Name *
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                      Contact Person / Lead Engineer *
                     </label>
                     <input
                       required
+                      type="text"
+                      placeholder="e.g. Engr. Shafiqul Islam"
                       className="field"
-                      placeholder="e.g. Shakib Rahman"
-                      value={info.name}
-                      onChange={(e) => setInfo({ ...info, name: e.target.value })}
-                      autoComplete="name"
+                      value={info.contactPerson}
+                      onChange={(e) =>
+                        setInfo({ ...info, contactPerson: e.target.value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
-                      Phone Number *
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                      Phone / WhatsApp *
                     </label>
                     <input
                       required
                       type="tel"
+                      placeholder="+880 17XXXXXXXX"
                       className="field"
-                      placeholder="+880 1..."
                       value={info.phone}
-                      onChange={(e) => setInfo({ ...info, phone: e.target.value })}
-                      autoComplete="tel"
+                      onChange={(e) =>
+                        setInfo({ ...info, phone: e.target.value })
+                      }
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
-                      Specific Symptoms or Vehicle Notes (Optional)
-                    </label>
-                    <textarea
-                      className="field h-24 py-2.5"
-                      placeholder="Describe any warning lights, abnormal noises, or specific checkups required"
-                      value={info.notes}
-                      onChange={(e) => setInfo({ ...info, notes: e.target.value })}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    Corporate Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="workshop@company.com"
+                    className="field"
+                    value={info.email}
+                    onChange={(e) =>
+                      setInfo({ ...info, email: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    Specific Technical Questions / Bay Requirements
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Provide details about your workshop power supply (single/three phase), ceiling height, or specific demo requirements..."
+                    className="field"
+                    value={info.notes}
+                    onChange={(e) =>
+                      setInfo({ ...info, notes: e.target.value })
+                    }
+                  />
                 </div>
               </div>
             )}
 
-            {/* Stepper Navigation Buttons */}
-            <div className="mt-8 flex justify-between gap-3 border-t border-border pt-6">
+            {/* Navigation buttons */}
+            <div className="mt-8 flex items-center justify-between border-t border-border pt-4">
               <button
                 type="button"
-                onClick={() => setStep(step - 1)}
                 disabled={step === 0}
-                className="btn btn-outline h-10 px-5 text-xs font-bold uppercase"
+                onClick={() => setStep(step - 1)}
+                className="btn btn-outline h-10 px-5 text-xs font-bold uppercase disabled:opacity-30"
               >
-                Back
+                Previous
               </button>
 
-              {step < 4 ? (
+              {step < steps.length - 1 ? (
                 <button
                   type="button"
                   disabled={!canNext}
                   onClick={() => setStep(step + 1)}
-                  className="btn btn-primary h-10 px-6 text-xs font-bold uppercase"
+                  className="btn btn-primary h-10 px-6 text-xs font-bold uppercase tracking-wider disabled:opacity-40"
                 >
-                  Continue
+                  Continue to Step {step + 2}
                 </button>
               ) : (
                 <button
                   type="button"
                   disabled={!canNext}
                   onClick={() => setDone(true)}
-                  className="btn btn-primary h-10 px-8 text-xs font-bold uppercase"
+                  className="btn btn-primary h-10 px-8 text-xs font-bold uppercase tracking-wider shadow"
                 >
                   Confirm Appointment
                 </button>
@@ -429,54 +624,65 @@ export function Book() {
             </div>
           </div>
 
-          {/* Right Live Booking Summary */}
-          <aside className="h-fit rounded border border-ink-border bg-ink p-6 text-ink-foreground shadow-lg lg:sticky lg:top-28">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-primary border-b border-ink-border pb-3">
-              Booking Summary
+          {/* Sidebar Summary */}
+          <aside className="rounded border border-border bg-card p-6 h-fit space-y-5">
+            <h3 className="font-heading text-xl uppercase text-foreground border-b border-border pb-2">
+              Appointment Summary
             </h3>
 
-            <dl className="mt-4 space-y-3.5 text-xs">
+            <div className="text-xs space-y-3">
               <div>
-                <dt className="text-ink-muted">Selected Services:</dt>
-                <dd className="font-bold text-ink-foreground mt-0.5">
-                  {chosen.length ? chosen.map((s) => s.name).join(", ") : "— None selected"}
-                </dd>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Service Need:
+                </span>
+                <span className="font-bold text-foreground">
+                  {chosenServices.map((s) => s.name).join(", ") || "None selected"}
+                </span>
+              </div>
+
+              {biz.businessName && (
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    Business:
+                  </span>
+                  <span className="text-foreground">
+                    {biz.businessName} ({biz.businessType})
+                  </span>
+                </div>
+              )}
+
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Location:
+                </span>
+                <span className="text-foreground">
+                  {locationType === "hub"
+                    ? `${c?.name} (${c?.area})`
+                    : "On-site at Client Facility"}
+                </span>
               </div>
 
               <div>
-                <dt className="text-ink-muted">Target Vehicle:</dt>
-                <dd className="font-bold text-ink-foreground mt-0.5">
-                  {v.make ? `${v.make} ${v.model} (${v.year})` : "— Not specified"}
-                </dd>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Scheduled Time:
+                </span>
+                <span className="text-foreground">
+                  {day !== null ? days[day]!.toDateString() : "Date not set"} at{" "}
+                  {slot}
+                </span>
               </div>
-
-              <div>
-                <dt className="text-ink-muted">Workshop Hub:</dt>
-                <dd className="font-bold text-ink-foreground mt-0.5">
-                  {c?.name ?? "—"}
-                </dd>
-              </div>
-
-              <div>
-                <dt className="text-ink-muted">Appointment Slot:</dt>
-                <dd className="font-bold text-ink-foreground mt-0.5">
-                  {day !== null && slot
-                    ? `${days[day]!.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })}, at ${slot}`
-                    : "—"}
-                </dd>
-              </div>
-            </dl>
-
-            <div className="mt-6 flex items-baseline justify-between border-t border-ink-border/80 pt-4">
-              <span className="text-xs text-ink-muted">Estimated from</span>
-              <span className="font-display text-3xl font-bold text-ink-foreground">
-                {taka(est)}
-              </span>
             </div>
 
-            <p className="mt-2 text-[11px] text-ink-muted">
-              * Exact quotation confirmed upon technician computerised diagnostic inspection.
-            </p>
+            <div className="border-t border-border pt-4 text-xs text-muted-foreground space-y-2">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                <span>Complimentary commercial engineering session</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Wrench className="h-4 w-4 text-primary shrink-0" />
+                <span>Live machinery load demonstration</span>
+              </div>
+            </div>
           </aside>
         </div>
       </div>

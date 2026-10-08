@@ -4,6 +4,7 @@ import {
   Car,
   CheckCircle2,
   Clock,
+  FileSpreadsheet,
   Package,
   ShieldCheck,
   Trash2,
@@ -16,13 +17,17 @@ import { useCart } from "@/lib/cart";
 export const Route = createFileRoute("/garage")({
   head: () => ({
     meta: [
-      { title: "My Garage & Vehicle Profile — PAGE International" },
+      { title: "Fleet Platform & Equipment Portal — PAGE International" },
       {
         name: "description",
-        content: "Manage saved vehicles, see compatible automotive parts, view order records and upcoming service center bookings.",
+        content:
+          "Manage saved fleet platforms, view compatible parts, track commercial quotes, and review equipment warranty status.",
       },
-      { property: "og:title", content: "My Garage — PAGE" },
-      { property: "og:description", content: "Manage your vehicle and compatible parts." },
+      { property: "og:title", content: "Workshop & Fleet Portal — PAGE" },
+      {
+        property: "og:description",
+        content: "Manage vehicle platforms and commercial orders.",
+      },
     ],
   }),
   component: Garage,
@@ -34,9 +39,13 @@ export function Garage() {
   return (
     <div className="bg-background text-foreground min-h-screen">
       <PageHeader
-        eyebrow="Vehicle Manager"
-        title={vehicle ? `${vehicle.make} ${vehicle.model} (${vehicle.year})` : "My Garage Portal"}
-        intro="Save your vehicles to automatically filter compatible brake pads, batteries, engine oils, and service intervals across the entire catalog."
+        eyebrow="Commercial Fleet & Workshop Portal"
+        title={
+          vehicle
+            ? `${vehicle.make} ${vehicle.model} (${vehicle.year})`
+            : "Platform & Equipment Portal"
+        }
+        intro="Save your target vehicle or fleet platform to automatically highlight compatible brake pads, batteries, engine oils, and tooling across the entire commercial catalogue."
       />
 
       <section className="container-page py-12 lg:py-16 space-y-8">
@@ -49,17 +58,19 @@ export function Garage() {
               </span>
               <div>
                 <h2 className="font-display text-2xl font-bold uppercase text-foreground">
-                  {vehicle ? "Active Saved Vehicle" : "Save Your Vehicle"}
+                  {vehicle ? "Active Saved Platform" : "Select Target Platform"}
                 </h2>
                 <span className="text-[11px] text-muted-foreground">
-                  {vehicle ? "Fitment filter is active" : "Select make and model"}
+                  {vehicle
+                    ? "Fitment filter active across catalogue"
+                    : "Select 4W, 2W, 3W, or EV platform"}
                 </span>
               </div>
             </div>
 
             {vehicle && (
-              <span className="flex items-center gap-1 text-xs font-semibold text-success">
-                <CheckCircle2 className="h-4 w-4" /> 100% Fitment Match Active
+              <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                <CheckCircle2 className="h-4 w-4" /> Fitment Filter Active
               </span>
             )}
           </div>
@@ -68,14 +79,14 @@ export function Garage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 rounded bg-secondary/50 p-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  {vehicle.make}
+                  {vehicle.platform || "Vehicle Platform"} · {vehicle.make}
                 </span>
                 <h3 className="font-display text-3xl font-bold uppercase text-foreground mt-0.5">
                   {vehicle.model}
                 </h3>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Year: <strong>{vehicle.year}</strong> • Engine:{" "}
-                  <strong>{vehicle.engine || "Standard Trim"}</strong>
+                  Production Year: <strong>{vehicle.year}</strong> • Powertrain:{" "}
+                  <strong>{vehicle.engine || "Standard Specification"}</strong>
                 </p>
               </div>
 
@@ -83,15 +94,15 @@ export function Garage() {
                 <Link
                   to="/shop"
                   search={{ vehicle: `${vehicle.make} ${vehicle.model}` }}
-                  className="btn btn-primary h-10 px-5 text-xs font-bold uppercase"
+                  className="btn btn-primary h-10 px-5 text-xs font-bold uppercase tracking-wider"
                 >
-                  Shop Compatible Parts
+                  Shop Compatible Products
                 </Link>
                 <Link
-                  to="/services/book"
-                  className="btn btn-dark h-10 px-4 text-xs font-bold uppercase"
+                  to="/support"
+                  className="btn btn-dark h-10 px-4 text-xs font-bold uppercase tracking-wider"
                 >
-                  Book Service
+                  Request Bulk Quote
                 </Link>
                 <button
                   onClick={() => setVehicle(null)}
@@ -104,14 +115,14 @@ export function Garage() {
           ) : (
             <div>
               <p className="text-xs text-muted-foreground mb-4">
-                Add your vehicle details once. All shop items will highlight fitment compatibility badges automatically:
+                Select your vehicle platform below. All shop items will highlight compatibility automatically:
               </p>
               <VehicleFinder dark={false} />
             </div>
           )}
         </div>
 
-        {/* Orders, Bookings and Reminders 3-Column Grid */}
+        {/* Orders, Quotations and Machinery 3-Column Grid */}
         <div className="grid gap-6 sm:grid-cols-3">
           {/* My Orders */}
           <div className="rounded border border-border bg-card p-6 flex flex-col justify-between">
@@ -119,56 +130,65 @@ export function Garage() {
               <span className="grid h-9 w-9 place-items-center rounded bg-primary/10 text-primary mb-3">
                 <Package className="h-4 w-4" />
               </span>
-              <h3 className="font-display text-xl font-bold uppercase text-foreground">
-                My Parts Orders
+              <h3 className="font-heading text-2xl uppercase text-foreground">
+                Parts & Tool Orders
               </h3>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Track current parts shipments, download VAT invoices, or re-order high-wear consumables.
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                Track current B2B shipments, download registered VAT invoices, or re-order high-wear consumables.
               </p>
             </div>
             <div className="mt-6 pt-3 border-t border-border">
-              <Link to="/shop" className="btn btn-outline h-9 w-full text-xs font-bold uppercase">
-                Browse Catalog
+              <Link
+                to="/shop"
+                className="btn btn-outline h-9 w-full text-xs font-bold uppercase tracking-wider"
+              >
+                Browse Catalogue
               </Link>
             </div>
           </div>
 
-          {/* My Bookings */}
+          {/* Quotations & Demonstrations */}
           <div className="rounded border border-border bg-card p-6 flex flex-col justify-between">
             <div>
               <span className="grid h-9 w-9 place-items-center rounded bg-primary/10 text-primary mb-3">
-                <CalendarCheck className="h-4 w-4" />
+                <FileSpreadsheet className="h-4 w-4" />
               </span>
-              <h3 className="font-display text-xl font-bold uppercase text-foreground">
-                Service Bookings
+              <h3 className="font-heading text-2xl uppercase text-foreground">
+                Equipment Quotes & Demos
               </h3>
-              <p className="mt-2 text-xs text-muted-foreground">
-                View upcoming appointments, service history job cards, and technician multipoint inspection records.
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                Track open machinery quotations, commercial discount schedules, and hub demonstration bookings.
               </p>
             </div>
             <div className="mt-6 pt-3 border-t border-border">
-              <Link to="/services/book" className="btn btn-outline h-9 w-full text-xs font-bold uppercase">
-                Book Next Service
+              <Link
+                to="/services/book"
+                className="btn btn-outline h-9 w-full text-xs font-bold uppercase tracking-wider"
+              >
+                Book Machinery Demo
               </Link>
             </div>
           </div>
 
-          {/* Maintenance Interval Reminder */}
+          {/* Machinery Warranty & Engineering */}
           <div className="rounded border border-ink-border bg-ink p-6 text-ink-foreground flex flex-col justify-between">
             <div>
               <span className="grid h-9 w-9 place-items-center rounded bg-primary/20 text-primary mb-3">
-                <Clock className="h-4 w-4" />
+                <ShieldCheck className="h-4 w-4" />
               </span>
-              <h3 className="font-display text-xl font-bold uppercase text-ink-foreground">
-                Maintenance Schedule
+              <h3 className="font-heading text-2xl uppercase text-ink-foreground">
+                Warranty & AMC Service
               </h3>
               <p className="mt-2 text-xs text-ink-muted leading-relaxed">
-                Standard automotive preventive interval: General service recommended every 5,000–10,000 km or 6 months. Brake pads should be inspected every 15,000 km.
+                Check warranty coverage on your installed vehicle lifts, tyre changers, and rotary screw compressors.
               </p>
             </div>
-            <div className="mt-6 pt-3 border-t border-ink-border/60">
-              <Link to="/support" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                Read Maintenance Guide →
+            <div className="mt-6 pt-3 border-t border-ink-border">
+              <Link
+                to="/support"
+                className="btn btn-primary h-9 w-full text-xs font-bold uppercase tracking-wider"
+              >
+                Check Warranty Status
               </Link>
             </div>
           </div>

@@ -5,11 +5,13 @@ import {
   Building2,
   CheckCircle2,
   Compass,
+  FileSpreadsheet,
   MapPin,
   ShieldCheck,
   Truck,
   Users,
   Wrench,
+  Zap,
 } from "lucide-react";
 import { PageHeader } from "@/components/site/PageHeader";
 import { brands, images } from "@/lib/data";
@@ -17,13 +19,24 @@ import { brands, images } from "@/lib/data";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About PAGE International Ltd. — Automotive Equipment & Parts" },
+      {
+        title:
+          "About PAGE International Ltd. — The Company Behind the Workshop",
+      },
       {
         name: "description",
-        content: "PAGE International Ltd. is a premier distributor and provider of automotive spare parts, commercial garage workshop equipment, electronic diagnostics, and vehicle servicing solutions.",
+        content:
+          "PAGE International Ltd. is a specialized B2B supplier and distributor of automotive garage equipment, spare parts, diagnostics, tools, and workshop solutions to professional automotive businesses.",
       },
-      { property: "og:title", content: "About PAGE International Ltd." },
-      { property: "og:description", content: "Automotive parts, garage equipment and workshop solutions." },
+      {
+        property: "og:title",
+        content: "About PAGE International Ltd. — B2B Automotive Supplier",
+      },
+      {
+        property: "og:description",
+        content:
+          "Supplying professional automotive equipment, parts and workshop engineering.",
+      },
     ],
   }),
   component: About,
@@ -35,7 +48,7 @@ export function About() {
       <PageHeader
         eyebrow="Company Profile"
         title="About PAGE International Ltd."
-        intro="A specialized automotive trading, distribution, and workshop engineering company providing commercial vehicle lifts, diagnostic technology, and genuine spare parts."
+        intro="The company behind the workshop. A specialized automotive trading, distribution, and equipment engineering supplier providing commercial vehicle lifts, diagnostic technology, precision spare parts, and EV workshop solutions."
       />
 
       {/* Main Profile Story */}
@@ -44,55 +57,88 @@ export function About() {
           <div className="relative aspect-[4/3] overflow-hidden rounded border border-border shadow-md">
             <img
               src={images.heroWorkshop}
-              alt="PAGE International commercial automotive workshop"
+              alt="PAGE International commercial automotive workshop equipment warehouse"
               loading="lazy"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4 right-4 text-white">
-              <p className="font-display text-xl font-bold uppercase">Tejgaon Central Hub & Showroom</p>
-              <p className="text-xs text-white/80">Automotive machinery testing bay & parts warehouse</p>
+              <p className="font-display text-xl font-bold uppercase">
+                Tejgaon Central Hub & Demonstration Showroom
+              </p>
+              <p className="text-xs text-white/80">
+                Automotive machinery testing bay, logistics dispatch & parts warehouse
+              </p>
             </div>
           </div>
 
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-primary">
-              Engineering Reliability
+              The Company Behind The Workshop
             </span>
             <h2 className="display-lg mt-2 text-foreground font-bold">
-              AN AUTOMOTIVE ECOSYSTEM FOR PROFESSIONALS
+              WE EQUIP THE BUSINESSES THAT SERVICE VEHICLES
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              PAGE International Ltd. operates at the intersection of automotive distribution, garage equipment engineering, and technical vehicle maintenance. We solve the critical bottleneck faced by workshops, fleet managers, and car owners: access to certified, genuine components and heavy-duty workshop machinery with direct manufacturer backing.
+              PAGE International Ltd. is a B2B supplier and distributor. We do not operate
+              consumer repair shops or offer roadside car maintenance. Instead, we supply
+              the automotive service centers, independent workshops, franchise dealerships,
+              fleet depots, and EV businesses with the industrial machinery, replacement parts,
+              and tooling they rely on every day.
             </p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Headquartered in Dhaka with distribution operations reaching across Chattogram and major regional transport corridors, we supply commercial lifts, computerized balancers, pneumatic tyre machinery, and OEM replacement spares.
+              From heavy-duty electro-hydraulic vehicle lifts and computerized 3D wheel
+              alignment systems to 1000V insulated EV safety tools and OEM replacement parts,
+              PAGE bridges the gap between international manufacturing excellence and local
+              workshop productivity.
             </p>
 
             <div className="mt-8 grid grid-cols-2 gap-4 border-t border-border pt-6">
               <div>
-                <span className="font-display text-3xl font-bold text-primary">10,000+</span>
-                <p className="text-xs text-muted-foreground font-medium">Spares Sourced in Stock</p>
+                <span className="font-display text-3xl font-bold text-primary">
+                  10,000+
+                </span>
+                <p className="text-xs text-muted-foreground font-medium">
+                  B2B Parts & SKUs in Stock
+                </p>
               </div>
               <div>
-                <span className="font-display text-3xl font-bold text-primary">4 HUBS</span>
-                <p className="text-xs text-muted-foreground font-medium">Service Centers & Warehouses</p>
+                <span className="font-display text-3xl font-bold text-primary">
+                  4-MOBILITY
+                </span>
+                <p className="text-xs text-muted-foreground font-medium">
+                  4W · 2W · 3W · EV Platforms
+                </p>
               </div>
               <div>
-                <span className="font-display text-3xl font-bold text-primary">50+</span>
-                <p className="text-xs text-muted-foreground font-medium">Technicians & Engineers</p>
+                <span className="font-display text-3xl font-bold text-primary">
+                  100%
+                </span>
+                <p className="text-xs text-muted-foreground font-medium">
+                  Direct Factory Provenance
+                </p>
               </div>
               <div>
-                <span className="font-display text-3xl font-bold text-primary">100%</span>
-                <p className="text-xs text-muted-foreground font-medium">Genuine Parts Guarantee</p>
+                <span className="font-display text-3xl font-bold text-primary">
+                  NATIONWIDE
+                </span>
+                <p className="text-xs text-muted-foreground font-medium">
+                  Logistics & Hub Distribution
+                </p>
               </div>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/shop" className="btn btn-primary h-11 px-6 text-xs font-bold uppercase">
+              <Link
+                to="/shop"
+                className="btn btn-primary h-11 px-6 text-xs font-bold uppercase tracking-wider"
+              >
                 Explore Product Catalog
               </Link>
-              <Link to="/solutions" className="btn btn-outline h-11 px-6 text-xs font-bold uppercase">
+              <Link
+                to="/solutions"
+                className="btn btn-outline h-11 px-6 text-xs font-bold uppercase tracking-wider"
+              >
                 Workshop & Fleet Solutions
               </Link>
             </div>
@@ -104,7 +150,7 @@ export function About() {
       <section className="bg-secondary/60 py-16 border-y border-border">
         <div className="container-page">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <p className="eyebrow">Core Capabilities</p>
+            <p className="eyebrow">Core B2B Capabilities</p>
             <h2 className="display-md mt-1 text-foreground">FOUR OPERATING PILLARS</h2>
           </div>
 
@@ -121,14 +167,14 @@ export function About() {
                 desc: "Low-dust ceramic brake pads, AGM/EFB batteries, full synthetic lubricants, and high-flow air/oil filtration.",
               },
               {
-                icon: Award,
-                title: "Diagnostics & ADAS",
-                desc: "OE-level electronic scan tablets, sensor calibration targets, and EV battery testing platforms.",
+                icon: Zap,
+                title: "EV & Next-Gen Tooling",
+                desc: "1000V VDE insulated tools, battery cell balancers, high-voltage PPE, and specialized EV diagnostic software.",
               },
               {
                 icon: Building2,
-                title: "Service Hubs",
-                desc: "Multipoint vehicle inspection, scheduled servicing, AC gas recharge, and laser alignment by certified mechanics.",
+                title: "Workshop Engineering",
+                desc: "Turnkey bay layout planning, certified lift chemical anchoring, calibration, and hands-on technician equipment operation training.",
               },
             ].map((p) => (
               <div key={p.title} className="rounded border border-border bg-card p-6">

@@ -81,8 +81,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "PAGE International — Automotive Parts, Garage Equipment & Workshop Solutions" },
-      { name: "description", content: "PAGE International supplies genuine automotive parts, commercial garage equipment, diagnostics, and professional workshop servicing." },
+      { title: "PAGE International — Automotive Equipment, Spare Parts & Workshop Solutions" },
+      { name: "description", content: "PAGE International is a specialized B2B supplier and distributor of automotive garage machinery, spare parts, diagnostics, tools, and workshop solutions to service centers, workshops, dealerships, and EV businesses." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

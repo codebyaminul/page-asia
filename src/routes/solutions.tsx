@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  Building2,
   Check,
-  Compass,
-  FileText,
+  FileSpreadsheet,
   ShieldCheck,
   Truck,
   Users,
@@ -19,93 +19,128 @@ export const Route = createFileRoute("/solutions")({
       { title: "B2B Workshop & Automotive Solutions — PAGE International" },
       {
         name: "description",
-        content: "Turnkey garage setup, commercial fleet maintenance, EV workshop tooling, and equipment supply packages from PAGE International.",
+        content:
+          "Turnkey workshop setup, equipment upgrades, service center supply, EV workshop tooling, commercial fleet depots, and distributor supply.",
       },
       { property: "og:title", content: "PAGE B2B Automotive Solutions" },
       {
         property: "og:description",
-        content: "Complete workshop equipment, fleet maintenance and garage solutions.",
+        content:
+          "Commercial workshop solutions for workshops, service centers, dealerships, and EV businesses.",
       },
     ],
   }),
   component: Solutions,
 });
 
-const solutionPackages = [
+const b2bSolutionPackages = [
   {
-    slug: "garage-setup",
-    name: "Turnkey Garage & Workshop Setup",
-    subtitle: "Complete bay design, equipment supply, air lines & commissioning",
-    desc: "For new workshop investments or bay expansions. We handle 2D bay layout planning, 2-post and scissor lift anchoring, pneumatic rotary screw compressor line sizing, diagnostic workstation setup, and technician equipment operation training.",
-    target: "New Workshop Investors, Dealership Bay Expansions, Tyre Centers",
+    slug: "workshop-setup",
+    name: "Workshop Setup",
+    subtitle: "Everything needed to build a professional automotive workshop",
+    desc: "For new workshop investments, dealership bay expansions, or independent garages. We provide 2D/3D workshop ergonomics, 2-post and scissor lift anchoring, compressor ring-main line installation, electrical load planning, and technician equipment operation training.",
+    target: "New Workshop Owners, Expanding Garages, Tyre Centers, Dealerships",
     features: [
-      "Custom 2D/3D bay ergonomics and vehicle flow layout",
-      "Supply of certified 2-post, 4-post and scissor lifts",
-      "Pneumatic ring-main pipework & compressor installation",
-      "Technician equipment safety & calibration training",
-      "12 to 36-month commercial machinery warranty",
+      "2D/3D vehicle workflow and bay layout engineering",
+      "Supply and certified anchoring of 2-post, 4-post and scissor lifts",
+      "Rotary screw compressor line sizing & pneumatic ring-main installation",
+      "Technician machinery calibration & safety operation training",
+      "Official 2-year commercial equipment warranty & tax invoicing",
     ],
+    actionLink: "/shop",
+    actionSearch: { cat: "Garage Equipment" },
+    actionText: "Explore Workshop Setup Equipment",
     image: images.heroWorkshop,
   },
   {
-    slug: "workshop",
-    name: "Professional Workshop Modernization",
-    subtitle: "Upgrade diagnostics, tyre changing and wheel balancing throughput",
-    desc: "Designed for independent garages ready to handle modern OBD2, European, and Japanese vehicle platforms. Replace obsolete machinery with high-speed automated tyre changers, laser wheel balancers, and computerized ECU diagnostic tablets.",
-    target: "Independent Garages, Tyre Fitment Centers, Quick Lube Stations",
+    slug: "workshop-upgrade",
+    name: "Workshop Upgrade & Modernization",
+    subtitle: "Upgrade equipment, diagnostics, and technician productivity",
+    desc: "Replace aging manual equipment with high-speed automated tyre changers, laser wheel balancers, and computerized ECU diagnostic tablets capable of servicing modern Japanese, European, and hybrid models. Increase workshop throughput and vehicle turnover.",
+    target: "Independent Garages, Quick-Service Bays, Tyre Fitment Centers",
     features: [
-      "Microprocessor laser-guided wheel balancers",
-      "Pneumatic tilt-back run-flat tyre changers",
-      "Multi-brand OE level computerized diagnostic scanners",
-      "Trade-in and equipment upgrade financing options",
-      "Priority parts delivery supply agreement",
+      "Microprocessor laser-guided digital wheel balancers",
+      "Pneumatic tilt-back run-flat tyre changing machines",
+      "Multi-brand OE-level ECU diagnostic tablets with active actuation",
+      "Machinery trade-in consultation and staggered delivery plans",
+      "Fast replacement spare parts inventory access",
     ],
+    actionLink: "/shop",
+    actionSearch: { type: "equipment" },
+    actionText: "Explore Modernization Machinery",
     image: images.workshop,
   },
   {
-    slug: "fleet",
-    name: "Commercial Fleet Maintenance & Supply",
-    subtitle: "Bulk spare parts procurement, scheduled servicing and downtime minimization",
-    desc: "Keep delivery fleets, corporate shuttles, and commercial vehicles on the road. We provide centralized billing, scheduled preventive maintenance windows, guaranteed spare parts inventory reserves, and volume B2B pricing.",
-    target: "Logistics Companies, Corporate Fleets, Rental Operators, Ride-hail Fleets",
+    slug: "ev-workshop",
+    name: "EV Workshop Solutions",
+    subtitle: "Prepare your workshop for the next generation of electric mobility",
+    desc: "Equip your facility to safely diagnose and service 2W, 3W, and 4W electric mobility. We supply certified 1000V VDE insulated hand tools, traction battery cell balancing stations, high-voltage insulation testers, safety perimeter barriers, and PPE kits.",
+    target: "Pioneering EV Garages, Hybrid Specialists, Fleet Hubs, Conversion Centers",
     features: [
-      "Dedicated account manager & B2B procurement portal",
-      "Guaranteed stock holding of high-wear brake pads, filters, and fluids",
-      "Scheduled night/weekend service bay reservation",
-      "Consolidated monthly invoicing with registered VAT documentation",
-      "Mobile emergency technician dispatched for breakdown support",
+      "1000V VDE certified insulated tool sets & lockout kits",
+      "High-voltage battery pack cell balancing & capacity test stations",
+      "Specialized diagnostic software for BYD, MG, Tesla and Hybrid platforms",
+      "Hydraulic battery pack lowering and lifting tables",
+      "Safety perimeter barriers, rescue hooks, and high-voltage PPE gear",
     ],
-    image: images.engine,
-  },
-  {
-    slug: "ev",
-    name: "EV & Hybrid Workshop Transition",
-    subtitle: "High-voltage safety gear, insulated tooling and battery testing platforms",
-    desc: "Prepare your garage for the surge of hybrid and electric vehicles. We equip your technicians with IEC 60900 insulated hand tools, Class 0 safety PPE, high-voltage battery health diagnostic scanners, and specialized isolation enclosures.",
-    target: "Pioneering Garages, Hybrid Repair Specialists, Commercial EV Fleets",
-    features: [
-      "1000V insulated hand tool sets & safety lockout kits",
-      "High-voltage battery pack cell balancing & capacity test tools",
-      "Electric motor and thermal loop diagnostic scanners",
-      "Safety perimeter barriers, rescue hooks, and PPE gear",
-      "High-voltage technician safety certification guidance",
-    ],
+    actionLink: "/shop",
+    actionSearch: { mobility: "EV" },
+    actionText: "Explore EV Workshop Tooling",
     image: images.brakes,
   },
   {
-    slug: "personal",
-    name: "Personal Vehicle Care Plans",
-    subtitle: "Comprehensive preventive maintenance for individual car owners",
-    desc: "Transparent maintenance schedules for personal car owners. We ensure your car receives genuine OEM filters, full synthetic oils, computerised diagnostic scans, and clear digital job cards without surprise bills.",
-    target: "Everyday Commuters, Luxury Vehicle Owners, Family Cars",
+    slug: "service-center",
+    name: "Service Center Solutions",
+    subtitle: "Equipment and parts for professional high-volume service operations",
+    desc: "Comprehensive parts supply contracts, bulk lubricant drum dispensing setups, multi-bay vehicle lifts, and computerized 3D wheel alignment stations designed for high daily vehicle traffic in multi-brand and dealership service operations.",
+    target: "Multi-Brand Service Hubs, Dealerships, Franchise Workshop Operations",
     features: [
-      "Pre-booked service bay slots with zero waiting time",
-      "100% genuine lubricants and replacement parts with proof of origin",
-      "Digital vehicle health report with photos of worn components",
-      "Collected old parts returned to owner upon request",
-      "Online booking history in My Garage portal",
+      "Volume spare parts supply agreements with guaranteed stock levels",
+      "Multi-post vehicle lifts engineered for 12-hour continuous daily cycles",
+      "Centralized lubricant storage and pneumatic overhead reel dispensers",
+      "Consolidated monthly corporate billing with registered VAT tax invoices",
+      "Priority technical hotline and emergency engineer dispatch",
     ],
-    image: images.heroCar,
+    actionLink: "/shop",
+    actionSearch: { cat: "Brakes" },
+    actionText: "Explore Service Center Supplies",
+    image: images.engine,
+  },
+  {
+    slug: "commercial-vehicles",
+    name: "Commercial Vehicle & Fleet Depots",
+    subtitle: "Equipment for commercial, bus, logistics, and fleet environments",
+    desc: "Equip in-house fleet maintenance depots with heavy-duty vehicle lifts, high-torque pneumatic impact wrenches, computerized diagnostic tablets, and scheduled replenishment of brake pads, commercial batteries, filters, and synthetic fluids.",
+    target: "Logistics Depots, Corporate Shuttles, Bus & Truck Garages, Delivery Fleets",
+    features: [
+      "Heavy commercial vehicle lifts & mobile column lift systems",
+      "Commercial fleet wear-item stocking (heavy brake drums, pads, filters)",
+      "High-output rotary screw compressors for simultaneous air tool use",
+      "Scheduled fleet replenishment to prevent roadside operational downtime",
+      "Standardized fleet preventive maintenance toolkits",
+    ],
+    actionLink: "/shop",
+    actionSearch: { type: "parts" },
+    actionText: "Explore Fleet Maintenance Parts",
+    image: images.compressor,
+  },
+  {
+    slug: "distributor",
+    name: "Distributor & Wholesale Supply",
+    subtitle: "Reliable automotive product supply for regional businesses",
+    desc: "Partner with PAGE International as an authorized regional equipment dealer or spare parts stockist. Access volume container pricing, exclusive territorial product lines, manufacturer marketing assets, and registered commercial tax invoices.",
+    target: "Regional Wholesalers, Automotive Store Chains, Importers, Equipment Resellers",
+    features: [
+      "Volume wholesale and container-load discount schedules",
+      "Exclusive territorial distribution opportunities for select machinery brands",
+      "Direct technical training for your regional field sales and service staff",
+      "Marketing collaterals, display stands, and digital spec sheets provided",
+      "Flexible commercial trade credit terms for verified institutional partners",
+    ],
+    actionLink: "/support",
+    actionSearch: {},
+    actionText: "Inquire About Distribution Terms",
+    image: images.tyreChanger,
   },
 ];
 
@@ -113,20 +148,32 @@ export function Solutions() {
   return (
     <div className="bg-background text-foreground min-h-screen">
       <PageHeader
-        eyebrow="Commercial Solutions"
-        title="Automotive Solutions for Every Scale"
-        intro="From single-bay equipment modernization to turnkey 10-bay garage installation and nationwide fleet maintenance contracts, PAGE delivers industrial machinery, genuine parts, and engineering expertise."
+        eyebrow="B2B Commercial Solutions"
+        title="Solutions for Automotive Businesses"
+        intro="PAGE International equips the businesses that service vehicles. Whether setting up a new garage, transitioning to EV service, or outfitting a commercial fleet depot, we supply industrial machinery, verified spare parts, and workshop engineering."
       >
-        <Link to="/support" className="btn btn-primary h-11 text-xs">
-          Request Commercial Consultation
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="#inquiry"
+            className="btn btn-primary h-11 px-6 text-xs font-bold uppercase tracking-wider"
+          >
+            <FileSpreadsheet className="h-4 w-4" /> Request Solutions Quote
+          </a>
+          <Link
+            to="/shop"
+            className="btn btn-outline border-ink-border text-ink-foreground hover:bg-ink-2 h-11 px-6 text-xs font-bold uppercase tracking-wider"
+          >
+            Browse Products
+          </Link>
+        </div>
       </PageHeader>
 
       <section className="container-page py-16 space-y-12">
-        {solutionPackages.map((s, idx) => (
+        {b2bSolutionPackages.map((s, idx) => (
           <article
             key={s.slug}
-            className={`grid gap-8 rounded border border-border bg-card overflow-hidden shadow-xs lg:grid-cols-2 lg:items-center ${
+            id={s.slug}
+            className={`grid gap-8 rounded border border-border bg-card overflow-hidden shadow-xs lg:grid-cols-2 lg:items-center scroll-mt-24 ${
               idx % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""
             }`}
           >
@@ -149,44 +196,45 @@ export function Solutions() {
               <span className="text-[11px] font-bold uppercase tracking-widest text-primary">
                 {s.subtitle}
               </span>
-              <h2 className="display-lg mt-2 text-foreground font-bold">{s.name}</h2>
+              <h2 className="display-lg mt-2 text-foreground font-bold">
+                {s.name}
+              </h2>
               <p className="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {s.desc}
               </p>
 
               <div className="mt-4 rounded bg-secondary/60 p-3 text-xs">
-                <span className="font-bold text-foreground">Target Applications: </span>
+                <span className="font-bold text-foreground">
+                  Target Businesses:{" "}
+                </span>
                 <span className="text-muted-foreground">{s.target}</span>
               </div>
 
-              {/* Deliverables List */}
-              <div className="mt-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-foreground mb-2.5">
-                  Package Capabilities:
+              <div className="mt-6 space-y-2.5">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-foreground">
+                  What PAGE Delivers:
                 </p>
-                <ul className="space-y-1.5 text-xs text-foreground/85">
-                  {s.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <Check className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
+                {s.features.map((f) => (
+                  <div key={f} className="flex items-start gap-2.5 text-xs text-foreground/80">
+                    <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>{f}</span>
+                  </div>
+                ))}
               </div>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
                 <Link
-                  to="/support"
-                  className="btn btn-primary h-10 px-5 text-xs font-bold uppercase"
+                  to={s.actionLink}
+                  search={s.actionSearch}
+                  className="btn btn-primary h-10 text-xs font-bold uppercase tracking-wider"
                 >
-                  Request Proposal
+                  {s.actionText} <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
                 <Link
-                  to="/shop"
-                  search={{ cat: "Equipment" }}
-                  className="btn btn-outline h-10 px-4 text-xs font-bold uppercase"
+                  to="/support"
+                  className="btn btn-outline h-10 text-xs font-bold uppercase tracking-wider"
                 >
-                  View Related Machinery
+                  Request Consultation
                 </Link>
               </div>
             </div>
@@ -194,23 +242,36 @@ export function Solutions() {
         ))}
       </section>
 
-      {/* Direct Contact Banner */}
-      <section className="bg-ink py-16 text-ink-foreground border-t border-ink-border">
-        <div className="container-page flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">
-              B2B Commercial Desk
-            </span>
-            <h3 className="font-display text-2xl font-bold uppercase mt-1">
-              Speak with a PAGE Workshop Engineer
-            </h3>
-            <p className="text-xs text-ink-muted mt-1 max-w-xl">
-              We arrange on-site facility measurements, compressed air calculations, and custom volume discounts.
-            </p>
+      {/* Solutions Conversion Banner */}
+      <section
+        id="inquiry"
+        className="bg-ink text-ink-foreground py-16 border-t border-ink-border"
+      >
+        <div className="container-page text-center max-w-3xl">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-primary block">
+            Commercial Project Consultation
+          </span>
+          <h2 className="display-lg mt-2 text-ink-foreground">
+            CONSULT WITH A PAGE WORKSHOP ENGINEER
+          </h2>
+          <p className="mt-3 text-sm text-ink-muted leading-relaxed max-w-xl mx-auto">
+            Discuss machinery specifications, bay layout blueprints, or bulk container
+            supply contracts with our commercial equipment team.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              to="/support"
+              className="btn btn-primary h-11 px-8 text-xs font-bold uppercase tracking-wider"
+            >
+              Submit Commercial Project Details
+            </Link>
+            <Link
+              to="/shop"
+              className="btn btn-ghost-light h-11 px-8 text-xs font-bold uppercase tracking-wider"
+            >
+              Browse Equipment Catalogue
+            </Link>
           </div>
-          <Link to="/support" className="btn btn-primary h-11 px-8 text-xs font-bold uppercase whitespace-nowrap">
-            Contact B2B Team
-          </Link>
         </div>
       </section>
     </div>

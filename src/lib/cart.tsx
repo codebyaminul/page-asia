@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { products, type Product } from "./data";
 
 type Line = { slug: string; qty: number };
-type Garage = { make: string; model: string; year: string; engine: string } | null;
+type Garage = { platform?: string; make: string; model: string; year: string; engine: string } | null;
 type Ctx = {
   lines: (Line & { product: Product })[];
   count: number; subtotal: number;
