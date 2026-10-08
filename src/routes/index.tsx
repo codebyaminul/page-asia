@@ -202,15 +202,16 @@ function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative overflow-hidden bg-ink py-24 text-ink-foreground lg:py-36">
-        <img src={images.heroCar} alt="" loading="lazy" width={1920} height={1088} className="absolute inset-0 h-full w-full object-cover opacity-40" />
-        <div className="absolute inset-0 bg-hero-fade" />
-        <div className="container-page relative">
-          <h2 className="display-xl max-w-4xl">Keep your vehicle moving.</h2>
-          <div className="mt-10 flex flex-wrap gap-3">
+      {/* Final CTA — oversized wordmark band */}
+      <section className="border-t border-border bg-background py-20 lg:py-28">
+        <div className="container-page">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">PAGE International Ltd.</p>
+          <h2 className="mt-6 font-display font-bold uppercase leading-[0.85] tracking-tight text-foreground" style={{ fontSize: "clamp(3.5rem, 12.5vw, 13rem)" }}>
+            Keep your<br />vehicle moving<span className="text-primary">.</span>
+          </h2>
+          <div className="mt-12 flex flex-wrap items-center gap-3">
             <Link to="/shop" className="btn btn-primary">Shop Parts</Link>
-            <Link to="/services/book" className="btn btn-ghost-light">Book Service</Link>
+            <Link to="/services/book" className="btn btn-outline">Book Service</Link>
           </div>
         </div>
       </section>
