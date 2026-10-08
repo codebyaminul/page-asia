@@ -99,6 +99,10 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false);
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
+  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 1200);
+
+  // Hover Intent Timer to avoid nervous sensitivity / rapid jitter
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -111,7 +115,14 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
       setIsTouchDevice(true);
     }
 
-    return () => media.removeEventListener("change", handler);
+    const onResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", onResize, { passive: true });
+
+    return () => {
+      media.removeEventListener("change", handler);
+      window.removeEventListener("resize", onResize);
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
   }, []);
 
   const nextItem = useCallback(() => {
@@ -141,84 +152,111 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
     setTouchStartX(null);
   };
 
+  // Intent-based hover handler: prevents rapid jitter / oversensitivity
+  const handleCardMouseEnter = (index: number) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    if (activeIndex === index) return;
+
+    // Intent buffer: 140ms dwell time before re-centering
+    hoverTimeoutRef.current = setTimeout(() => {
+      setActiveIndex(index);
+    }, 140);
+  };
+
+  const handleCardMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  };
+
   // Determine whether cards are currently fanned out
   const isCurrentlyFanned =
     viewMode === "fanned" ||
     (viewMode === "auto" && (isHovered || isTouchDevice));
 
+  // Dynamic responsive horizontal offsets ensuring true dead-center alignment
+  const getFanOffsets = () => {
+    if (windowWidth >= 1024) {
+      return { step1: 185, step2: 355 };
+    }
+    if (windowWidth >= 768) {
+      return { step1: 140, step2: 270 };
+    }
+    return { step1: 65, step2: 125 };
+  };
+
+  const { step1, step2 } = getFanOffsets();
+
   // Compute balanced circular fan offset for each card relative to activeIndex
+  // Note: All transforms start from -50% on X and -50% on Y to guarantee DEAD-CENTER alignment
   const getCardStyle = (index: number) => {
-    // Symmetrical cyclic difference: -2, -1, 0, 1, 2
     const rawDiff =
       ((index - activeIndex + total + Math.floor(total / 2)) % total) -
       Math.floor(total / 2);
 
     if (isReducedMotion) {
       return {
-        transform: `translateX(${rawDiff * 50}px) scale(${rawDiff === 0 ? 1 : 0.92})`,
+        transform: `translate3d(calc(-50% + ${rawDiff * 50}px), -50%, 0px) scale(${rawDiff === 0 ? 1 : 0.92})`,
         zIndex: rawDiff === 0 ? 40 : 20 - Math.abs(rawDiff) * 5,
         opacity: rawDiff === 0 ? 1 : 0.75,
-        boxShadow: rawDiff === 0 ? "0 20px 40px -10px rgba(0,0,0,0.25)" : "none",
+        boxShadow: rawDiff === 0 ? "0 20px 40px -10px rgba(0,0,0,0.5)" : "none",
         transformOrigin: "50% 50%",
       };
     }
 
-    // STATE 1: FANNED OUT ARC (Reference Screenshot 1)
+    // STATE 1: FANNED OUT ARC (Dead-Centered on Screen)
     if (isCurrentlyFanned) {
       switch (rawDiff) {
-        case 0: // ACTIVE CENTER
+        case 0: // ACTIVE CENTER (True Middle)
           return {
             transform:
-              "translateX(0px) translateY(-32px) translateZ(0px) rotate(0deg) scale(1.02)",
+              "translate3d(-50%, calc(-50% - 32px), 0px) rotate(0deg) scale(1.02)",
             zIndex: 40,
             opacity: 1,
             boxShadow:
-              "0 32px 64px -16px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.12)",
+              "0 32px 64px -16px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.25)",
             transformOrigin: "50% 115%",
           };
         case -1: // LEFT 1
           return {
-            transform:
-              "translateX(calc(-58% - 16px)) translateY(14px) translateZ(-40px) rotate(-8.5deg) scale(0.92)",
+            transform: `translate3d(calc(-50% - ${step1}px), calc(-50% + 14px), -40px) rotate(-8.5deg) scale(0.92)`,
             zIndex: 30,
-            opacity: 0.94,
+            opacity: 0.95,
             boxShadow:
-              "0 18px 36px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06)",
+              "0 20px 40px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15)",
             transformOrigin: "50% 115%",
           };
         case 1: // RIGHT 1
           return {
-            transform:
-              "translateX(calc(58% + 16px)) translateY(14px) translateZ(-40px) rotate(8.5deg) scale(0.92)",
+            transform: `translate3d(calc(-50% + ${step1}px), calc(-50% + 14px), -40px) rotate(8.5deg) scale(0.92)`,
             zIndex: 30,
-            opacity: 0.94,
+            opacity: 0.95,
             boxShadow:
-              "0 18px 36px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06)",
+              "0 20px 40px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15)",
             transformOrigin: "50% 115%",
           };
         case -2: // FAR LEFT 2
           return {
-            transform:
-              "translateX(calc(-112% - 30px)) translateY(42px) translateZ(-80px) rotate(-16deg) scale(0.84)",
+            transform: `translate3d(calc(-50% - ${step2}px), calc(-50% + 42px), -80px) rotate(-16deg) scale(0.84)`,
             zIndex: 20,
-            opacity: 0.82,
+            opacity: 0.86,
             boxShadow:
-              "0 12px 28px -6px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+              "0 14px 30px -8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)",
             transformOrigin: "50% 115%",
           };
         case 2: // FAR RIGHT 2
           return {
-            transform:
-              "translateX(calc(112% + 30px)) translateY(42px) translateZ(-80px) rotate(16deg) scale(0.84)",
+            transform: `translate3d(calc(-50% + ${step2}px), calc(-50% + 42px), -80px) rotate(16deg) scale(0.84)`,
             zIndex: 20,
-            opacity: 0.82,
+            opacity: 0.86,
             boxShadow:
-              "0 12px 28px -6px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+              "0 14px 30px -8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)",
             transformOrigin: "50% 115%",
           };
         default:
           return {
-            transform: "translateX(0px) scale(0.7)",
+            transform: "translate3d(-50%, -50%, 0px) scale(0.7)",
             zIndex: 10,
             opacity: 0.4,
             boxShadow: "none",
@@ -227,61 +265,61 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
       }
     }
 
-    // STATE 2: STACKED DECK (Reference Screenshot 2)
+    // STATE 2: STACKED DECK (Dead-Centered on Screen)
     switch (rawDiff) {
       case 0: // ACTIVE FRONT
         return {
           transform:
-            "translateX(0px) translateY(0px) translateZ(0px) rotate(0deg) scale(1)",
+            "translate3d(-50%, -50%, 0px) rotate(0deg) scale(1)",
           zIndex: 40,
           opacity: 1,
           boxShadow:
-            "0 26px 50px -12px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+            "0 28px 56px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.25)",
           transformOrigin: "50% 50%",
         };
       case -1: // BEHIND LEFT 1
         return {
           transform:
-            "translateX(-6px) translateY(3px) translateZ(-20px) rotate(-2.8deg) scale(0.985)",
+            "translate3d(calc(-50% - 6px), calc(-50% + 3px), -20px) rotate(-2.8deg) scale(0.985)",
           zIndex: 30,
-          opacity: 0.95,
+          opacity: 0.96,
           boxShadow:
-            "0 12px 24px -6px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08)",
+            "0 14px 28px -6px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)",
           transformOrigin: "50% 50%",
         };
       case 1: // BEHIND RIGHT 1
         return {
           transform:
-            "translateX(6px) translateY(3px) translateZ(-20px) rotate(2.8deg) scale(0.985)",
+            "translate3d(calc(-50% + 6px), calc(-50% + 3px), -20px) rotate(2.8deg) scale(0.985)",
           zIndex: 29,
-          opacity: 0.95,
+          opacity: 0.96,
           boxShadow:
-            "0 12px 24px -6px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08)",
+            "0 14px 28px -6px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1)",
           transformOrigin: "50% 50%",
         };
       case -2: // BEHIND FAR LEFT 2
         return {
           transform:
-            "translateX(-11px) translateY(7px) translateZ(-40px) rotate(-5deg) scale(0.97)",
+            "translate3d(calc(-50% - 12px), calc(-50% + 7px), -40px) rotate(-5deg) scale(0.97)",
           zIndex: 20,
-          opacity: 0.88,
+          opacity: 0.9,
           boxShadow:
-            "0 8px 18px -4px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.06)",
+            "0 10px 22px -5px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.08)",
           transformOrigin: "50% 50%",
         };
       case 2: // BEHIND FAR RIGHT 2
         return {
           transform:
-            "translateX(11px) translateY(7px) translateZ(-40px) rotate(5deg) scale(0.97)",
+            "translate3d(calc(-50% + 12px), calc(-50% + 7px), -40px) rotate(5deg) scale(0.97)",
           zIndex: 19,
-          opacity: 0.88,
+          opacity: 0.9,
           boxShadow:
-            "0 8px 18px -4px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.06)",
+            "0 10px 22px -5px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.08)",
           transformOrigin: "50% 50%",
         };
       default:
         return {
-          transform: "translateX(0px) scale(0.9)",
+          transform: "translate3d(-50%, -50%, 0px) scale(0.9)",
           zIndex: 10,
           opacity: 0.5,
           boxShadow: "none",
@@ -291,6 +329,7 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
   };
 
   const handleCardClick = (index: number, item: CatalogueItem) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     if (activeIndex === index) {
       // Already active: navigate to catalogue route
       navigate({ to: item.link, search: item.search });
@@ -305,39 +344,44 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
   return (
     <section
       id="catalogue-showcase"
-      className={`relative py-20 lg:py-28 bg-[#FAF9F6] text-zinc-900 overflow-hidden border-b border-zinc-200 ${className}`}
+      className={`relative py-20 lg:py-28 bg-[#C81E1E] text-white overflow-hidden border-b border-red-900/60 shadow-inner ${className}`}
+      style={{
+        background: "linear-gradient(180deg, #B91C1C 0%, #C81E1E 50%, #991B1B 100%)",
+      }}
     >
-      {/* Background Subtle Ambient Lighting & Architecture Grid */}
+      {/* Background Showroom Radial Atmosphere & Architectural Grid */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Soft radial showroom spotlight */}
-        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-amber-500/[0.035] blur-[140px] rounded-full" />
+        {/* Central warm spotlight */}
+        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[950px] h-[520px] bg-white/[0.12] blur-[140px] rounded-full" />
+        {/* Dark vignette corners */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,transparent_30%,rgba(0,0,0,0.35)_100%)]" />
         {/* Subtle engineering layout dots */}
-        <div className="absolute inset-0 bg-[radial-gradient(#d1d5db_1px,transparent_1px)] [background-size:28px_28px] opacity-60 [mask-image:radial-gradient(ellipse_75%_65%_at_50%_50%,black_40%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:32px_32px] opacity-40 [mask-image:radial-gradient(ellipse_75%_65%_at_50%_50%,black_40%,transparent_100%)]" />
       </div>
 
       <div className="container-page relative z-10">
-        {/* SECTION HEADER: Clean, Editorial, Minimal */}
+        {/* SECTION HEADER: High-Contrast White on Red Background */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 sm:mb-16">
           <div>
-            <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.25em] text-primary mb-2.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.25em] text-white bg-black/30 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 mb-3 shadow-xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
               <span>CATALOGUE / 01 · B2B COMMERCIAL DISCIPLINES</span>
             </div>
-            <h2 className="display-lg text-zinc-950 tracking-tight">
+            <h2 className="display-lg text-white tracking-tight drop-shadow-sm">
               EXPLORE OUR CATALOGUE.
             </h2>
-            <p className="mt-2 text-sm sm:text-base text-zinc-600 max-w-xl font-sans">
+            <p className="mt-2 text-sm sm:text-base text-red-50/90 max-w-xl font-sans leading-relaxed">
               Professional equipment, diagnostic systems, and workshop engineering solutions for modern automotive facilities.
             </p>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-block text-xs font-mono text-zinc-500 uppercase tracking-widest">
+            <span className="hidden sm:inline-block text-xs font-mono text-white/80 uppercase tracking-widest bg-black/20 px-3 py-1 rounded border border-white/10">
               {isCurrentlyFanned ? "HOVER / TAP TO INSPECT" : "HOVER TO SPREAD FAN"}
             </span>
             <Link
               to="/shop"
-              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:text-zinc-950 transition-colors group"
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-950 bg-white hover:bg-zinc-100 px-4 py-2.5 rounded-sm shadow-lg shadow-black/20 transition-all hover:scale-105 group"
             >
               <span>View Full B2B Catalog</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -346,14 +390,17 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
         </div>
 
         {/* ======================================================== */}
-        {/* THE INTERACTIVE CATALOGUE FAN STACK                      */}
+        {/* THE INTERACTIVE CATALOGUE FAN STACK (DEAD-CENTERED)      */}
         {/* ======================================================== */}
         <div
           onPointerEnter={() => setIsHovered(true)}
-          onPointerLeave={() => setIsHovered(false)}
+          onPointerLeave={() => {
+            setIsHovered(false);
+            handleCardMouseLeave();
+          }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="relative mx-auto flex items-center justify-center min-h-[500px] sm:min-h-[540px] md:min-h-[570px] lg:min-h-[590px] select-none py-6 px-4"
+          className="relative mx-auto flex items-center justify-center w-full min-h-[500px] sm:min-h-[540px] md:min-h-[570px] lg:min-h-[600px] select-none py-6 px-4"
           style={{
             perspective: "1400px",
             perspectiveOrigin: "50% 50%",
@@ -362,7 +409,7 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
           aria-label="Interactive Catalogue Fan Stack"
         >
           {/* Ground Soft Table Shadow beneath Stack */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[75%] max-w-3xl h-14 bg-black/15 blur-2xl rounded-full pointer-events-none" />
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[75%] max-w-3xl h-16 bg-black/45 blur-2xl rounded-full pointer-events-none" />
 
           {/* Render 5 Fanned Catalogue Panels */}
           {catalogueItems.map((item, index) => {
@@ -379,7 +426,8 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                     ? "Active catalogue. Press Enter to view products."
                     : "Press Enter to inspect catalogue."
                 }`}
-                onPointerEnter={() => setActiveIndex(index)}
+                onPointerEnter={() => handleCardMouseEnter(index)}
+                onPointerLeave={handleCardMouseLeave}
                 onClick={() => handleCardClick(index, item)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -393,10 +441,10 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                     prevItem();
                   }
                 }}
-                className={`absolute left-1/2 top-1/2 -translate-y-1/2 cursor-pointer w-[250px] sm:w-[280px] md:w-[305px] lg:w-[325px] h-[385px] sm:h-[415px] md:h-[435px] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-[28px] sm:rounded-[32px] border flex flex-col justify-between p-4 sm:p-5 ${
+                className={`absolute left-1/2 top-1/2 cursor-pointer w-[250px] sm:w-[280px] md:w-[305px] lg:w-[325px] h-[385px] sm:h-[415px] md:h-[435px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] rounded-[28px] sm:rounded-[32px] border flex flex-col justify-between p-4 sm:p-5 will-change-transform ${
                   isCenter
-                    ? "bg-[#18181B] text-white border-zinc-700/80 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.45)] ring-1 ring-white/10"
-                    : "bg-white text-zinc-900 border-zinc-200/90 shadow-md hover:border-zinc-300"
+                    ? "bg-[#141518] text-white border-white/30 shadow-[0_36px_72px_-16px_rgba(0,0,0,0.75)] ring-1 ring-white/20"
+                    : "bg-white text-zinc-950 border-white/60 shadow-xl hover:border-white"
                 }`}
                 style={{
                   transform: style.transform,
@@ -426,21 +474,21 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                     </span>
                   </div>
 
-                  {/* Top Button: Pill on Active, Circle on Inactive (Reference Match) */}
+                  {/* Top Button: Pill on Active, Circle on Inactive */}
                   {isCenter ? (
                     <div
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate({ to: item.link, search: item.search });
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white text-zinc-950 text-xs font-bold tracking-tight shadow-md transition-all hover:bg-zinc-100 hover:scale-105"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-zinc-950 text-xs font-bold tracking-tight shadow-lg transition-all hover:bg-zinc-100 hover:scale-105"
                     >
                       <span>Explore Catalogue</span>
                       <ArrowUpRight className="h-3.5 w-3.5 text-primary" />
                     </div>
                   ) : (
                     <div
-                      className="size-8 sm:size-9 rounded-full bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-zinc-800 transition-all hover:bg-zinc-200 hover:scale-105 shadow-xs"
+                      className="size-8 sm:size-9 rounded-full bg-zinc-100 border border-zinc-200/90 flex items-center justify-center text-zinc-900 transition-all hover:bg-zinc-200 hover:scale-105 shadow-xs"
                       aria-hidden="true"
                     >
                       <ArrowUpRight className="h-4 w-4" />
@@ -452,7 +500,7 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                 <div
                   className={`relative my-2 sm:my-3 aspect-[4/3] w-full flex items-center justify-center overflow-hidden rounded-[20px] p-4 transition-colors ${
                     isCenter
-                      ? "bg-[#27272A] border border-white/5"
+                      ? "bg-[#222327] border border-white/10"
                       : "bg-[#F4F4F5] border border-zinc-100"
                   }`}
                 >
@@ -469,7 +517,7 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
 
                   {/* Active Floating Spec Pill */}
                   {isCenter && (
-                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-zinc-950/80 text-white text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-xs border border-white/10 shadow-xs animate-in fade-in duration-300">
+                    <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-black/75 text-white text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-xs border border-white/15 shadow-xs">
                       {item.specs}
                     </div>
                   )}
@@ -512,7 +560,7 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                     <span>{item.count}</span>
                     <span
                       className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider ${
-                        isCenter ? "text-primary" : "text-zinc-700 hover:text-primary"
+                        isCenter ? "text-primary" : "text-zinc-800 hover:text-primary"
                       }`}
                     >
                       {isCenter ? "Ready To Order" : "Inspect →"}
@@ -527,12 +575,12 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
         {/* ======================================================== */}
         {/* BELOW STACK CONTROLS & ACTIVE INDEX INDICATOR            */}
         {/* ======================================================== */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-zinc-200">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-white/20">
           {/* Active Product Index Indicator: 01 / 05 */}
           <div className="flex items-center gap-4">
-            <span className="font-display text-2xl sm:text-3xl font-bold text-zinc-950 tracking-wider">
+            <span className="font-display text-2xl sm:text-3xl font-bold text-white tracking-wider drop-shadow-xs">
               0{activeIndex + 1}{" "}
-              <span className="text-zinc-400">/ 0{total}</span>
+              <span className="text-red-200/80">/ 0{total}</span>
             </span>
 
             {/* Interactive Dot Selectors */}
@@ -544,14 +592,14 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                   aria-label={`Inspect ${item.title}`}
                   className={`h-2 rounded-full transition-all duration-300 ${
                     activeIndex === idx
-                      ? "w-8 bg-primary shadow-xs"
-                      : "w-2 bg-zinc-300 hover:bg-zinc-400"
+                      ? "w-8 bg-white shadow-[0_0_10px_rgba(255,255,255,0.7)]"
+                      : "w-2 bg-white/40 hover:bg-white/70"
                   }`}
                 />
               ))}
             </div>
 
-            <span className="hidden md:inline-block text-xs font-medium text-zinc-600 truncate max-w-xs ml-2">
+            <span className="hidden md:inline-block text-xs font-medium text-white/90 truncate max-w-xs ml-2">
               {activeCatalogue.title} · {activeCatalogue.subtitle}
             </span>
           </div>
@@ -559,13 +607,13 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
           {/* Quick View Mode Toggle & Navigation Chevrons */}
           <div className="flex items-center gap-3 sm:gap-4">
             {/* View Mode Switch: Deck Stack vs Fan Out */}
-            <div className="hidden sm:inline-flex items-center p-1 rounded-full bg-zinc-200/80 border border-zinc-300/80 text-[11px] font-bold">
+            <div className="hidden sm:inline-flex items-center p-1 rounded-full bg-black/35 backdrop-blur-md border border-white/20 text-[11px] font-bold text-white">
               <button
                 onClick={() => setViewMode("stacked")}
                 className={`px-3 py-1 rounded-full flex items-center gap-1.5 transition-all ${
                   viewMode === "stacked"
-                    ? "bg-white text-zinc-950 shadow-xs"
-                    : "text-zinc-600 hover:text-zinc-950"
+                    ? "bg-white text-zinc-950 shadow-sm"
+                    : "text-white/80 hover:text-white"
                 }`}
                 title="Keep cards stacked as a deck"
               >
@@ -576,8 +624,8 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                 onClick={() => setViewMode("auto")}
                 className={`px-3 py-1 rounded-full flex items-center gap-1.5 transition-all ${
                   viewMode === "auto"
-                    ? "bg-white text-zinc-950 shadow-xs"
-                    : "text-zinc-600 hover:text-zinc-950"
+                    ? "bg-white text-zinc-950 shadow-sm"
+                    : "text-white/80 hover:text-white"
                 }`}
                 title="Cards fan out on hover"
               >
@@ -588,8 +636,8 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
                 onClick={() => setViewMode("fanned")}
                 className={`px-3 py-1 rounded-full flex items-center gap-1.5 transition-all ${
                   viewMode === "fanned"
-                    ? "bg-white text-zinc-950 shadow-xs"
-                    : "text-zinc-600 hover:text-zinc-950"
+                    ? "bg-white text-zinc-950 shadow-sm"
+                    : "text-white/80 hover:text-white"
                 }`}
                 title="Keep cards fanned out"
               >
@@ -602,14 +650,14 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
               <button
                 onClick={prevItem}
                 aria-label="Previous catalogue panel"
-                className="grid h-9 w-9 place-items-center rounded-full border border-zinc-300 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50 transition-colors shadow-xs"
+                className="grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-black/25 text-white hover:bg-white/20 transition-colors shadow-xs"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 onClick={nextItem}
                 aria-label="Next catalogue panel"
-                className="grid h-9 w-9 place-items-center rounded-full border border-zinc-300 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50 transition-colors shadow-xs"
+                className="grid h-9 w-9 place-items-center rounded-full border border-white/25 bg-black/25 text-white hover:bg-white/20 transition-colors shadow-xs"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -617,7 +665,7 @@ export function CatalogueFanStack({ className = "" }: { className?: string }) {
 
             <Link
               to="/shop"
-              className="btn btn-primary h-9 sm:h-10 px-4 sm:px-5 text-xs font-bold uppercase tracking-wider rounded-sm shadow-md shadow-primary/20"
+              className="btn bg-white text-zinc-950 hover:bg-zinc-100 h-9 sm:h-10 px-4 sm:px-5 text-xs font-bold uppercase tracking-wider rounded-sm shadow-xl shadow-black/20"
             >
               <span>Explore Complete Catalogue</span>
               <ArrowRight className="h-3.5 w-3.5" />
