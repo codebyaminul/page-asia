@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { CinematicIntro } from "@/components/site/CinematicIntro";
+import { CatalogueFanStack } from "@/components/site/CatalogueFanStack";
 import {
   brands,
   images,
@@ -341,91 +342,9 @@ function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 03 — VISUAL CATEGORY NAVIGATION (NO REPETITIVE CARDS)    */}
+      {/* 03 — INTERACTIVE CATALOGUE SHOWCASE (FAN STACK MOTION)   */}
       {/* ======================================================== */}
-      <section className="py-20 lg:py-24 bg-zinc-50 border-b border-border">
-        <div className="container-page">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="eyebrow text-primary">Direct Navigation</span>
-            <h2 className="display-lg mt-1 text-foreground">
-              CATEGORIES
-            </h2>
-          </div>
-
-          {/* 6 Large Category Tiles with Authentic Product Imagery */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-            {[
-              {
-                title: "GARAGE EQUIPMENT",
-                desc: "Lifts, changers & balancers",
-                img: images.lift,
-                link: "/shop?cat=Garage+Equipment",
-              },
-              {
-                title: "DIAGNOSTICS",
-                desc: "OE tablets & code readers",
-                img: images.scanner,
-                link: "/shop?cat=Diagnostic+Equipment",
-              },
-              {
-                title: "TYRE & WHEEL",
-                desc: "Automatic changers & balancers",
-                img: images.tyreChanger,
-                link: "/shop?cat=Tyre+%26+Wheel",
-              },
-              {
-                title: "WORKSHOP TOOLS",
-                desc: "Pneumatics & hand tooling",
-                img: images.evTools,
-                link: "/shop?cat=Workshop+Tools",
-              },
-              {
-                title: "PARTS & BRAKES",
-                desc: "Ceramic pads & rotors",
-                img: images.brakepads,
-                link: "/shop?cat=Brakes",
-              },
-              {
-                title: "EV EQUIPMENT",
-                desc: "1000V tools & battery stations",
-                img: images.evBatteryAnalyzer,
-                link: "/shop?mobility=EV",
-              },
-            ].map((cat) => (
-              <Link
-                key={cat.title}
-                to={cat.link}
-                className="group relative flex flex-col justify-between rounded border border-border bg-card p-5 sm:p-6 transition-all duration-200 hover:border-foreground hover:shadow-xl"
-              >
-                <div className="flex items-center justify-between text-muted-foreground group-hover:text-primary">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider">
-                    Catalogue
-                  </span>
-                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </div>
-
-                <div className="my-4 aspect-[4/3] overflow-hidden rounded bg-zinc-100 p-3">
-                  <img
-                    src={cat.img}
-                    alt={cat.title}
-                    loading="lazy"
-                    className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-108"
-                  />
-                </div>
-
-                <div className="pt-2 border-t border-border/70">
-                  <h3 className="font-display text-xl sm:text-2xl font-bold uppercase text-foreground group-hover:text-primary transition-colors">
-                    {cat.title}
-                  </h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {cat.desc}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CatalogueFanStack />
 
       {/* ======================================================== */}
       {/* 04 — FEATURED PRODUCTS: 4 STRONG COMMODITIES             */}
