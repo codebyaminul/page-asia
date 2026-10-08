@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { CinematicIntro } from "@/components/site/CinematicIntro";
 import { CatalogueFanStack } from "@/components/site/CatalogueFanStack";
+import { ScrollSolutionsStack } from "@/components/site/ScrollSolutionsStack";
 import {
   brands,
   images,
@@ -432,37 +433,9 @@ function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 05 — MAJOR VISUAL BREAK: CINEMATIC WORKSHOP (65VH)       */}
+      {/* 05 — SCROLL-DRIVEN STACKED CARDS: WORKSHOP SOLUTIONS     */}
       {/* ======================================================== */}
-      <section className="relative min-h-[65vh] flex items-center justify-center overflow-hidden bg-black text-white text-center py-24 border-y border-zinc-800">
-        <div className="absolute inset-0 z-0">
-          <img
-            src={images.heroWorkshop}
-            alt="Real commercial automotive workshop interior with 2-post lifts and diagnostic bays"
-            className="h-full w-full object-cover object-center brightness-75 contrast-125"
-          />
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-[1px]" />
-        </div>
-
-        <div className="container-page relative z-10 max-w-3xl mx-auto">
-          <h2 className="display-hero text-white leading-[0.9] tracking-tight">
-            EQUIP YOUR WORKSHOP <br />
-            <span className="text-primary">FOR WHAT&apos;S NEXT.</span>
-          </h2>
-          <p className="mt-4 text-base sm:text-lg text-zinc-300 leading-relaxed font-sans max-w-xl mx-auto">
-            Turnkey hydraulic lifting bays, pneumatic infrastructure and certified diagnostic engineering.
-          </p>
-          <div className="mt-8">
-            <Link
-              to="/shop"
-              search={{ cat: "Garage Equipment" }}
-              className="btn btn-primary h-12 px-9 text-xs sm:text-sm font-bold uppercase tracking-widest shadow-2xl shadow-primary/30"
-            >
-              Explore Garage Equipment <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <ScrollSolutionsStack />
 
       {/* ======================================================== */}
       {/* 06 — GARAGE EQUIPMENT: VISUAL EQUIPMENT SHOWCASE         */}
