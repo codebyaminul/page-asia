@@ -29,13 +29,7 @@ const navLinks = [
   { to: "/about", label: "About" },
 ] as const;
 
-export function Logo({
-  className = "",
-  scrolled = false,
-}: {
-  className?: string;
-  scrolled?: boolean;
-}) {
+export function Logo({ className = "" }: { className?: string; scrolled?: boolean }) {
   return (
     <Link to="/" aria-label="PAGE International Ltd." className={`group flex items-center ${className}`}>
       <img
@@ -43,9 +37,7 @@ export function Logo({
         alt="PAGE International Ltd."
         width={140}
         height={56}
-        className={`h-8 sm:h-9 md:h-10 w-auto object-contain transition-all duration-300 group-hover:scale-105 ${
-          scrolled ? "" : "drop-shadow-[0_1px_2px_rgba(255,255,255,0.45)]"
-        }`}
+        className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
       />
     </Link>
   );
