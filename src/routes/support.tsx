@@ -9,7 +9,7 @@ export const Route = createFileRoute("/support")({
   component: Support,
 });
 
-const faqs = [
+const faqs: [string, string][] = [
   ["How do I know a part fits my vehicle?", "Save your vehicle in My Garage or use the vehicle finder; compatible products are highlighted. If unsure, contact support with your VIN."],
   ["Can PAGE install parts I buy online?", "Yes — choose ‘Book installation’ on any product page to schedule fitting at a service center."],
   ["What warranty applies?", "Warranty varies by product and is listed on each product page. Keep your invoice for claims."],
