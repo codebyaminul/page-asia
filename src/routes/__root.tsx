@@ -84,6 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "PAGE International — Automotive Equipment, Spare Parts & Workshop Solutions" },
       { name: "description", content: "PAGE International is a specialized B2B supplier and distributor of automotive garage machinery, spare parts, diagnostics, tools, and workshop solutions to service centers, workshops, dealerships, and EV businesses." },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/page logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -91,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Bebas+Neue&family=Barlow+Condensed:wght@600;700&display=swap" },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/page logo.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,

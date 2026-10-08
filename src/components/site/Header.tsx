@@ -31,18 +31,14 @@ const navLinks = [
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <Link to="/" aria-label="PAGE International Ltd." className={`group flex items-center gap-2.5 ${className}`}>
-      <span className="grid h-9 w-9 place-items-center bg-primary font-display text-xl font-bold text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
-        P
-      </span>
-      <div className="flex flex-col">
-        <span className="font-display text-2xl font-bold tracking-[0.14em] text-ink-foreground leading-none">
-          PAGE<span className="text-primary">.</span>
-        </span>
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-ink-muted">
-          International Ltd
-        </span>
-      </div>
+    <Link to="/" aria-label="PAGE International Ltd." className={`group flex items-center ${className}`}>
+      <img
+        src="/page logo.png"
+        alt="PAGE International Ltd."
+        width={140}
+        height={56}
+        className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_0_1px_rgba(255,255,255,0.35)]"
+      />
     </Link>
   );
 }
