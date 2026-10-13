@@ -28,7 +28,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2200); };
   const add = (slug: string, qty = 1) => {
     setLines((ls) => { const f = ls.find((l) => l.slug === slug); return f ? ls.map((l) => (l.slug === slug ? { ...l, qty: l.qty + qty } : l)) : [...ls, { slug, qty }]; });
-    flash("Added to cart");
+    flash("Added to Quotation List");
   };
   const setQty = (slug: string, qty: number) => setLines((ls) => ls.map((l) => (l.slug === slug ? { ...l, qty: Math.max(1, qty) } : l)));
   const remove = (slug: string) => setLines((ls) => ls.filter((l) => l.slug !== slug));

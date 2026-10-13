@@ -2,9 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
   ArrowUpRight,
-  CheckCircle2,
-  FileSpreadsheet,
-  Send,
+  ShoppingBag,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -62,22 +60,6 @@ function Home() {
   const [model, setModel] = useState<string>("Corolla");
   const [year, setYear] = useState<string>("2022");
 
-  // Streamlined Quote Form State
-  const [quoteForm, setQuoteForm] = useState({
-    name: "",
-    company: "",
-    phone: "",
-    email: "",
-    businessType: "Workshop",
-    requirement: "",
-  });
-  const [quoteSubmitted, setQuoteSubmitted] = useState(false);
-
-  const handleQuoteSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quoteForm.company || !quoteForm.phone) return;
-    setQuoteSubmitted(true);
-  };
 
   const handleFinderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,12 +170,12 @@ function Home() {
               >
                 Explore Products <ArrowRight className="h-4 w-4" />
               </Link>
-              <a
-                href="#request-quote"
-                className="btn btn-outline border-white/40 text-white hover:bg-white hover:text-black h-12 px-7 text-xs sm:text-sm font-bold uppercase tracking-widest"
+              <Link
+                to="/cart"
+                className="btn btn-outline border-white/40 text-white hover:bg-white hover:text-black h-12 px-7 text-xs sm:text-sm font-bold uppercase tracking-widest inline-flex items-center gap-2"
               >
-                <FileSpreadsheet className="h-4 w-4 text-primary" /> Request a Quote
-              </a>
+                <ShoppingBag className="h-4 w-4 text-primary" /> Quotation Cart
+              </Link>
             </div>
           </div>
         </div>
@@ -505,12 +487,12 @@ function Home() {
               </div>
 
               <div className="mt-8">
-                <a
-                  href="#request-quote"
+                <Link
+                  to="/shop"
                   className="btn btn-outline h-11 px-8 text-xs font-bold uppercase tracking-wider"
                 >
-                  Request Supply Terms
-                </a>
+                  Explore Workshop Equipment
+                </Link>
               </div>
             </div>
           </div>
@@ -654,183 +636,18 @@ function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 11 — REQUEST A QUOTE: STREAMLINED SPLIT-SCREEN           */}
+      {/* 11 — THINK NEXT: MASSIVE FULL-PAGE BRAND STATEMENT        */}
       {/* ======================================================== */}
-      <section
-        id="request-quote"
-        className="py-20 lg:py-28 bg-zinc-50 border-b border-border scroll-mt-20"
-      >
-        <div className="container-page max-w-5xl">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            {/* Left: Powerful Statement */}
-            <div>
-              <span className="eyebrow text-primary">Commercial Inquiry Desk</span>
-              <h2 className="display-hero text-foreground leading-[0.9] mt-3">
-                NEED EQUIPMENT <br />
-                <span className="text-primary">FOR YOUR BUSINESS?</span>
-              </h2>
-              <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-                Commercial quotation returned within 24 hours for workshop machinery, bulk spares, and turnkey bay projects.
-              </p>
-              <div className="mt-8 font-mono text-sm font-bold text-foreground">
-                Hotline: +880 9612-PAGE-INTL · b2b@page-intl.com
-              </div>
-            </div>
-
-            {/* Right: Streamlined 6-Field Form */}
-            <div className="rounded border border-border bg-card p-6 sm:p-8 shadow-sm">
-              {quoteSubmitted ? (
-                <div className="py-8 text-center">
-                  <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-500/10 text-emerald-600 mb-3">
-                    <CheckCircle2 className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-display text-2xl uppercase text-foreground">
-                    Quote Request Received
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-                    Thank you, {quoteForm.name || quoteForm.company}. We will reach out with commercial pricing and specifications within 24 hours.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setQuoteSubmitted(false);
-                      setQuoteForm({
-                        name: "",
-                        company: "",
-                        phone: "",
-                        email: "",
-                        businessType: "Workshop",
-                        requirement: "",
-                      });
-                    }}
-                    className="btn btn-outline h-9 text-xs font-bold uppercase mt-4"
-                  >
-                    Submit Another
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleQuoteSubmit} className="space-y-3.5">
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                        Contact Name *
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        placeholder="e.g. Tanvir Ahmed"
-                        className="field h-10 text-xs"
-                        value={quoteForm.name}
-                        onChange={(e) => setQuoteForm({ ...quoteForm, name: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                        Company Name *
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        placeholder="e.g. Apex Auto Workshop Ltd."
-                        className="field h-10 text-xs"
-                        value={quoteForm.company}
-                        onChange={(e) => setQuoteForm({ ...quoteForm, company: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                        Phone / WhatsApp *
-                      </label>
-                      <input
-                        required
-                        type="tel"
-                        placeholder="+880 17XXXXXXXX"
-                        className="field h-10 text-xs"
-                        value={quoteForm.phone}
-                        onChange={(e) => setQuoteForm({ ...quoteForm, phone: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="procurement@company.com"
-                        className="field h-10 text-xs"
-                        value={quoteForm.email}
-                        onChange={(e) => setQuoteForm({ ...quoteForm, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                      Business Type
-                    </label>
-                    <select
-                      value={quoteForm.businessType}
-                      onChange={(e) => setQuoteForm({ ...quoteForm, businessType: e.target.value })}
-                      className="field h-10 text-xs"
-                    >
-                      <option value="Workshop">Workshop / Garage</option>
-                      <option value="Service Center">Service Center Hub</option>
-                      <option value="Dealer">Automotive Dealership</option>
-                      <option value="Distributor">Wholesale Distributor</option>
-                      <option value="Fleet">Commercial Fleet Operator</option>
-                      <option value="EV Business">EV Workshop / Business</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                      Requirement / Target Equipment *
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="e.g. 2-Post Lifts, Tyre Changer, 1000V EV Tools, Brake Parts"
-                      className="field h-10 text-xs"
-                      value={quoteForm.requirement}
-                      onChange={(e) => setQuoteForm({ ...quoteForm, requirement: e.target.value })}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="btn btn-primary h-11 w-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 mt-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    <span>Submit Quote Request</span>
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
+      <section className="relative w-full flex flex-col items-center justify-center bg-black text-white text-center overflow-hidden border-t border-zinc-900 px-4 sm:px-6 py-10 sm:py-14 md:py-16 select-none">
+        {/* Ambient atmospheric backdrop */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <div className="h-[30vw] w-[45vw] max-w-[600px] max-h-[260px] rounded-full bg-primary/10 blur-[120px]" />
         </div>
-      </section>
 
-      {/* ======================================================== */}
-      {/* 12 — THINK NEXT: FINAL BRAND STATEMENT SIGNATURE          */}
-      {/* ======================================================== */}
-      <section className="bg-black py-28 lg:py-36 text-white text-center border-t border-zinc-900">
-        <div className="container-page max-w-3xl">
-          <h2 className="display-hero text-white tracking-tight text-6xl sm:text-8xl lg:text-9xl">
+        <div className="relative z-10 w-full max-w-[95vw] mx-auto flex items-center justify-center">
+          <h2 className="text-7xl sm:text-9xl md:text-[15vw] lg:text-[18vw] font-black tracking-tighter leading-none text-white font-display uppercase whitespace-nowrap">
             THINK NEXT<span className="text-primary">.</span>
           </h2>
-          <p className="font-display text-2xl sm:text-3xl uppercase tracking-widest text-zinc-400 mt-4">
-            Equipment. Parts. Solutions.
-          </p>
-          <div className="mt-8">
-            <Link
-              to="/shop"
-              className="btn btn-primary h-12 px-10 text-xs sm:text-sm font-bold uppercase tracking-widest shadow-2xl shadow-primary/30"
-            >
-              Explore Products
-            </Link>
-          </div>
         </div>
       </section>
     </div>

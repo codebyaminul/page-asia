@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
-import { products, taka, type Product } from "@/lib/data";
+import { products, type Product } from "@/lib/data";
 import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/shop/$slug")({
@@ -77,11 +77,12 @@ type TabType =
 
 export function ProductPage() {
   const { p } = Route.useLoaderData();
-  const { add, vehicle } = useCart();
+  const { add, vehicle, lines } = useCart();
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<TabType>("specs");
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [quoteSent, setQuoteSent] = useState(false);
+  const inCart = lines.some((l) => l.slug === p.slug);
 
   // Quote Form State
   const [quoteData, setQuoteData] = useState({
@@ -284,26 +285,25 @@ export function ProductPage() {
               </span>
             </div>
 
-            {/* Price / Quote Box */}
-            <div className="mt-6 rounded border border-border bg-secondary/30 p-4">
-              <div className="flex items-baseline gap-3">
-                <span className="font-display text-4xl font-bold text-foreground">
-                  {taka(p.price)}
-                </span>
-                {p.oldPrice && (
-                  <span className="text-base text-muted-foreground line-through">
-                    {taka(p.oldPrice)}
-                  </span>
-                )}
-                <span className="text-xs text-muted-foreground">
-                  (B2B Trade Pricing · Excl. optional bay rigging)
+            {/* Price / Official Quotation Box */}
+            <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-4 sm:p-5">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">
+                  Official Trade Pricing
                 </span>
               </div>
-              {p.isEquipment && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Commercial machinery pricing includes standard foundation bolts, oil/fluid fill, and technician commissioning at your workshop.
-                </p>
-              )}
+              <div className="mt-1 flex flex-wrap items-baseline gap-3">
+                <span className="font-display text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+                  Quotation on Request
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  (B2B Commercial Pricing · Admin Pro-Forma Invoice)
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                Direct trade pricing is calculated based on required quantities, fleet specifications, site freight, and warranty commissioning.
+              </p>
             </div>
 
             {/* Vehicle Compatibility Banner */}
@@ -358,66 +358,68 @@ export function ProductPage() {
               {p.description}
             </p>
 
-            {/* Dual B2B Purchase Action Panel */}
+            {/* Dual B2B Quotation Action Panel */}
             <div className="mt-8 space-y-3">
-              <div className="flex gap-3">
-                <div className="flex h-11 items-center rounded border border-input bg-card">
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Quantity Stepper */}
+                <div className="flex h-11 items-center rounded-xl border border-input bg-card shadow-xs shrink-0 w-fit">
                   <button
+                    type="button"
                     onClick={() => setQty(Math.max(1, qty - 1))}
                     aria-label="Decrease quantity"
-                    className="grid h-full w-10 place-items-center hover:bg-secondary text-foreground"
+                    className="grid h-full w-10 place-items-center hover:bg-secondary text-foreground transition-colors"
                   >
                     <Minus className="h-3.5 w-3.5" />
                   </button>
                   <span
-                    className="w-9 text-center font-bold text-sm"
+                    className="w-10 text-center font-bold font-mono text-sm"
                     aria-live="polite"
                   >
                     {qty}
                   </span>
                   <button
+                    type="button"
                     onClick={() => setQty(qty + 1)}
                     aria-label="Increase quantity"
-                    className="grid h-full w-10 place-items-center hover:bg-secondary text-foreground"
+                    className="grid h-full w-10 place-items-center hover:bg-secondary text-foreground transition-colors"
                   >
                     <Plus className="h-3.5 w-3.5" />
                   </button>
                 </div>
 
-                {p.requiresQuote ? (
-                  <button
-                    onClick={() => setQuoteModalOpen(true)}
-                    className="btn btn-primary flex-1 h-11 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow"
-                  >
-                    <FileSpreadsheet className="h-4 w-4" />
-                    <span>Request Commercial Quote</span>
-                  </button>
-                ) : (
-                  <button
-                    disabled={out}
-                    onClick={() => add(p.slug, qty)}
-                    className="btn btn-primary flex-1 h-11 text-xs font-bold uppercase tracking-wider"
-                  >
-                    {out ? "Out of Stock" : "Add to Cart"}
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+                {/* Direct Single Product Quote Button */}
                 <button
                   type="button"
                   onClick={() => setQuoteModalOpen(true)}
-                  className="btn btn-outline h-10 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+                  className="btn btn-primary flex-1 h-11 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md rounded-xl"
                 >
-                  <FileSpreadsheet className="h-3.5 w-3.5" />
-                  <span>Request B2B Quote</span>
+                  <FileSpreadsheet className="h-4 w-4" />
+                  <span>Request Instant Quotation ({qty} {qty === 1 ? "Unit" : "Units"})</span>
                 </button>
-                <Link
-                  to="/solutions"
-                  className="btn btn-dark h-10 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {/* Add to RFQ Cart Button */}
+                <button
+                  type="button"
+                  disabled={out}
+                  onClick={() => add(p.slug, qty)}
+                  className={`h-10.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl shadow-xs transition-all ${
+                    inCart
+                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                      : "btn btn-outline border-primary/50 text-primary hover:bg-primary hover:text-white"
+                  }`}
                 >
-                  <Wrench className="h-3.5 w-3.5 text-primary" />
-                  <span>Workshop Solutions</span>
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>{inCart ? "✓ In RFQ Cart" : "Add to RFQ Cart"}</span>
+                </button>
+
+                <Link
+                  to="/cart"
+                  className="btn btn-dark h-10.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl shadow-xs"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5 text-primary" />
+                  <span>View Quotation Cart</span>
                 </Link>
               </div>
             </div>

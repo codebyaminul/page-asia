@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Building2,
   Car,
@@ -9,7 +9,6 @@ import {
   MapPin,
   Menu,
   Phone,
-  Search,
   ShieldCheck,
   ShoppingBag,
   Wrench,
@@ -19,10 +18,30 @@ import {
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 
+const shopLinks = [
+  {
+    to: "/shop",
+    label: "Products",
+    desc: "Complete catalog of parts, tools & workshop machinery",
+    icon: ShoppingBag,
+  },
+  {
+    to: "/shop",
+    search: { cat: "Garage Equipment" },
+    label: "Garage Equipment",
+    desc: "Lifts, tyre changers, wheel balancers & compressors",
+    icon: Wrench,
+  },
+  {
+    to: "/shop",
+    search: { mobility: "EV" },
+    label: "EV",
+    desc: "Electric vehicle tools, battery analyzers & safety kits",
+    icon: Zap,
+  },
+] as const;
+
 const navLinks = [
-  { to: "/shop", label: "Products" },
-  { to: "/shop", search: { cat: "Garage Equipment" }, label: "Garage Equipment" },
-  { to: "/shop", search: { mobility: "EV" }, label: "EV" },
   { to: "/solutions", label: "Solutions" },
   { to: "/#brands", label: "Brands" },
   { to: "/support", label: "Support" },
@@ -46,15 +65,15 @@ export function Logo({ className = "" }: { className?: string; scrolled?: boolea
 export function Header() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
+  const [mobileShopOpen, setMobileShopOpen] = useState(true);
+  const [topBarDismissed, setTopBarDismissed] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const navigate = useNavigate();
   const { count } = useCart();
 
   useEffect(() => {
     setOpen(false);
-    setSearchOpen(false);
+    setShopDropdownOpen(false);
   }, [path]);
 
   useEffect(() => {
@@ -66,17 +85,9 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    navigate({ to: "/shop", search: { q: query.trim() } });
-    setSearchOpen(false);
-  };
-
   // Check if current page begins with dark hero/header
   const isDarkTopPage =
     path === "/" ||
-    path.startsWith("/shop") ||
     path.startsWith("/solutions") ||
     path.startsWith("/support") ||
     path.startsWith("/about") ||
@@ -95,94 +106,144 @@ export function Header() {
         }`}
       >
         {/* Top B2B Commercial Utility Bar */}
-        <div
-          className={`hidden lg:block transition-all duration-300 ease-in-out ${
-            scrolled
-              ? "max-h-0 opacity-0 overflow-hidden py-0 pointer-events-none"
-              : isGlass
-              ? "max-h-10 opacity-100 border-b border-white/70 bg-white/50 text-[11px] font-semibold text-zinc-700 backdrop-blur-md"
-              : "max-h-10 opacity-100 border-b border-white/10 bg-transparent text-[11px] font-semibold text-white/80"
-          }`}
-        >
-          <div className="container-page flex h-8 items-center justify-between">
-            <div className="flex items-center gap-5">
-              <span className={`flex items-center gap-1.5 font-bold ${isGlass ? "text-zinc-950" : "text-white"}`}>
-                <Building2 className="h-3.5 w-3.5 text-primary" />
-                <span>B2B Automotive Equipment & Parts</span>
-              </span>
-              <span className={`flex items-center gap-1.5 transition-colors ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}>
-                <Phone className="h-3.5 w-3.5 text-primary" />
-                <span>+880 9612-PAGE-INTL</span>
-              </span>
-              <span className={`flex items-center gap-1.5 transition-colors ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}>
-                <Mail className="h-3.5 w-3.5 text-primary" />
-                <span>b2b@page-intl.com</span>
-              </span>
-              <span className={`hidden xl:flex items-center gap-1.5 ${isGlass ? "text-zinc-500" : "text-white/60"}`}>
-                <MapPin className="h-3.5 w-3.5 text-primary" />
-                <span>Tejgaon Industrial Area, Dhaka</span>
-              </span>
-            </div>
+        {!topBarDismissed && (
+          <div
+            className={`hidden lg:block transition-all duration-300 ease-in-out ${
+              scrolled
+                ? "max-h-0 opacity-0 overflow-hidden py-0 pointer-events-none"
+                : isGlass
+                ? "max-h-10 opacity-100 border-b border-white/70 bg-white/50 text-[11px] font-semibold text-zinc-700 backdrop-blur-md"
+                : "max-h-10 opacity-100 border-b border-white/10 bg-transparent text-[11px] font-semibold text-white/80"
+            }`}
+          >
+            <div className="container-page flex h-8 items-center justify-between">
+              <div className="flex items-center gap-5">
+                <span className={`flex items-center gap-1.5 font-bold ${isGlass ? "text-zinc-950" : "text-white"}`}>
+                  <Building2 className="h-3.5 w-3.5 text-primary" />
+                  <span>B2B Automotive Equipment & Parts</span>
+                </span>
+                <span className={`flex items-center gap-1.5 transition-colors ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}>
+                  <Phone className="h-3.5 w-3.5 text-primary" />
+                  <span>+880 9612-PAGE-INTL</span>
+                </span>
+                <span className={`flex items-center gap-1.5 transition-colors ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}>
+                  <Mail className="h-3.5 w-3.5 text-primary" />
+                  <span>b2b@page-intl.com</span>
+                </span>
+                <span className={`hidden xl:flex items-center gap-1.5 ${isGlass ? "text-zinc-500" : "text-white/60"}`}>
+                  <MapPin className="h-3.5 w-3.5 text-primary" />
+                  <span>Tejgaon Industrial Area, Dhaka</span>
+                </span>
+              </div>
 
-            <div className="flex items-center gap-6">
-              <Link
-                to="/solutions"
-                className={`transition-colors flex items-center gap-1 font-medium ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}
-              >
-                <Wrench className="h-3.5 w-3.5 text-primary" /> Workshop Setup & Upgrades
-              </Link>
-              <Link
-                to="/support"
-                className={`transition-colors flex items-center gap-1 font-medium ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}
-              >
-                <FileText className="h-3.5 w-3.5" /> Technical Catalogues & Warranty
-              </Link>
-              <Link to="/support" className="text-primary font-bold hover:underline">
-                Request a Quote →
-              </Link>
+              <div className="flex items-center gap-5">
+                <Link
+                  to="/solutions"
+                  className={`transition-colors flex items-center gap-1 font-medium ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}
+                >
+                  <Wrench className="h-3.5 w-3.5 text-primary" /> Workshop Setup & Upgrades
+                </Link>
+                <Link
+                  to="/support"
+                  className={`transition-colors flex items-center gap-1 font-medium ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}
+                >
+                  <FileText className="h-3.5 w-3.5" /> Technical Catalogues & Warranty
+                </Link>
+                {/* Dismiss / Close (Crop) Button */}
+                <button
+                  type="button"
+                  onClick={() => setTopBarDismissed(true)}
+                  aria-label="Dismiss utility bar"
+                  title="Close bar"
+                  className={`ml-1 flex h-5 w-5 items-center justify-center rounded-full transition-all ${
+                    isGlass
+                      ? "text-zinc-400 hover:bg-zinc-200/80 hover:text-zinc-800"
+                      : "text-white/60 hover:bg-white/20 hover:text-white"
+                  }`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Main Header Row */}
         <div className="container-page flex h-16 items-center justify-between gap-4 lg:h-[4.25rem]">
           <Logo scrolled={isGlass} />
 
-          {/* Central Catalog Search Bar */}
-          <form onSubmit={handleSearch} className="hidden flex-1 max-w-md mx-4 md:flex items-center">
-            <div className="relative w-full">
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search equipment, 4W/2W/3W/EV parts, diagnostics, SKU..."
-                className={`h-9.5 w-full rounded-full pl-9 pr-18 text-xs transition-all ${
-                  isGlass
-                    ? "bg-white/75 text-zinc-900 placeholder:text-zinc-500 border border-white/90 focus:border-primary focus:bg-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
-                    : "bg-white/10 text-white placeholder:text-white/60 border border-white/20 focus:border-white/50 focus:bg-white/15 backdrop-blur-sm shadow-none"
-                } focus:outline-none`}
-              />
-              <Search
-                className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 ${
-                  isGlass ? "text-zinc-500" : "text-white/70"
-                }`}
-              />
-              <button
-                type="submit"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7.5 px-3 rounded-full bg-primary text-[10px] font-bold uppercase tracking-wider text-white hover:bg-primary/90 shadow-sm transition-transform active:scale-95"
-              >
-                Search
-              </button>
-            </div>
-          </form>
 
           {/* Primary Navigation Links */}
           <nav aria-label="Primary" className="hidden items-center gap-4 xl:gap-6 lg:flex">
+            {/* Shop Dropdown Button & Submenu */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShopDropdownOpen(true)}
+              onMouseLeave={() => setShopDropdownOpen(false)}
+            >
+              <button
+                type="button"
+                onClick={() => setShopDropdownOpen((v) => !v)}
+                aria-expanded={shopDropdownOpen}
+                className={`relative flex items-center gap-1.5 py-2 text-xs xl:text-[13px] font-bold uppercase tracking-wider transition-colors ${
+                  isGlass
+                    ? "text-zinc-700 hover:text-primary"
+                    : "text-white/85 hover:text-white"
+                } ${
+                  path.startsWith("/shop")
+                    ? isGlass
+                      ? "!text-primary after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:bg-primary after:shadow-[0_0_6px_rgba(224,36,36,0.6)]"
+                      : "!text-white after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:bg-primary after:shadow-[0_0_6px_rgba(224,36,36,0.6)]"
+                    : ""
+                }`}
+              >
+                <span>Shop</span>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                    shopDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Dropdown Menu */}
+              {shopDropdownOpen && (
+                <div className="absolute left-0 top-full pt-2 z-50 min-w-[280px] animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="rounded-xl border border-zinc-200/90 bg-white/95 p-2 shadow-2xl backdrop-blur-2xl ring-1 ring-black/5 text-zinc-900">
+                    <div className="px-3 py-1.5 text-[10px] font-mono font-bold tracking-wider uppercase text-zinc-600">
+                      Product Categories
+                    </div>
+                    <div className="space-y-1">
+                      {shopLinks.map((item) => (
+                        <Link
+                          key={item.label}
+                          to={item.to}
+                          search={"search" in item ? item.search : undefined}
+                          onClick={() => setShopDropdownOpen(false)}
+                          className="group flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-zinc-100"
+                        >
+                          <div className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-bold uppercase tracking-wider text-zinc-900 group-hover:text-primary transition-colors">
+                              {item.label}
+                            </div>
+                            <div className="text-[11px] text-zinc-600 line-clamp-1">
+                              {item.desc}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {navLinks.map((n) => (
               <Link
                 key={n.label}
                 to={n.to}
-                search={"search" in n ? n.search : undefined}
                 className={`relative py-2 text-xs xl:text-[13px] font-bold uppercase tracking-wider transition-colors ${
                   isGlass
                     ? "text-zinc-700 hover:text-primary"
@@ -201,15 +262,6 @@ export function Header() {
 
           {/* Action CTAs */}
           <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              aria-label="Toggle mobile search"
-              className={`grid h-9 w-9 place-items-center md:hidden transition-colors ${
-                isGlass ? "text-zinc-700 hover:text-zinc-900" : "text-white/90 hover:text-white"
-              }`}
-            >
-              <Search className="h-4.5 w-4.5" />
-            </button>
 
             <Link
               to="/cart"
@@ -228,12 +280,6 @@ export function Header() {
               )}
             </Link>
 
-            <Link
-              to="/support"
-              className="btn btn-primary h-9.5 px-4.5 text-xs font-bold uppercase tracking-wider hidden sm:inline-flex rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
-            >
-              Request a Quote
-            </Link>
 
             <button
               onClick={() => setOpen(true)}
@@ -249,35 +295,6 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile search bar expandable */}
-        {searchOpen && (
-          <form
-            onSubmit={handleSearch}
-            className={`border-t p-3 md:hidden backdrop-blur-xl ${
-              isGlass ? "border-white/60 bg-white/85" : "border-white/10 bg-black/85"
-            }`}
-          >
-            <div className="relative">
-              <input
-                type="search"
-                autoFocus
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search equipment, 4W/2W/3W/EV parts, diagnostics..."
-                className={`h-10 w-full rounded-full px-4 pl-9 text-xs transition-all ${
-                  isGlass
-                    ? "bg-white text-zinc-900 placeholder:text-zinc-500 border border-zinc-200"
-                    : "bg-white/10 text-white placeholder:text-white/60 border border-white/20"
-                } focus:border-primary focus:outline-none shadow-xs`}
-              />
-              <Search
-                className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${
-                  isGlass ? "text-zinc-500" : "text-white/60"
-                }`}
-              />
-            </div>
-          </form>
-        )}
       </header>
 
       {/* Mobile Drawer Menu with Light Liquid Glass */}
@@ -315,11 +332,50 @@ export function Header() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-1">
+            {/* Shop expandable item */}
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => setMobileShopOpen((v) => !v)}
+                className="flex w-full items-center justify-between py-3 px-3 rounded hover:bg-zinc-100 text-sm font-bold uppercase tracking-wider text-zinc-900"
+              >
+                <span className="flex items-center gap-2.5">
+                  <ShoppingBag className="h-4 w-4 text-primary" />
+                  Shop
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 text-zinc-400 transition-transform duration-200 ${
+                    mobileShopOpen ? "rotate-180 text-primary" : ""
+                  }`}
+                />
+              </button>
+
+              {mobileShopOpen && (
+                <div className="ml-3 pl-3 border-l-2 border-primary/20 space-y-1 py-1">
+                  {shopLinks.map((item) => (
+                    <Link
+                      key={item.label}
+                      to={item.to}
+                      search={"search" in item ? item.search : undefined}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center justify-between py-2 px-3 rounded hover:bg-zinc-100 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-primary"
+                    >
+                      <div className="flex items-center gap-2">
+                        <item.icon className="h-3.5 w-3.5 text-primary" />
+                        <span>{item.label}</span>
+                      </div>
+                      <ChevronRight className="h-3.5 w-3.5 text-zinc-400" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {navLinks.map((n) => (
               <Link
                 key={n.label}
                 to={n.to}
-                search={"search" in n ? n.search : undefined}
+                onClick={() => setOpen(false)}
                 className="flex items-center justify-between py-3 px-3 rounded hover:bg-zinc-100 text-sm font-bold uppercase tracking-wider text-zinc-900"
               >
                 <span>{n.label}</span>
@@ -330,10 +386,12 @@ export function Header() {
 
           <div className="p-4 border-t border-zinc-200 bg-white/60 backdrop-blur-md space-y-3">
             <Link
-              to="/support"
-              className="btn btn-primary h-11 w-full text-xs font-bold uppercase tracking-wider shadow-lg rounded-full"
+              to="/cart"
+              onClick={() => setOpen(false)}
+              className="btn btn-primary h-11 w-full text-xs font-bold uppercase tracking-wider shadow-lg rounded-full flex items-center justify-center gap-2"
             >
-              Request a Quote
+              <ShoppingBag className="h-4 w-4" />
+              <span>Quotation Cart {count > 0 ? `(${count})` : ""}</span>
             </Link>
           </div>
         </div>

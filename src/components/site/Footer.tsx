@@ -87,53 +87,57 @@ export function Footer() {
   return (
     <footer className="bg-ink text-ink-foreground border-t border-ink-border">
       {/* Top Value Propositions */}
-      <div className="border-b border-ink-border/60 bg-black/30 py-8">
-        <div className="container-page grid grid-cols-2 gap-6 md:grid-cols-4">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-primary/10 text-primary">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
+      <div className="border-b border-white/10 bg-black/40 py-7 sm:py-8">
+        <div className="container-page grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* 1. Genuine Supply Guarantee */}
+          <div className="flex items-start gap-3.5">
+            <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" strokeWidth={2} />
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
+              <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
                 Genuine Supply Guarantee
+              </h4>
+              <p className="text-xs text-zinc-400 mt-0.5 leading-snug">
+                Authorized B2B parts provenance
               </p>
-              <p className="text-[11px] text-ink-muted">Authorized B2B parts provenance</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-primary/10 text-primary">
-              <Wrench className="h-5 w-5" />
-            </span>
+          {/* 2. Workshop Engineering */}
+          <div className="flex items-start gap-3.5">
+            <Wrench className="h-5 w-5 text-primary shrink-0 mt-0.5" strokeWidth={2} />
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
+              <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
                 Workshop Engineering
+              </h4>
+              <p className="text-xs text-zinc-400 mt-0.5 leading-snug">
+                Installation, calibration & training
               </p>
-              <p className="text-[11px] text-ink-muted">Installation, calibration & training</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-primary/10 text-primary">
-              <Zap className="h-5 w-5" />
-            </span>
+          {/* 3. EV Readiness */}
+          <div className="flex items-start gap-3.5">
+            <Zap className="h-5 w-5 text-primary shrink-0 mt-0.5" strokeWidth={2} />
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
+              <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
                 EV Readiness
+              </h4>
+              <p className="text-xs text-zinc-400 mt-0.5 leading-snug">
+                2W, 3W & 4W EV workshop solutions
               </p>
-              <p className="text-[11px] text-ink-muted">2W, 3W & 4W EV workshop solutions</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-primary/10 text-primary">
-              <Truck className="h-5 w-5" />
-            </span>
+          {/* 4. Nationwide B2B Logistics */}
+          <div className="flex items-start gap-3.5">
+            <Truck className="h-5 w-5 text-primary shrink-0 mt-0.5" strokeWidth={2} />
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-ink-foreground">
+              <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
                 Nationwide B2B Logistics
+              </h4>
+              <p className="text-xs text-zinc-400 mt-0.5 leading-snug">
+                Express hub dispatch to garages
               </p>
-              <p className="text-[11px] text-ink-muted">Express hub dispatch to garages</p>
             </div>
           </div>
         </div>
