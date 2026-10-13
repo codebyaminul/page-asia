@@ -111,10 +111,9 @@ export function Header() {
               onMouseEnter={() => setShopDropdownOpen(true)}
               onMouseLeave={() => setShopDropdownOpen(false)}
             >
-              <button
-                type="button"
-                onClick={() => setShopDropdownOpen((v) => !v)}
-                aria-expanded={shopDropdownOpen}
+              <Link
+                to="/shop"
+                onClick={() => setShopDropdownOpen(false)}
                 className={`relative flex items-center gap-1.5 py-2 text-xs xl:text-[13px] font-bold uppercase tracking-wider transition-colors ${
                   isGlass
                     ? "text-zinc-700 hover:text-primary"
@@ -133,7 +132,7 @@ export function Header() {
                     shopDropdownOpen ? "rotate-180" : ""
                   }`}
                 />
-              </button>
+              </Link>
 
               {/* Dropdown Menu */}
               {shopDropdownOpen && (
@@ -147,7 +146,7 @@ export function Header() {
                         <Link
                           key={item.label}
                           to={item.to}
-                          search={"search" in item ? item.search : undefined}
+                          search={"search" in item ? item.search : {}}
                           onClick={() => setShopDropdownOpen(false)}
                           className="group flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-zinc-100"
                         >
@@ -251,21 +250,31 @@ export function Header() {
           <div className="flex-1 overflow-y-auto p-4 space-y-1">
             {/* Shop expandable item */}
             <div className="space-y-1">
-              <button
-                type="button"
-                onClick={() => setMobileShopOpen((v) => !v)}
-                className="flex w-full items-center justify-between py-3 px-3 rounded hover:bg-zinc-100 text-sm font-bold uppercase tracking-wider text-zinc-900"
-              >
-                <span className="flex items-center gap-2.5">
+              <div className="flex w-full items-center justify-between rounded hover:bg-zinc-100 text-sm font-bold uppercase tracking-wider text-zinc-900">
+                <Link
+                  to="/shop"
+                  onClick={() => setOpen(false)}
+                  className="flex flex-1 items-center gap-2.5 py-3 px-3 hover:text-primary transition-colors"
+                >
                   <ShoppingBag className="h-4 w-4 text-primary" />
-                  Shop
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 text-zinc-400 transition-transform duration-200 ${
-                    mobileShopOpen ? "rotate-180 text-primary" : ""
-                  }`}
-                />
-              </button>
+                  <span>Shop</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMobileShopOpen((v) => !v);
+                  }}
+                  aria-label="Toggle shop categories"
+                  className="p-3 text-zinc-400 hover:text-zinc-600 transition-colors"
+                >
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      mobileShopOpen ? "rotate-180 text-primary" : ""
+                    }`}
+                  />
+                </button>
+              </div>
 
               {mobileShopOpen && (
                 <div className="ml-3 pl-3 border-l-2 border-primary/20 space-y-1 py-1">
@@ -273,7 +282,7 @@ export function Header() {
                     <Link
                       key={item.label}
                       to={item.to}
-                      search={"search" in item ? item.search : undefined}
+                      search={"search" in item ? item.search : {}}
                       onClick={() => setOpen(false)}
                       className="flex items-center justify-between py-2 px-3 rounded hover:bg-zinc-100 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-primary"
                     >
