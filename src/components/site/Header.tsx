@@ -1,15 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Building2,
-  Car,
   ChevronDown,
   ChevronRight,
-  FileText,
-  Mail,
-  MapPin,
   Menu,
-  Phone,
-  ShieldCheck,
   ShoppingBag,
   Wrench,
   X,
@@ -43,7 +36,6 @@ const shopLinks = [
 
 const navLinks = [
   { to: "/solutions", label: "Solutions" },
-  { to: "/#brands", label: "Brands" },
   { to: "/support", label: "Support" },
   { to: "/about", label: "About" },
 ] as const;
@@ -67,7 +59,6 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
   const [mobileShopOpen, setMobileShopOpen] = useState(true);
-  const [topBarDismissed, setTopBarDismissed] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { count } = useCart();
 
@@ -105,68 +96,7 @@ export function Header() {
             : "bg-gradient-to-b from-black/60 via-black/25 to-transparent border-b border-white/10 text-white"
         }`}
       >
-        {/* Top B2B Commercial Utility Bar */}
-        {!topBarDismissed && (
-          <div
-            className={`hidden lg:block transition-all duration-300 ease-in-out ${
-              scrolled
-                ? "max-h-0 opacity-0 overflow-hidden py-0 pointer-events-none"
-                : isGlass
-                ? "max-h-10 opacity-100 border-b border-white/70 bg-white/50 text-[11px] font-semibold text-zinc-700 backdrop-blur-md"
-                : "max-h-10 opacity-100 border-b border-white/10 bg-transparent text-[11px] font-semibold text-white/80"
-            }`}
-          >
-            <div className="container-page flex h-8 items-center justify-between">
-              <div className="flex items-center gap-5">
-                <span className={`flex items-center gap-1.5 font-bold ${isGlass ? "text-zinc-950" : "text-white"}`}>
-                  <Building2 className="h-3.5 w-3.5 text-primary" />
-                  <span>B2B Automotive Equipment & Parts</span>
-                </span>
-                <span className={`flex items-center gap-1.5 transition-colors ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}>
-                  <Phone className="h-3.5 w-3.5 text-primary" />
-                  <span>+880 9612-PAGE-INTL</span>
-                </span>
-                <span className={`flex items-center gap-1.5 transition-colors ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}>
-                  <Mail className="h-3.5 w-3.5 text-primary" />
-                  <span>b2b@page-intl.com</span>
-                </span>
-                <span className={`hidden xl:flex items-center gap-1.5 ${isGlass ? "text-zinc-500" : "text-white/60"}`}>
-                  <MapPin className="h-3.5 w-3.5 text-primary" />
-                  <span>Tejgaon Industrial Area, Dhaka</span>
-                </span>
-              </div>
 
-              <div className="flex items-center gap-5">
-                <Link
-                  to="/solutions"
-                  className={`transition-colors flex items-center gap-1 font-medium ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}
-                >
-                  <Wrench className="h-3.5 w-3.5 text-primary" /> Workshop Setup & Upgrades
-                </Link>
-                <Link
-                  to="/support"
-                  className={`transition-colors flex items-center gap-1 font-medium ${isGlass ? "hover:text-zinc-950" : "hover:text-white"}`}
-                >
-                  <FileText className="h-3.5 w-3.5" /> Technical Catalogues & Warranty
-                </Link>
-                {/* Dismiss / Close (Crop) Button */}
-                <button
-                  type="button"
-                  onClick={() => setTopBarDismissed(true)}
-                  aria-label="Dismiss utility bar"
-                  title="Close bar"
-                  className={`ml-1 flex h-5 w-5 items-center justify-center rounded-full transition-all ${
-                    isGlass
-                      ? "text-zinc-400 hover:bg-zinc-200/80 hover:text-zinc-800"
-                      : "text-white/60 hover:bg-white/20 hover:text-white"
-                  }`}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Main Header Row */}
         <div className="container-page flex h-16 items-center justify-between gap-4 lg:h-[4.25rem]">
@@ -316,20 +246,7 @@ export function Header() {
             </button>
           </div>
 
-          <div className="container-page p-4 border-b border-zinc-200 bg-white/40 backdrop-blur-md">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search equipment, parts, tools..."
-                  className="h-10 w-full rounded-full bg-white px-3 pl-9 text-xs text-zinc-900 placeholder:text-zinc-500 border border-zinc-200 focus:border-primary"
-                />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-              </div>
-            </form>
-          </div>
+
 
           <div className="flex-1 overflow-y-auto p-4 space-y-1">
             {/* Shop expandable item */}

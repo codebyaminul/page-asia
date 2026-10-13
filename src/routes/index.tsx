@@ -9,8 +9,8 @@ import {
 import { useState } from "react";
 import { CinematicIntro } from "@/components/site/CinematicIntro";
 import { MobilityScrollStack } from "@/components/site/MobilityScrollStack";
+import { BrandPartners } from "@/components/site/BrandPartners";
 import {
-  brands,
   images,
   products,
   taka,
@@ -616,22 +616,12 @@ function Home() {
 
       {/* ======================================================== */}
       {/* 10 — BRANDS: MINIMAL LOGO WALL                           */}
-      {/* ======================================================== */}
-      <section id="brands" className="py-16 bg-white border-b border-border scroll-mt-20">
+      <section id="brands" className="py-14 sm:py-16 bg-white border-b border-border scroll-mt-20">
         <div className="container-page">
-          <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground mb-8">
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground mb-8 sm:mb-10">
             Authorized Equipment & Component Partners
           </p>
-          <div className="flex flex-wrap items-center justify-between gap-8 md:gap-12 opacity-80">
-            {brands.slice(0, 8).map((b) => (
-              <span
-                key={b}
-                className="font-display text-2xl md:text-3xl font-bold tracking-widest text-zinc-400 hover:text-foreground transition-colors cursor-default"
-              >
-                {b.toUpperCase()}
-              </span>
-            ))}
-          </div>
+          <BrandPartners />
         </div>
       </section>
 

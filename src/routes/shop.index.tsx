@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Bike,
   Car,
   Check,
   FileSpreadsheet,
@@ -201,56 +200,6 @@ export function Shop() {
             </div>
           </form>
 
-          {/* Quick Segment / Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 scrollbar-none text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => {
-                nav({ search: (s: S) => ({ ...s, mobility: undefined, cat: undefined }) });
-              }}
-              className={`px-4 py-1.5 rounded-full transition-all whitespace-nowrap ${
-                !searchMobility && !cat
-                  ? "bg-zinc-950 text-white shadow-xs font-bold"
-                  : "bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700"
-              }`}
-            >
-              All Products
-            </button>
-            {mobilitySegments.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => {
-                  nav({ search: (s: S) => ({ ...s, mobility: m.id }) });
-                }}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all whitespace-nowrap ${
-                  searchMobility === m.id
-                    ? "bg-primary text-white shadow-xs font-bold"
-                    : "bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700"
-                }`}
-              >
-                {m.id === "4-Wheeler" && <Car className="h-3.5 w-3.5" />}
-                {m.id === "2-Wheeler" && <Bike className="h-3.5 w-3.5" />}
-                {m.id === "3-Wheeler" && <Truck className="h-3.5 w-3.5" />}
-                {m.id === "EV" && <Zap className="h-3.5 w-3.5" />}
-                <span>{m.id}</span>
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => {
-                nav({ search: (s: S) => ({ ...s, cat: "Garage Equipment" }) });
-              }}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all whitespace-nowrap ${
-                cat === "Garage Equipment"
-                  ? "bg-primary text-white shadow-xs font-bold"
-                  : "bg-zinc-100 hover:bg-zinc-200/80 text-zinc-700"
-              }`}
-            >
-              <Wrench className="h-3.5 w-3.5" />
-              <span>Garage Equipment</span>
-            </button>
-          </div>
         </div>
 
         {/* Hero Video Banner Card: Controlled Sleek Height */}
