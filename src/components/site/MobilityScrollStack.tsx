@@ -25,7 +25,7 @@ export function MobilityScrollStack() {
       id: "4-wheeler",
       num: "01",
       title: "4-WHEELER",
-      image: images.heroWorkshop,
+      image: encodeURI("/Fuel Efficiency Highway Showcase.png"),
       link: "/shop",
       mobilityKey: "4-Wheeler",
     },
@@ -33,7 +33,7 @@ export function MobilityScrollStack() {
       id: "2-wheeler",
       num: "02",
       title: "2-WHEELER",
-      image: images.motoLift,
+      image: encodeURI("/Futuristic Automotive Diagnostics Showcase.png"),
       link: "/shop",
       mobilityKey: "2-Wheeler",
     },
@@ -41,7 +41,7 @@ export function MobilityScrollStack() {
       id: "3-wheeler",
       num: "03",
       title: "3-WHEELER",
-      image: images.commercial3wHub,
+      image: encodeURI("/Page Two-Post Lift 4.0 Ton.png"),
       link: "/shop",
       mobilityKey: "3-Wheeler",
     },
@@ -56,7 +56,7 @@ export function MobilityScrollStack() {
     return () => media.removeEventListener("change", handler);
   }, []);
 
-  // Update active HUD counter (01/03, 02/03, 03/03) using IntersectionObserver
+  // Update active HUD counter using IntersectionObserver
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -99,24 +99,18 @@ export function MobilityScrollStack() {
             </span>
           </div>
 
-          {/* Minimal 01 / 03 Step Counter */}
-          <div className="flex items-center gap-3 font-mono text-xs font-bold">
-            <span className="text-white text-sm font-display tracking-wider">
-              0{activeScene + 1}
-            </span>
-            <span className="text-zinc-600">/ 03</span>
-            <div className="flex items-center gap-1.5 ml-2">
-              {[0, 1, 2].map((idx) => (
-                <div
-                  key={idx}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    activeScene === idx
-                      ? "w-6 bg-primary shadow-[0_0_8px_rgba(224,36,36,0.7)]"
-                      : "w-2 bg-zinc-800"
-                  }`}
-                />
-              ))}
-            </div>
+          {/* Progress Indicator Dots */}
+          <div className="flex items-center gap-1.5">
+            {[0, 1, 2].map((idx) => (
+              <div
+                key={idx}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  activeScene === idx
+                    ? "w-6 bg-primary shadow-[0_0_8px_rgba(224,36,36,0.7)]"
+                    : "w-2 bg-zinc-800"
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>

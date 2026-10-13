@@ -10,8 +10,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { CinematicIntro } from "@/components/site/CinematicIntro";
-import { CatalogueFanStack } from "@/components/site/CatalogueFanStack";
-import { ScrollSolutionsStack } from "@/components/site/ScrollSolutionsStack";
 import { MobilityScrollStack } from "@/components/site/MobilityScrollStack";
 import {
   brands,
@@ -206,10 +204,6 @@ function Home() {
       {/* ======================================================== */}
       <MobilityScrollStack />
 
-      {/* ======================================================== */}
-      {/* 03 — INTERACTIVE CATALOGUE SHOWCASE (FAN STACK MOTION)   */}
-      {/* ======================================================== */}
-      <CatalogueFanStack />
 
       {/* ======================================================== */}
       {/* 04 — FEATURED PRODUCTS: 4 STRONG COMMODITIES             */}
@@ -295,11 +289,6 @@ function Home() {
           </div>
         </div>
       </section>
-
-      {/* ======================================================== */}
-      {/* 05 — SCROLL-DRIVEN STACKED CARDS: WORKSHOP SOLUTIONS     */}
-      {/* ======================================================== */}
-      <ScrollSolutionsStack />
 
       {/* ======================================================== */}
       {/* 06 — GARAGE EQUIPMENT: VISUAL EQUIPMENT SHOWCASE         */}
