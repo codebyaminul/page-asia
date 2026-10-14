@@ -35,25 +35,25 @@ export function ProductCard({
           loading="lazy"
           width={816}
           height={816}
-          className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-out group-hover:scale-105"
+          className="h-full w-full object-contain transition-transform duration-300 ease-out group-hover:scale-105"
         />
 
         {/* Minimalist Single Tag (Only if EV or Machinery) */}
         {p.mobility?.includes("EV") ? (
-          <span className="absolute top-3 left-3 rounded-full bg-emerald-600 text-white px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-xs">
+          <span className="absolute top-3 left-3 rounded-full bg-emerald-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-xs">
             EV Platform
           </span>
         ) : p.isEquipment ? (
-          <span className="absolute top-3 left-3 rounded-full bg-zinc-900/90 text-white dark:bg-zinc-800 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-xs">
+          <span className="absolute top-3 left-3 rounded-full bg-zinc-900/90 text-white dark:bg-zinc-800 px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-xs">
             Machinery
           </span>
         ) : null}
       </Link>
 
       {/* Product Content Details - Clean & Uncluttered */}
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
+      <div className="flex flex-1 flex-col p-4.5 sm:p-5">
         {/* Brand & Category */}
-        <div className="flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center justify-between gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
           <span className="text-primary font-bold">{p.brand}</span>
           <span className="truncate">{p.category}</span>
         </div>
@@ -62,19 +62,19 @@ export function ProductCard({
         <Link
           to="/shop/$slug"
           params={{ slug: p.slug }}
-          className="mt-1.5 line-clamp-2 text-sm font-semibold text-foreground leading-snug hover:text-primary transition-colors min-h-[2.5rem]"
+          className="mt-2 line-clamp-2 text-base font-bold text-foreground leading-snug hover:text-primary transition-colors min-h-[2.75rem]"
         >
           {p.name}
         </Link>
 
         {/* Bottom Quotation Status & Stock Indicator */}
-        <div className="mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
+        <div className="mt-auto pt-3.5 border-t border-zinc-100 dark:border-zinc-800/80">
           <div className="flex items-center justify-between text-xs mb-3">
-            <span className="text-[11px] font-medium text-foreground/85">
+            <span className="text-xs font-medium text-foreground/85">
               Quotation on Request
             </span>
             <span
-              className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+              className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                 out ? "text-destructive" : "text-emerald-600"
               }`}
             >
@@ -93,18 +93,18 @@ export function ProductCard({
               <button
                 type="button"
                 onClick={handleQuoteClick}
-                className="btn btn-primary h-8.5 text-xs font-bold tracking-wider uppercase rounded-xl flex items-center justify-center gap-1 shadow-xs hover:shadow transition-all active:scale-95"
+                className="btn btn-primary h-9.5 text-xs font-bold tracking-wider uppercase rounded-xl flex items-center justify-center gap-1.5 shadow-xs hover:shadow transition-all active:scale-95"
               >
-                <FileSpreadsheet className="h-3.5 w-3.5" />
+                <FileSpreadsheet className="h-4 w-4" />
                 <span>Get Quote</span>
               </button>
             ) : (
               <Link
                 to="/shop/$slug"
                 params={{ slug: p.slug }}
-                className="btn btn-primary h-8.5 text-xs font-bold tracking-wider uppercase rounded-xl flex items-center justify-center gap-1 shadow-xs hover:shadow transition-all active:scale-95"
+                className="btn btn-primary h-9.5 text-xs font-bold tracking-wider uppercase rounded-xl flex items-center justify-center gap-1.5 shadow-xs hover:shadow transition-all active:scale-95"
               >
-                <FileSpreadsheet className="h-3.5 w-3.5" />
+                <FileSpreadsheet className="h-4 w-4" />
                 <span>Get Quote</span>
               </Link>
             )}
@@ -113,7 +113,7 @@ export function ProductCard({
               type="button"
               disabled={out}
               onClick={() => add(p.slug)}
-              className={`h-8.5 text-xs font-bold tracking-wider uppercase rounded-xl border transition-all flex items-center justify-center gap-1 active:scale-95 ${
+              className={`h-9.5 text-xs font-bold tracking-wider uppercase rounded-xl border transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
                 inCart
                   ? "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold"
                   : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-2xs"
@@ -122,12 +122,12 @@ export function ProductCard({
             >
               {inCart ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                  <Check className="h-4 w-4 text-emerald-600" />
                   <span>In RFQ</span>
                 </>
               ) : (
                 <>
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-4 w-4" />
                   <span>RFQ Cart</span>
                 </>
               )}

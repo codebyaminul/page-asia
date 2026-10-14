@@ -171,39 +171,62 @@ export function Shop() {
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen">
+    <div className="bg-white text-zinc-900 min-h-screen">
       {/* ======================================================== */}
-      {/* SHOP HERO: COMPACT ULTRA-WIDE SHOWCASE VIDEO BANNER       */}
+      {/* CLEAN MINIMALIST CATALOGUE HEADER                        */}
       {/* ======================================================== */}
-      <section className="pt-20 sm:pt-24 lg:pt-26 pb-2 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        {/* Top Search & Category Navigation Pill Bar (Matching Reference Screenshot) */}
-        <div className="flex flex-col items-center gap-4 mb-6">
+      <div className="border-b border-zinc-200/80 bg-zinc-50/60 py-3 pt-20 sm:pt-24">
+        <nav
+          aria-label="Breadcrumb"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-zinc-600 flex items-center gap-2"
+        >
+          <Link to="/" className="hover:text-zinc-950 font-medium">
+            Home
+          </Link>
+          <span>/</span>
+          <span className="font-semibold text-zinc-900">
+            {cat || "Automotive Equipment & Spare Parts"}
+          </span>
+        </nav>
+      </div>
+
+      <section className="pt-6 pb-2 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-zinc-200">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">
+              {cat ? cat : "Automotive Equipment & Spare Parts"}
+            </h1>
+            <p className="text-sm text-zinc-500 mt-1">
+              Showing {filteredList.length} commercial {filteredList.length === 1 ? "product" : "products"} for workshops, service bays & dealerships
+            </p>
+          </div>
+
+          {/* Clean Search Input */}
           <form
             onSubmit={handleSearchSubmit}
-            className="w-full max-w-2xl"
+            className="w-full sm:w-80"
           >
-            <div className="relative flex items-center shadow-xs">
+            <div className="relative flex items-center">
               <input
                 id="shop-q"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="What equipment, parts, or mobility platform are you looking for?"
-                className="w-full h-12 sm:h-13 pl-12 pr-28 rounded-full bg-white border border-zinc-200/90 text-xs sm:text-sm text-zinc-900 shadow-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Search equipment, SKU, or parts..."
+                className="w-full h-10 pl-9 pr-20 rounded-xl bg-white border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
-              <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <button
                 type="submit"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 sm:h-10 px-5 rounded-full bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-all shadow-sm active:scale-95"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 rounded-lg bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-all active:scale-95 cursor-pointer"
               >
                 Search
               </button>
             </div>
           </form>
-
         </div>
 
-        {/* Hero Video Banner Card: Controlled Sleek Height */}
-        <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 border border-zinc-200/90 dark:border-zinc-800 shadow-md ring-1 ring-black/5">
+        {/* Hero Video Banner Card */}
+        <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 border border-zinc-200 shadow-md ring-1 ring-black/5">
           <div className="relative w-full h-40 sm:h-48 md:h-56 lg:h-64 max-h-[265px] flex items-center justify-center bg-black overflow-hidden">
             <video
               src="/1013.mp4"

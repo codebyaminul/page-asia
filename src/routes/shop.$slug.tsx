@@ -1,26 +1,17 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
-  Bike,
+  ArrowRight,
   Car,
   Check,
   CheckCircle2,
-  Clock,
-  Download,
   FileSpreadsheet,
-  FileText,
-  HelpCircle,
+  Maximize2,
   Minus,
   Plus,
-  RotateCcw,
   Send,
-  ShieldCheck,
-  Star,
-  Truck,
-  Wrench,
   X,
-  Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
 import { products, type Product } from "@/lib/data";
 import { useCart } from "@/lib/cart";
@@ -54,9 +45,9 @@ export const Route = createFileRoute("/shop/$slug")({
     };
   },
   notFoundComponent: () => (
-    <div className="container-page py-40 text-center">
+    <div className="container-page py-40 text-center text-zinc-900">
       <h1 className="display-lg">Product Not Found</h1>
-      <p className="mt-2 text-muted-foreground">
+      <p className="mt-2 text-zinc-600">
         The equipment or spare part you requested is not in the active catalogue.
       </p>
       <Link to="/shop" className="btn btn-primary mt-6">
@@ -67,21 +58,38 @@ export const Route = createFileRoute("/shop/$slug")({
   component: ProductPage,
 });
 
-type TabType =
-  | "specs"
-  | "overview"
-  | "fit"
-  | "applications"
-  | "warranty"
-  | "downloads";
+type TabType = "description" | "specs";
 
 export function ProductPage() {
   const { p } = Route.useLoaderData();
   const { add, vehicle, lines } = useCart();
   const [qty, setQty] = useState(1);
-  const [tab, setTab] = useState<TabType>("specs");
+  const [tab, setTab] = useState<TabType>("description");
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [quoteSent, setQuoteSent] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
+
+  // Define configurable options dynamically (pre-select first item as default)
+  const voltageOptions = p.isEquipment
+    ? [
+        { id: "380v", label: "380V 3-Phase", desc: "Commercial High-Torque (Recommended)" },
+        { id: "220v", label: "220V Single-Phase", desc: "Standard Workshop Supply" },
+      ]
+    : [{ id: "standard", label: "OEM Standard Spec", desc: "Factory Specification" }];
+
+  const armOptions =
+    p.isEquipment && p.slug.includes("lift")
+      ? [
+          { id: "standard", label: "Symmetric Telescopic Arms", desc: "Universal Workshop Fleet" },
+          { id: "asymmetric", label: "Asymmetric + EV Bay Arms", desc: "Low-profile EV Clearance" },
+        ]
+      : [];
+
+  // Default option state (always pre-selected so customer can add directly to cart)
+  const [selectedVoltage, setSelectedVoltage] = useState(voltageOptions[0].id);
+  const [selectedArmType, setSelectedArmType] = useState(armOptions[0]?.id || "standard");
+
   const inCart = lines.some((l) => l.slug === p.slug);
 
   // Quote Form State
@@ -104,7 +112,22 @@ export function ProductPage() {
   const out = p.stock === "Out of stock";
   const low = p.stock === "Low stock";
 
-  // Related products from same category or equipment
+  // Gallery view configurations
+  const galleryViews = useMemo(() => {
+    return [
+      { id: "main", label: "Front View", img: p.image },
+      { id: "mechanism", label: "Hydraulic Core", img: p.image },
+      { id: "safety", label: "Safety Lock", img: p.image },
+      { id: "bay", label: "Workshop Scale", img: p.image },
+    ];
+  }, [p.image]);
+
+  const activeImage = galleryViews[activeImageIndex]?.img || p.image;
+
+  // Key Technical Highlights (First 4-5 specs for the right-hand highlight box)
+  const quickHighlights = p.specs.slice(0, 4);
+
+  // Related products
   const related = products
     .filter(
       (x) =>
@@ -126,317 +149,341 @@ export function ProductPage() {
     : false;
 
   return (
-    <div className="bg-background text-foreground pt-24 lg:pt-32 min-h-screen">
-      {/* Breadcrumb Navigation */}
-      <div className="border-b border-border bg-secondary/40 py-3">
+    <div className="bg-white text-zinc-900 pt-20 lg:pt-24 min-h-screen selection:bg-primary selection:text-white">
+      {/* ======================================================== */}
+      {/* CLEAN MINIMALIST BREADCRUMBS                             */}
+      {/* ======================================================== */}
+      <div className="border-b border-zinc-200/80 bg-zinc-50/60 py-3">
         <nav
           aria-label="Breadcrumb"
-          className="container-page text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-zinc-600 flex items-center gap-2 flex-wrap"
         >
-          <Link to="/" className="hover:text-foreground">
+          <Link to="/" className="hover:text-zinc-950 font-medium">
             Home
           </Link>
           <span>/</span>
-          <Link to="/shop" className="hover:text-foreground">
+          <Link to="/shop" className="hover:text-zinc-950 font-medium">
             Products
           </Link>
           <span>/</span>
           <Link
             to="/shop"
             search={{ cat: p.category }}
-            className="hover:text-foreground font-medium text-foreground"
+            className="hover:text-zinc-950 font-semibold text-zinc-900"
           >
             {p.category}
           </Link>
           <span>/</span>
-          <span className="text-muted-foreground truncate max-w-xs">
+          <span className="text-zinc-500 truncate max-w-sm">
             {p.name}
           </span>
         </nav>
       </div>
 
-      {/* Main Product Layout */}
-      <section className="container-page py-10 lg:py-14">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-          {/* LEFT: Product Gallery */}
-          <div>
-            <div className="relative aspect-square overflow-hidden rounded border border-border bg-card p-6 flex items-center justify-center">
-              <img
-                src={p.image}
-                alt={p.name}
-                width={816}
-                height={816}
-                className="h-full w-full object-contain mix-blend-multiply"
-              />
-              {p.oldPrice && (
-                <span className="absolute left-4 top-4 rounded bg-primary px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-primary-foreground">
-                  Special Offer
-                </span>
-              )}
-              {p.isEquipment ? (
-                <span className="absolute right-4 top-4 flex items-center gap-1.5 rounded bg-ink px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink-foreground border border-ink-border">
-                  <Wrench className="h-3.5 w-3.5 text-primary" /> Garage Equipment
-                </span>
-              ) : (
-                <span className="absolute right-4 top-4 rounded bg-secondary px-3 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground border border-border">
-                  Genuine Spare Part
-                </span>
-              )}
-            </div>
-
-            {/* Thumbnail Row */}
-            <div className="mt-4 grid grid-cols-4 gap-3">
-              {[p.image, p.image, p.image, p.image].map((img, i) => (
-                <div
-                  key={i}
-                  className={`aspect-square rounded border p-2 cursor-pointer transition-all ${
-                    i === 0
-                      ? "border-primary bg-secondary/50"
-                      : "border-border bg-card hover:border-foreground/40 opacity-70"
-                  }`}
-                >
-                  <img
-                    src={img}
-                    alt=""
-                    className="h-full w-full object-contain mix-blend-multiply"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Technical Highlights Quick Pill Box */}
-            <div className="mt-6 rounded border border-border bg-secondary/40 p-4">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                Commercial Supply Guarantee & Services
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <span className="flex items-center gap-1.5 text-foreground font-medium">
-                  <ShieldCheck className="h-3.5 w-3.5 text-primary" /> 100% Genuine OEM / OES
-                </span>
-                <span className="flex items-center gap-1.5 text-foreground font-medium">
-                  <Truck className="h-3.5 w-3.5 text-primary" /> Direct Workshop Dispatch
-                </span>
-                <span className="flex items-center gap-1.5 text-foreground font-medium">
-                  <Wrench className="h-3.5 w-3.5 text-primary" /> Anchoring & Rigging Available
-                </span>
-                <span className="flex items-center gap-1.5 text-foreground font-medium">
-                  <RotateCcw className="h-3.5 w-3.5 text-primary" /> 2-Year Equipment Warranty
-                </span>
+      {/* ======================================================== */}
+      {/* MAIN TWO-COLUMN HERO SECTION (MINIMALIST & CLEAN)         */}
+      {/* ======================================================== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          
+          {/* ==================================================== */}
+          {/* LEFT COLUMN: Clean Minimal Product Gallery Stage     */}
+          {/* ==================================================== */}
+          <div className="lg:col-span-6 space-y-4">
+            {/* Main Image Stage */}
+            <div className="relative aspect-square w-full rounded-2xl border border-zinc-200 bg-white p-6 sm:p-10 flex items-center justify-center overflow-hidden shadow-xs group">
+              {/* Subtle Platform Badge */}
+              <div className="absolute top-4 left-4 z-10 flex gap-2">
+                {p.mobility?.includes("EV") ? (
+                  <span className="rounded-full bg-emerald-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-xs">
+                    EV Platform
+                  </span>
+                ) : p.isEquipment ? (
+                  <span className="rounded-full bg-zinc-900 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-xs">
+                    Garage Machinery
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200 px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                    OEM Genuine
+                  </span>
+                )}
               </div>
+
+              {/* Fullscreen Zoom Trigger */}
+              <button
+                type="button"
+                onClick={() => setZoomOpen(true)}
+                className="absolute top-4 right-4 grid h-9 w-9 place-items-center rounded-full bg-zinc-100 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200 transition-all cursor-pointer"
+                title="View High-Resolution Gallery"
+                aria-label="Expand image"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
+
+              {/* Product Visual */}
+              <img
+                src={activeImage}
+                alt={p.name}
+                width={700}
+                height={700}
+                className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+
+            {/* Thumbnail Switcher (Clean, simple row) */}
+            <div className="grid grid-cols-4 gap-3">
+              {galleryViews.map((item, idx) => {
+                const isActive = activeImageIndex === idx;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`aspect-square rounded-xl border p-2 flex items-center justify-center transition-all bg-white cursor-pointer ${
+                      isActive
+                        ? "border-primary ring-2 ring-primary/20 shadow-xs"
+                        : "border-zinc-200 hover:border-zinc-400"
+                    }`}
+                  >
+                    <img
+                      src={item.img}
+                      alt={item.label}
+                      className="h-full w-full object-contain"
+                    />
+                    <span className="sr-only">{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* RIGHT: Commercial Details & Purchase Panel */}
-          <div className="flex flex-col">
-            {/* Top Brand, Category & Mobility Badges */}
-            <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider">
-              <span className="text-primary">{p.brand}</span>
-              <span className="text-muted-foreground">•</span>
-              <span className="text-muted-foreground">{p.category}</span>
-              <span className="text-muted-foreground">•</span>
-              <span className="font-mono text-muted-foreground">SKU: {p.sku}</span>
-            </div>
+          {/* ==================================================== */}
+          {/* RIGHT COLUMN: Minimalist Product Details & Buy Block  */}
+          {/* ==================================================== */}
+          <div className="lg:col-span-6 flex flex-col space-y-5">
+            {/* Brand, Category, SKU */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-zinc-500">
+                <span className="text-primary font-bold">{p.brand}</span>
+                <span>•</span>
+                <span>{p.category}</span>
+                <span>•</span>
+                <span>SKU: {p.sku}</span>
+              </div>
 
-            {/* Mobility Platforms Supported */}
-            {p.mobility && p.mobility.length > 0 && (
-              <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Platforms:
-                </span>
-                {p.mobility.map((m) => (
+              {/* Title */}
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-zinc-950 mt-1.5 leading-tight">
+                {p.name}
+              </h1>
+
+              {/* Compact Price / Quotation & Stock Status (TechDiversity clean style) */}
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-zinc-600">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-zinc-500">Price:</span>
+                  <span className="font-medium text-zinc-900">Quotation on Request</span>
+                  <span className="text-xs text-zinc-400 font-normal">(Pro-Forma B2B)</span>
+                </div>
+                <span className="text-zinc-300">|</span>
+                <span
+                  className={`inline-flex items-center gap-1.5 font-bold uppercase tracking-wider text-xs ${
+                    out
+                      ? "text-destructive"
+                      : low
+                      ? "text-amber-600"
+                      : "text-emerald-600"
+                  }`}
+                >
                   <span
-                    key={m}
-                    className="inline-flex items-center gap-1 rounded bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground"
-                  >
-                    {m === "4-Wheeler" && <Car className="h-3 w-3" />}
-                    {m === "2-Wheeler" && <Bike className="h-3 w-3" />}
-                    {m === "3-Wheeler" && <Truck className="h-3 w-3" />}
-                    {m === "EV" && <Zap className="h-3 w-3 text-amber-500" />}
-                    <span>{m}</span>
-                  </span>
+                    className={`h-2 w-2 rounded-full ${
+                      out ? "bg-destructive" : low ? "bg-amber-500" : "bg-emerald-500"
+                    }`}
+                  />
+                  {p.stock}
+                </span>
+                <span className="text-zinc-300">|</span>
+                <span className="text-xs font-medium text-zinc-500">
+                  Dhaka Central Hub
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Highlight Description on Side */}
+            <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-4 sm:p-5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-800 mb-2.5">
+                Key Technical Highlights:
+              </h3>
+              <ul className="space-y-2 text-sm text-zinc-700">
+                {quickHighlights.map(([k, v]) => (
+                  <li key={k} className="flex items-start gap-2">
+                    <span className="text-primary font-bold mt-0.5">•</span>
+                    <span>
+                      <strong className="font-semibold text-zinc-950">{k}:</strong> {v}
+                    </span>
+                  </li>
                 ))}
-              </div>
-            )}
-
-            <h1 className="display-lg mt-3 text-foreground font-bold leading-tight">
-              {p.name}
-            </h1>
-
-            {/* Rating and Stock Row */}
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
-              <div className="flex items-center gap-1 text-amber-500 font-bold">
-                <Star className="h-4 w-4 fill-current" />
-                <span className="text-foreground text-sm">{p.rating}</span>
-                <span className="text-muted-foreground font-normal">
-                  ({p.reviews} verified business ratings)
-                </span>
-              </div>
-              <span className="text-muted-foreground">•</span>
-              <span
-                className={`font-bold uppercase tracking-wider ${
-                  out
-                    ? "text-destructive"
-                    : low
-                    ? "text-amber-600"
-                    : "text-emerald-600"
-                }`}
-              >
-                ● {p.stock}
-              </span>
+              </ul>
             </div>
 
-            {/* Price / Official Quotation Box */}
-            <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-4 sm:p-5">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">
-                  Official Trade Pricing
-                </span>
-              </div>
-              <div className="mt-1 flex flex-wrap items-baseline gap-3">
-                <span className="font-display text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                  Quotation on Request
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  (B2B Commercial Pricing · Admin Pro-Forma Invoice)
-                </span>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                Direct trade pricing is calculated based on required quantities, fleet specifications, site freight, and warranty commissioning.
-              </p>
-            </div>
-
-            {/* Vehicle Compatibility Banner */}
-            <div
-              className={`mt-6 rounded border p-4 text-xs ${
-                vehicle
-                  ? isVehicleCompatible
-                    ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300"
-                    : "border-amber-500/50 bg-amber-500/10 text-amber-800 dark:text-amber-300"
-                  : "border-border bg-secondary/60 text-foreground"
-              }`}
-            >
-              {vehicle ? (
-                <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-600" />
-                  <div>
-                    <p className="font-bold">
-                      {isVehicleCompatible
-                        ? "Verified Platform Compatibility"
-                        : "Fitment Notice"}
-                    </p>
-                    <p className="mt-0.5 text-foreground/80">
-                      Checking against selected platform:{" "}
-                      <strong>
-                        {vehicle.make} {vehicle.model} ({vehicle.year})
-                      </strong>
-                      .
-                      {isVehicleCompatible
-                        ? " This item is confirmed compatible."
-                        : " Please review the fitment list below or request technical confirmation."}
-                    </p>
+            {/* Variant / Option Selectors (Customer can toggle, default pre-set) */}
+            <div className="space-y-4 pt-1">
+              {/* Option 1: Power & Voltage */}
+              {voltageOptions.length > 1 ? (
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-900 mb-2">
+                    <span>Power & Voltage Supply:</span>
+                    <span className="text-primary font-mono lowercase font-semibold">
+                      {voltageOptions.find((v) => v.id === selectedVoltage)?.label}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2.5">
+                    {voltageOptions.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setSelectedVoltage(opt.id)}
+                        className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
+                          selectedVoltage === opt.id
+                            ? "border-zinc-950 bg-zinc-950 text-white shadow-xs"
+                            : "border-zinc-300 bg-white text-zinc-800 hover:border-zinc-400"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-2">
-                    <Car className="h-4 w-4 text-primary shrink-0" />
-                    <span>Check compatibility against specific vehicle platform?</span>
+                <div className="text-xs text-zinc-500 flex items-center gap-2">
+                  <span className="font-semibold text-zinc-700">Specification:</span>
+                  <span className="font-mono bg-zinc-100 px-2.5 py-1 rounded-md text-zinc-800">
+                    {voltageOptions[0].label} (Default)
                   </span>
-                  <Link
-                    to="/garage"
-                    className="font-bold text-primary hover:underline whitespace-nowrap"
-                  >
-                    Set Platform in My Garage →
-                  </Link>
+                </div>
+              )}
+
+              {/* Option 2: Arm / Carriage configuration (if applicable) */}
+              {armOptions.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-900 mb-2">
+                    <span>Lifting Arm Configuration:</span>
+                    <span className="text-primary font-mono lowercase font-semibold">
+                      {armOptions.find((a) => a.id === selectedArmType)?.label}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2.5">
+                    {armOptions.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setSelectedArmType(opt.id)}
+                        className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer ${
+                          selectedArmType === opt.id
+                            ? "border-zinc-950 bg-zinc-950 text-white shadow-xs"
+                            : "border-zinc-300 bg-white text-zinc-800 hover:border-zinc-400"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Description */}
-            <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-              {p.description}
-            </p>
-
-            {/* Dual B2B Quotation Action Panel */}
-            <div className="mt-8 space-y-3">
-              <div className="flex flex-col sm:flex-row gap-3">
-                {/* Quantity Stepper */}
-                <div className="flex h-11 items-center rounded-xl border border-input bg-card shadow-xs shrink-0 w-fit">
+            {/* Quantity Stepper + Add to Cart + Request Quote */}
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center gap-3">
+                {/* Stepper */}
+                <div className="flex h-12 items-center rounded-xl border border-zinc-300 bg-white shadow-xs shrink-0">
                   <button
                     type="button"
                     onClick={() => setQty(Math.max(1, qty - 1))}
                     aria-label="Decrease quantity"
-                    className="grid h-full w-10 place-items-center hover:bg-secondary text-foreground transition-colors"
+                    className="grid h-full w-10 place-items-center hover:bg-zinc-100 text-zinc-700 transition-colors rounded-l-xl cursor-pointer"
                   >
-                    <Minus className="h-3.5 w-3.5" />
+                    <Minus className="h-4 w-4" />
                   </button>
-                  <span
-                    className="w-10 text-center font-bold font-mono text-sm"
-                    aria-live="polite"
-                  >
+                  <span className="w-10 text-center font-bold font-mono text-sm text-zinc-950">
                     {qty}
                   </span>
                   <button
                     type="button"
                     onClick={() => setQty(qty + 1)}
                     aria-label="Increase quantity"
-                    className="grid h-full w-10 place-items-center hover:bg-secondary text-foreground transition-colors"
+                    className="grid h-full w-10 place-items-center hover:bg-zinc-100 text-zinc-700 transition-colors rounded-r-xl cursor-pointer"
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="h-4 w-4" />
                   </button>
                 </div>
 
-                {/* Direct Single Product Quote Button */}
-                <button
-                  type="button"
-                  onClick={() => setQuoteModalOpen(true)}
-                  className="btn btn-primary flex-1 h-11 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md rounded-xl"
-                >
-                  <FileSpreadsheet className="h-4 w-4" />
-                  <span>Request Instant Quotation ({qty} {qty === 1 ? "Unit" : "Units"})</span>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 {/* Add to RFQ Cart Button */}
                 <button
                   type="button"
                   disabled={out}
                   onClick={() => add(p.slug, qty)}
-                  className={`h-10.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl shadow-xs transition-all ${
+                  className={`flex-1 h-12 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl shadow-xs transition-all cursor-pointer ${
                     inCart
                       ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                      : "btn btn-outline border-primary/50 text-primary hover:bg-primary hover:text-white"
+                      : "bg-primary text-white hover:bg-primary/90 shadow-sm active:scale-[0.99]"
                   }`}
                 >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>{inCart ? "✓ In RFQ Cart" : "Add to RFQ Cart"}</span>
+                  {inCart ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      <span>In RFQ Cart</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4" />
+                      <span>Add to RFQ Cart</span>
+                    </>
+                  )}
                 </button>
+              </div>
 
-                <Link
-                  to="/cart"
-                  className="btn btn-dark h-10.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-xl shadow-xs"
-                >
-                  <FileSpreadsheet className="h-3.5 w-3.5 text-primary" />
-                  <span>View Quotation Cart</span>
+              {/* Direct Request Quote Secondary Button */}
+              <button
+                type="button"
+                onClick={() => setQuoteModalOpen(true)}
+                className="w-full h-11 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 transition-all cursor-pointer"
+              >
+                <FileSpreadsheet className="h-4 w-4 text-primary" />
+                <span>Request Commercial Quotation ({qty} {qty === 1 ? "Unit" : "Units"})</span>
+              </button>
+            </div>
+
+            {/* Garage Platform Checker (Minimal single-line) */}
+            <div className="pt-2">
+              <div className="text-xs text-zinc-600 flex items-center justify-between p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
+                <span className="flex items-center gap-2">
+                  <Car className="h-4 w-4 text-primary shrink-0" />
+                  {vehicle ? (
+                    <span>
+                      Compatibility checked for: <strong>{vehicle.make} {vehicle.model}</strong>
+                    </span>
+                  ) : (
+                    <span>Check fit against your workshop platform?</span>
+                  )}
+                </span>
+                <Link to="/garage" className="font-bold text-primary hover:underline">
+                  {vehicle ? "Change →" : "Set Platform →"}
                 </Link>
               </div>
             </div>
 
-            {/* Service & Delivery Metrics */}
-            <div className="mt-8 border-t border-border pt-6 grid grid-cols-3 gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary shrink-0" />
-                <span>2–4 Day Hub Logistics</span>
+            {/* Minimal Guarantees */}
+            <div className="pt-3 border-t border-zinc-200/80 grid grid-cols-3 gap-2 text-[11px] sm:text-xs text-zinc-600 font-medium text-center">
+              <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-zinc-50">
+                <span className="font-bold text-zinc-950">2–4 Days</span>
+                <span>Fast Hub Dispatch</span>
               </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-                <span>B2B Commercial Warranty</span>
+              <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-zinc-50">
+                <span className="font-bold text-zinc-950">2-Year</span>
+                <span>Parts Warranty</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Wrench className="h-4 w-4 text-primary shrink-0" />
-                <span>Engineering Commissioning</span>
+              <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-zinc-50">
+                <span className="font-bold text-zinc-950">Certified</span>
+                <span>CE European Standard</span>
               </div>
             </div>
           </div>
@@ -444,275 +491,119 @@ export function ProductPage() {
       </section>
 
       {/* ======================================================== */}
-      {/* TECHNICAL TABS: SPECS, COMPATIBILITY, APPLICATIONS, ETC.  */}
+      {/* LOWER SECTION: FULL PRODUCT DETAILS & SPECS               */}
       {/* ======================================================== */}
-      <section className="container-page py-12 border-t border-border">
-        {/* Tab Headers */}
-        <div
-          role="tablist"
-          className="flex gap-2 sm:gap-6 border-b border-border overflow-x-auto pb-px"
-        >
-          {[
-            { id: "specs", label: "Technical Specifications" },
-            { id: "overview", label: "Commercial Overview" },
-            { id: "fit", label: "Vehicle Compatibility" },
-            { id: "applications", label: "Workshop Applications" },
-            { id: "warranty", label: "Warranty & Engineering" },
-            { id: "downloads", label: "Downloads & Manuals" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              role="tab"
-              aria-selected={tab === t.id}
-              onClick={() => setTab(t.id as TabType)}
-              className={`-mb-px border-b-2 py-3 px-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-colors ${
-                tab === t.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      <section className="border-t border-zinc-200 bg-zinc-50/50 py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Clean Tab Switcher */}
+          <div className="border-b border-zinc-200 mb-8 flex items-center gap-2 sm:gap-6 overflow-x-auto">
+            {[
+              { id: "description", label: "Product Overview" },
+              { id: "specs", label: "Technical Specifications" },
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id as TabType)}
+                className={`py-3 px-1 text-sm sm:text-base font-bold whitespace-nowrap border-b-2 transition-all cursor-pointer ${
+                  tab === t.id
+                    ? "border-primary text-primary"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Tab Contents */}
-        <div className="py-8 max-w-4xl">
-          {/* TAB: Specifications */}
-          {tab === "specs" && (
-            <div>
-              <h3 className="font-display text-2xl font-bold uppercase text-foreground mb-4">
-                Technical Specifications & Operating Parameters
-              </h3>
-              <div className="rounded border border-border overflow-hidden">
-                <table className="w-full text-xs">
-                  <tbody className="divide-y divide-border">
-                    {p.specs.map(([key, val], idx) => (
-                      <tr
-                        key={key}
-                        className={idx % 2 === 0 ? "bg-card" : "bg-secondary/40"}
-                      >
-                        <td className="w-1/3 py-3 px-4 font-bold text-foreground/80">
-                          {key}
-                        </td>
-                        <td className="py-3 px-4 font-medium text-foreground">
-                          {val}
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="bg-card">
-                      <td className="py-3 px-4 font-bold text-foreground/80">
-                        Brand / Manufacturer
-                      </td>
-                      <td className="py-3 px-4 font-medium text-foreground">
-                        {p.brand}
-                      </td>
-                    </tr>
-                    <tr className="bg-secondary/40">
-                      <td className="py-3 px-4 font-bold text-foreground/80">
-                        Part / Model Number
-                      </td>
-                      <td className="py-3 px-4 font-mono font-medium text-foreground">
-                        {p.sku}
-                      </td>
-                    </tr>
-                    <tr className="bg-card">
-                      <td className="py-3 px-4 font-bold text-foreground/80">
-                        Supported Platforms
-                      </td>
-                      <td className="py-3 px-4 font-medium text-foreground">
-                        {p.mobility.join(", ")}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* TAB: Overview */}
-          {tab === "overview" && (
-            <div className="space-y-4 text-sm text-foreground/90 leading-relaxed">
-              <h3 className="font-display text-2xl font-bold uppercase text-foreground">
-                Product Overview & Commercial Purpose
+          {/* Tab 1: Description */}
+          {tab === "description" && (
+            <div className="max-w-4xl bg-white p-6 sm:p-8 rounded-2xl border border-zinc-200 shadow-xs space-y-5 text-sm sm:text-base text-zinc-700 leading-relaxed">
+              <h3 className="text-lg font-bold text-zinc-950">
+                Detailed Product Overview
               </h3>
               <p>{p.description}</p>
               <p>
-                Supplied directly to professional workshops, service centers, and dealerships. Every unit is checked against factory quality benchmarks and safety certifications prior to container dispatch.
+                Supplied directly to professional automotive service centers, dealership workshops, and commercial fleet depots. Engineered for continuous operation with reinforced dual hydraulic lifting cylinders and precision synchronization cables.
               </p>
-              <div className="mt-6 rounded border border-border p-4 bg-secondary/30">
-                <h4 className="font-bold text-xs uppercase tracking-wider text-foreground mb-2">
-                  What is included in the supply shipment:
+              <div className="pt-4 border-t border-zinc-100">
+                <h4 className="font-bold text-zinc-950 text-sm uppercase tracking-wider mb-3">
+                  Key Engineering Advantages:
                 </h4>
-                <ul className="list-disc pl-5 space-y-1 text-xs text-muted-foreground">
-                  <li>
-                    1x {p.name} (SKU: {p.sku})
-                  </li>
-                  <li>Official PAGE International inspection certificate & warranty passport</li>
-                  <li>Technical operation manual with hydraulic/wiring schematic diagrams</li>
-                  <li>Standard accessories & installation hardware where specified</li>
+                <ul className="list-disc pl-5 space-y-2 text-zinc-700">
+                  <li>Reinforced dual-column laser cut structural steel with heavy-duty baseplates.</li>
+                  <li>Electro-hydraulic synchronization ensuring smooth, level carriage movement.</li>
+                  <li>Integrated mechanical safety ladders with automatic solenoid release.</li>
+                  <li>Tested to 115% dynamic load and 150% static structural benchmark.</li>
                 </ul>
               </div>
             </div>
           )}
 
-          {/* TAB: Compatibility */}
-          {tab === "fit" && (
-            <div>
-              <h3 className="font-display text-2xl font-bold uppercase text-foreground mb-2">
-                Compatible Vehicles & Platforms
-              </h3>
-              <p className="text-xs text-muted-foreground mb-6">
-                Verified against manufacturer technical tolerances. For specialized fleet inquiries, consult our technical applications engineers.
-              </p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {p.fits.map((f) => (
-                  <div
-                    key={f}
-                    className="flex items-center gap-2 rounded border border-border bg-card p-3 text-xs"
-                  >
-                    <Check className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span className="font-medium text-foreground">{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB: Applications */}
-          {tab === "applications" && (
-            <div className="space-y-4">
-              <h3 className="font-display text-2xl font-bold uppercase text-foreground mb-2">
-                Target Business Applications
-              </h3>
-              <div className="grid gap-3 sm:grid-cols-2 text-xs">
-                <div className="rounded border border-border p-4 bg-card">
-                  <h4 className="font-bold text-primary uppercase tracking-wider">
-                    Automotive Service Centers
-                  </h4>
-                  <p className="mt-1 text-muted-foreground">
-                    Engineered for high daily turnover, continuous multi-bay operation, and minimal downtime.
-                  </p>
-                </div>
-                <div className="rounded border border-border p-4 bg-card">
-                  <h4 className="font-bold text-primary uppercase tracking-wider">
-                    Commercial Fleet Maintenance Depots
-                  </h4>
-                  <p className="mt-1 text-muted-foreground">
-                    High-durability build to keep delivery vans, corporate fleets, and passenger carriers on schedule.
-                  </p>
-                </div>
-                <div className="rounded border border-border p-4 bg-card">
-                  <h4 className="font-bold text-primary uppercase tracking-wider">
-                    Authorized Dealership Workshops
-                  </h4>
-                  <p className="mt-1 text-muted-foreground">
-                    Compliant with manufacturer warranty requirements, diagnostic protocols, and CE safety standards.
-                  </p>
-                </div>
-                <div className="rounded border border-border p-4 bg-card">
-                  <h4 className="font-bold text-primary uppercase tracking-wider">
-                    EV & Hybrid Specialized Garages
-                  </h4>
-                  <p className="mt-1 text-muted-foreground">
-                    Rated for high-voltage testing, battery pack handling, and advanced sensor recalibration.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB: Warranty */}
-          {tab === "warranty" && (
-            <div className="space-y-4 text-xs text-muted-foreground">
-              <h3 className="font-display text-2xl font-bold uppercase text-foreground">
-                Warranty & Engineering Support
-              </h3>
-              <p>
-                This unit is covered under the PAGE International Commercial Warranty agreement. Claims include authorized replacement parts and dispatch of certified technicians where required.
-              </p>
-              <div className="rounded border border-border p-4 bg-secondary/40 space-y-2">
-                <p className="font-bold text-foreground">Commercial Claim Procedure:</p>
-                <p>
-                  1. Contact PAGE B2B Technical Desk with your Commercial Invoice # and equipment serial.
-                </p>
-                <p>
-                  2. Our technical service engineers verify diagnostic telemetry or inspect the machinery on site.
-                </p>
-                <p>
-                  3. Replacement parts or engineer deployment is executed within 24–48 working hours.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* TAB: Downloads */}
-          {tab === "downloads" && (
-            <div className="space-y-3">
-              <h3 className="font-display text-2xl font-bold uppercase text-foreground mb-4">
-                Technical Documentation & Downloads
-              </h3>
-              {[
-                {
-                  title: "Technical Datasheet & Dimensional Drawing (PDF)",
-                  size: "1.4 MB",
-                },
-                {
-                  title: "Installation & Maintenance Operating Manual (PDF)",
-                  size: "3.2 MB",
-                },
-                {
-                  title: "CE & ISO Quality Compliance Certificate (PDF)",
-                  size: "0.8 MB",
-                },
-              ].map((doc) => (
-                <div
-                  key={doc.title}
-                  className="flex items-center justify-between rounded border border-border bg-card p-3.5 text-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <div>
-                      <span className="font-semibold text-foreground block">
-                        {doc.title}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">
-                        {doc.size}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() =>
-                      alert("Datasheet PDF download available from B2B customer portal.")
-                    }
-                    className="btn btn-outline h-8 px-3 text-[11px] flex items-center gap-1"
-                  >
-                    <Download className="h-3 w-3" /> Download
-                  </button>
-                </div>
-              ))}
+          {/* Tab 2: Specs */}
+          {tab === "specs" && (
+            <div className="max-w-4xl bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-xs">
+              <table className="w-full text-sm sm:text-base">
+                <tbody className="divide-y divide-zinc-200">
+                  {p.specs.map(([k, v], idx) => (
+                    <tr key={k} className={idx % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}>
+                      <td className="w-1/3 py-3.5 px-6 font-bold text-zinc-800">{k}</td>
+                      <td className="py-3.5 px-6 font-medium text-zinc-950">{v}</td>
+                    </tr>
+                  ))}
+                  <tr className="bg-white">
+                    <td className="py-3.5 px-6 font-bold text-zinc-800">Brand / Manufacturer</td>
+                    <td className="py-3.5 px-6 font-medium text-zinc-950">{p.brand}</td>
+                  </tr>
+                  <tr className="bg-zinc-50/60">
+                    <td className="py-3.5 px-6 font-bold text-zinc-800">Part / Model SKU</td>
+                    <td className="py-3.5 px-6 font-mono font-medium text-zinc-950">{p.sku}</td>
+                  </tr>
+                  <tr className="bg-white">
+                    <td className="py-3.5 px-6 font-bold text-zinc-800">Selected Power Supply</td>
+                    <td className="py-3.5 px-6 font-mono font-semibold text-primary">
+                      {selectedVoltage === "380v" ? "380V 3-Phase (Industrial)" : "220V Single-Phase"}
+                    </td>
+                  </tr>
+                  {armOptions.length > 0 && (
+                    <tr className="bg-zinc-50/60">
+                      <td className="py-3.5 px-6 font-bold text-zinc-800">Arm Configuration</td>
+                      <td className="py-3.5 px-6 font-medium text-zinc-950">
+                        {selectedArmType === "asymmetric" ? "Asymmetric (EV Platform)" : "Symmetric Telescopic"}
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="bg-white">
+                    <td className="py-3.5 px-6 font-bold text-zinc-800">Supported Vehicle Platforms</td>
+                    <td className="py-3.5 px-6 font-medium text-zinc-950">{p.mobility.join(", ")}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       </section>
 
       {/* ======================================================== */}
-      {/* RELATED PRODUCTS SECTION                                  */}
+      {/* RELATED WORKSHOP PRODUCTS                                 */}
       {/* ======================================================== */}
-      <section className="bg-secondary/60 py-16 border-t border-border">
-        <div className="container-page">
+      <section className="bg-white py-12 sm:py-16 border-t border-zinc-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex items-end justify-between">
             <div>
-              <p className="eyebrow">Complementary Workshop Products</p>
-              <h2 className="display-md mt-1 text-foreground">
-                COMMERCIAL WORKSHOP COMPLEMENTS
+              <p className="text-xs font-mono font-bold uppercase tracking-wider text-primary">
+                Complementary Workshop Equipment
+              </p>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 mt-1">
+                Related Equipment & Spare Parts
               </h2>
             </div>
-            <Link to="/shop" className="link-arrow">
-              View All Products
+            <Link to="/shop" className="text-xs sm:text-sm font-bold uppercase tracking-wider text-primary hover:underline flex items-center gap-1.5">
+              <span>View All Products</span>
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-3.5 sm:gap-5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {related.map((r) => (
               <ProductCard key={r.slug} p={r} />
             ))}
@@ -721,68 +612,124 @@ export function ProductPage() {
       </section>
 
       {/* ======================================================== */}
+      {/* FULLSCREEN IMAGE LIGHTBOX MODAL                           */}
+      {/* ======================================================== */}
+      {zoomOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div className="relative w-full max-w-4xl rounded-3xl border border-white/10 bg-zinc-950 p-6 sm:p-10 text-white shadow-2xl">
+            <button
+              onClick={() => setZoomOpen(false)}
+              aria-label="Close high-res view"
+              className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white/80 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="text-center mb-4">
+              <h3 className="font-display text-2xl uppercase tracking-wide">
+                {p.name}
+              </h3>
+              <p className="text-xs text-white/60">
+                {p.brand} · SKU: {p.sku}
+              </p>
+            </div>
+            <div className="relative aspect-square sm:aspect-16/10 max-h-[65vh] w-full flex items-center justify-center p-4">
+              <img
+                src={activeImage}
+                alt={p.name}
+                className="max-h-full max-w-full object-contain rounded-xl"
+              />
+            </div>
+            <div className="mt-4 flex justify-center gap-3">
+              {galleryViews.map((item, idx) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+                    activeImageIndex === idx
+                      ? "bg-primary text-white"
+                      : "bg-white/10 text-white/70 hover:bg-white/20"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
       {/* QUICK B2B QUOTE MODAL                                    */}
       {/* ======================================================== */}
       {quoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-2xl sm:p-8">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+        >
+          <div className="relative w-full max-w-lg rounded-3xl border border-zinc-200/90 bg-white p-6 shadow-2xl sm:p-8">
             <button
               onClick={() => {
                 setQuoteModalOpen(false);
                 setQuoteSent(false);
               }}
               aria-label="Close modal"
-              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+              className="absolute right-5 top-5 grid h-8 w-8 place-items-center rounded-full bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
 
             {quoteSent ? (
               <div className="py-8 text-center">
-                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-500/10 text-emerald-600 mb-3">
-                  <CheckCircle2 className="h-6 w-6" />
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-500/10 text-emerald-600 mb-4">
+                  <CheckCircle2 className="h-8 w-8" />
                 </div>
-                <h3 className="font-heading text-2xl uppercase text-foreground">
+                <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-zinc-950">
                   Quotation Request Sent
                 </h3>
-                <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-                  Thank you! Our B2B equipment desk has logged your request for{" "}
-                  <strong>{p.name}</strong>. A formal commercial quote with tax details will be sent within 24 hours.
+                <p className="text-xs sm:text-sm text-zinc-600 mt-2 max-w-sm mx-auto leading-relaxed">
+                  Thank you! Our B2B commercial equipment desk has registered your request for{" "}
+                  <strong>{p.name}</strong>. A pro-forma quote with tax and delivery schedule will be provided within 24 hours.
                 </p>
                 <button
                   onClick={() => {
                     setQuoteModalOpen(false);
                     setQuoteSent(false);
                   }}
-                  className="btn btn-primary h-10 px-6 text-xs font-bold uppercase tracking-wider mt-6"
+                  className="btn btn-primary h-11 px-8 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl mt-6 cursor-pointer"
                 >
-                  Close
+                  Done
                 </button>
               </div>
             ) : (
               <form onSubmit={handleQuoteSubmit} className="space-y-4">
                 <div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
-                    B2B Commercial Desk
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-primary">
+                    B2B Commercial Procurement
                   </span>
-                  <h3 className="font-heading text-xl uppercase text-foreground mt-0.5">
-                    Request Quote for: {p.name}
+                  <h3 className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight text-zinc-950 mt-1">
+                    Request Quote: {p.name}
                   </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Model: {p.sku} · Brand: {p.brand}
+                  <p className="text-xs text-zinc-500 mt-1">
+                    Model: <span className="font-mono font-semibold">{p.sku}</span> · Brand: <span className="font-semibold">{p.brand}</span> · Config: <span className="font-mono font-semibold text-primary">{selectedVoltage.toUpperCase()}</span>
                   </p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                      Business Name *
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                      Business / Garage Name *
                     </label>
                     <input
                       required
                       type="text"
                       placeholder="e.g. Dhaka Auto Tech Ltd."
-                      className="field text-xs"
+                      className="field text-sm rounded-xl h-11 px-3.5"
                       value={quoteData.businessName}
                       onChange={(e) =>
                         setQuoteData({ ...quoteData, businessName: e.target.value })
@@ -791,13 +738,13 @@ export function ProductPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                       Contact Person
                     </label>
                     <input
                       type="text"
                       placeholder="Name"
-                      className="field text-xs"
+                      className="field text-sm rounded-xl h-11 px-3.5"
                       value={quoteData.contactPerson}
                       onChange={(e) =>
                         setQuoteData({ ...quoteData, contactPerson: e.target.value })
@@ -808,14 +755,14 @@ export function ProductPage() {
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                       Phone / WhatsApp *
                     </label>
                     <input
                       required
                       type="tel"
                       placeholder="+880 17XXXXXXXX"
-                      className="field text-xs"
+                      className="field text-sm rounded-xl h-11 px-3.5"
                       value={quoteData.phone}
                       onChange={(e) =>
                         setQuoteData({ ...quoteData, phone: e.target.value })
@@ -824,13 +771,13 @@ export function ProductPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                       Business Email
                     </label>
                     <input
                       type="email"
                       placeholder="procurement@workshop.com"
-                      className="field text-xs"
+                      className="field text-sm rounded-xl h-11 px-3.5"
                       value={quoteData.email}
                       onChange={(e) =>
                         setQuoteData({ ...quoteData, email: e.target.value })
@@ -841,11 +788,11 @@ export function ProductPage() {
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                       Business Type
                     </label>
                     <select
-                      className="field text-xs"
+                      className="field text-sm rounded-xl h-11 px-3.5"
                       value={quoteData.businessType}
                       onChange={(e) =>
                         setQuoteData({ ...quoteData, businessType: e.target.value })
@@ -861,13 +808,13 @@ export function ProductPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                       Quantity Required
                     </label>
                     <input
                       type="text"
                       placeholder="e.g. 1 unit / 5 sets"
-                      className="field text-xs"
+                      className="field text-sm rounded-xl h-11 px-3.5"
                       value={quoteData.quantity}
                       onChange={(e) =>
                         setQuoteData({ ...quoteData, quantity: e.target.value })
@@ -877,13 +824,13 @@ export function ProductPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                    Bay Specifications / Delivery Timeline
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+                    Bay Specifications / Notes
                   </label>
                   <textarea
                     rows={2}
-                    placeholder="Bay dimensions, ceiling height, or power requirements..."
-                    className="field text-xs"
+                    placeholder="Bay dimensions, ceiling height, or power availability..."
+                    className="field text-sm rounded-xl p-3 min-h-[72px]"
                     value={quoteData.notes}
                     onChange={(e) =>
                       setQuoteData({ ...quoteData, notes: e.target.value })
@@ -893,7 +840,7 @@ export function ProductPage() {
 
                 <button
                   type="submit"
-                  className="btn btn-primary h-11 w-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+                  className="btn btn-primary h-12 w-full text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-sm hover:shadow transition-all"
                 >
                   <Send className="h-4 w-4" />
                   <span>Send Quotation Request</span>
