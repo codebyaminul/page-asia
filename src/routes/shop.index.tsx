@@ -1,14 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  Bike,
   Car,
   Check,
+  ChevronDown,
   FileSpreadsheet,
-  Grid,
-  List,
   RotateCcw,
   Search,
   SlidersHorizontal,
-  Star,
   Truck,
   Wrench,
   X,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
+import { cn } from "@/lib/utils";
 import { QuoteModal } from "@/components/site/QuoteModal";
 import {
   brands,
@@ -82,17 +82,14 @@ export function Shop() {
   const { vehicle: savedVehicle } = useCart();
 
   const [query, setQuery] = useState(q);
-  const [sort, setSort] = useState("featured");
   const [inStock, setInStock] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<string>(searchBrand ?? "");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [activeQuoteProduct, setActiveQuoteProduct] = useState<Product | null>(null);
 
-
   // Filter application
   const filteredList = useMemo(() => {
-    let l = products.filter((p) => {
+    return products.filter((p) => {
       // Mobility Platform filter (4-Wheeler, 2-Wheeler, 3-Wheeler, EV)
       if (searchMobility && searchMobility !== "All") {
         if (!p.mobility.includes(searchMobility as MobilityType)) return false;
@@ -136,13 +133,6 @@ export function Shop() {
 
       return true;
     });
-
-    // Commercial sorting (no numerical prices)
-    if (sort === "rating") l = [...l].sort((a, b) => b.rating - a.rating);
-    if (sort === "brand") l = [...l].sort((a, b) => a.brand.localeCompare(b.brand));
-    if (sort === "name") l = [...l].sort((a, b) => a.name.localeCompare(b.name));
-
-    return l;
   }, [
     q,
     cat,
@@ -151,7 +141,6 @@ export function Shop() {
     inStock,
     searchType,
     searchMobility,
-    sort,
   ]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -170,54 +159,39 @@ export function Shop() {
     });
   };
 
+  const activeFiltersCount = [
+    searchMobility,
+    cat,
+    vehicle,
+    selectedBrand,
+    searchType,
+    inStock ? "1" : "",
+    q,
+  ].filter(Boolean).length;
+
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
-      {/* ======================================================== */}
-      {/* CLEAN MINIMALIST CATALOGUE HEADER                        */}
-      {/* ======================================================== */}
-      <div className="border-b border-zinc-200/80 bg-zinc-50/60 py-3 pt-20 sm:pt-24">
-        <nav
-          aria-label="Breadcrumb"
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-zinc-600 flex items-center gap-2"
-        >
-          <Link to="/" className="hover:text-zinc-950 font-medium">
-            Home
-          </Link>
-          <span>/</span>
-          <span className="font-semibold text-zinc-900">
-            {cat || "Automotive Equipment & Spare Parts"}
-          </span>
-        </nav>
-      </div>
+      {/* Search Bar & Video Section */}
+      <section className="pt-20 sm:pt-24 pb-2 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-4 sm:space-y-5">
+        <h1 className="sr-only">
+          {cat ? `${cat} — Automotive Equipment & Spare Parts` : "Automotive Equipment & Spare Parts"}
+        </h1>
 
-      <section className="pt-6 pb-2 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-zinc-200">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">
-              {cat ? cat : "Automotive Equipment & Spare Parts"}
-            </h1>
-            <p className="text-sm text-zinc-500 mt-1">
-              Showing {filteredList.length} commercial {filteredList.length === 1 ? "product" : "products"} for workshops, service bays & dealerships
-            </p>
-          </div>
-
-          {/* Clean Search Input */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="w-full sm:w-80"
-          >
+        {/* Centered Search Bar: Under the navbar, above the video */}
+        <div className="flex justify-center w-full pt-1 sm:pt-2">
+          <form onSubmit={handleSearchSubmit} className="w-full max-w-xl sm:max-w-2xl">
             <div className="relative flex items-center">
               <input
                 id="shop-q"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search equipment, SKU, or parts..."
-                className="w-full h-10 pl-9 pr-20 rounded-xl bg-white border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Search equipment, SKU, brand, or parts..."
+                className="w-full h-11 sm:h-12 pl-11 pr-24 rounded-2xl bg-white border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all shadow-sm hover:border-zinc-400"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <button
                 type="submit"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 rounded-lg bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-all active:scale-95 cursor-pointer"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 sm:h-9 px-4 sm:px-5 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-all active:scale-95 cursor-pointer shadow-xs"
               >
                 Search
               </button>
@@ -242,42 +216,28 @@ export function Shop() {
 
       {/* Main Shop Container */}
       <section className="container-page py-6 sm:py-8 lg:py-10">
-        {/* Mobile Filter Toggle & Quick Bar */}
-        <div className="flex items-center justify-between gap-4 mb-6 lg:hidden border-b border-border pb-4">
+        {/* Mobile Filter Toggle */}
+        <div className="mb-4 lg:hidden">
           <button
             onClick={() => setMobileFilterOpen(true)}
-            className="btn btn-outline h-9 px-3 text-xs flex items-center gap-1.5"
+            className="w-full h-9 px-3.5 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-foreground flex items-center justify-center gap-1.5 shadow-xs cursor-pointer hover:bg-secondary/50 transition-colors"
           >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            <span>
-              Filters (
-              {[
-                searchMobility,
-                cat,
-                vehicle,
-                selectedBrand,
-                searchType,
-                inStock ? "1" : "",
-              ].filter(Boolean).length}
-              )
-            </span>
+            <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
+            <span>Filters</span>
           </button>
-          <span className="text-xs text-muted-foreground font-semibold">
-            {filteredList.length} Products
-          </span>
         </div>
 
-        <div className="grid gap-10 lg:grid-cols-[270px_1fr]">
+        <div className="grid gap-8 lg:grid-cols-[250px_1fr]">
           {/* ======================================================== */}
-          {/* LEFT: ADVANCED B2B FILTERS SIDEBAR                       */}
+          {/* LEFT: ULTRA-COMPACT B2B CATALOGUE FILTERS                */}
           {/* ======================================================== */}
-          <aside className="hidden lg:block space-y-6">
-            {/* Premium Filter Floating Container */}
-            <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 p-5 shadow-xs space-y-6 sticky top-24">
-              {/* Header / Reset */}
-              <div className="flex items-center justify-between border-b border-border pb-3">
+          <aside className="hidden lg:block">
+            {/* Fits 100% On Screen Without Scrolling */}
+            <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 p-4 shadow-xs space-y-3.5 sticky top-24">
+              {/* Header: Title + Reset */}
+              <div className="flex items-center justify-between border-b border-border/80 pb-2.5">
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
-                  Catalogue Filters
+                  Filters
                 </span>
                 {(cat ||
                   vehicle ||
@@ -288,271 +248,211 @@ export function Shop() {
                   searchMobility) && (
                   <button
                     onClick={handleClearAll}
-                    className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                    className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                   >
                     <RotateCcw className="h-3 w-3" /> Reset
                   </button>
                 )}
               </div>
 
-              {/* 1. Mobility Platform Filter (4W / 2W / 3W / EV) */}
+              {/* 1. Availability Switch (Modern Toggle) */}
+              <div className="flex items-center justify-between py-1 px-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-800">
+                <span className="text-xs font-semibold text-foreground">In Stock Only</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={inStock}
+                  onClick={() => setInStock(!inStock)}
+                  className={cn(
+                    "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                    inStock ? "bg-primary" : "bg-zinc-300 dark:bg-zinc-700"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out",
+                      inStock ? "translate-x-4" : "translate-x-0"
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* 2. Vehicle Platform (Compact 4-Column Row) */}
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
-                  <Car className="h-3.5 w-3.5 text-primary" /> Vehicle Platform
-                </h3>
-                <div className="space-y-1 text-xs">
-                  <button
-                    onClick={() =>
-                      nav({ search: (s: S) => ({ ...s, mobility: undefined }) })
-                    }
-                    className={`w-full text-left rounded-lg px-2.5 py-1.5 font-medium transition-colors flex items-center justify-between ${
-                      !searchMobility
-                        ? "bg-primary text-white font-bold shadow-xs"
-                        : "text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    <span>All Platforms</span>
-                    <span className="text-[11px] opacity-80">{products.length}</span>
-                  </button>
-                  {mobilitySegments.map((m) => {
-                    const count = products.filter((p) =>
-                      p.mobility.includes(m.id)
-                    ).length;
-                    const active = searchMobility === m.id;
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Platform
+                  </span>
+                  {searchMobility && (
+                    <button
+                      onClick={() =>
+                        nav({ search: (s: S) => ({ ...s, mobility: undefined }) })
+                      }
+                      className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-4 gap-1 text-xs">
+                  {[
+                    { id: "4-Wheeler", label: "4W", title: "4-Wheeler", icon: Car },
+                    { id: "2-Wheeler", label: "2W", title: "2-Wheeler", icon: Bike },
+                    { id: "3-Wheeler", label: "3W", title: "3-Wheeler", icon: Truck },
+                    { id: "EV", label: "EV", title: "Electric Mobility", icon: Zap },
+                  ].map((item) => {
+                    const active = searchMobility === item.id;
+                    const Icon = item.icon;
                     return (
                       <button
-                        key={m.id}
+                        key={item.id}
+                        type="button"
+                        title={item.title}
                         onClick={() =>
-                          nav({ search: (s: S) => ({ ...s, mobility: m.id }) })
+                          nav({
+                            search: (s: S) => ({
+                              ...s,
+                              mobility: active ? undefined : item.id,
+                            }),
+                          })
                         }
-                        className={`w-full text-left rounded-lg px-2.5 py-1.5 font-medium transition-colors flex items-center justify-between ${
+                        className={cn(
+                          "flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-center font-medium transition-all cursor-pointer border text-xs gap-0.5",
                           active
-                            ? "bg-primary text-white font-bold shadow-xs"
-                            : "text-foreground hover:bg-secondary"
-                        }`}
+                            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs font-bold"
+                            : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200/80 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 hover:border-zinc-300"
+                        )}
                       >
-                        <span className="truncate">{m.label}</span>
-                        <span
-                          className={`text-[11px] ${
-                            active ? "text-white/90" : "text-muted-foreground"
-                          }`}
-                        >
-                          {count}
-                        </span>
+                        <Icon
+                          className={cn(
+                            "h-3.5 w-3.5",
+                            active ? "text-primary" : "text-muted-foreground"
+                          )}
+                        />
+                        <span className="text-[10.5px] leading-tight font-semibold">{item.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* 2. Vehicle compatibility quick selector */}
-              <div className="rounded-xl border border-border bg-secondary/40 p-3 text-xs">
-                <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-foreground text-[11px]">
-                  <Car className="h-3.5 w-3.5 text-primary" />
-                  <span>Workshop Fleet Fitment</span>
-                </div>
-                {vehicle ? (
-                  <div className="mt-2 text-xs">
-                    <p className="font-semibold text-primary">{vehicle}</p>
-                    <button
-                      onClick={() =>
-                        nav({ search: (s: S) => ({ ...s, vehicle: undefined }) })
-                      }
-                      className="mt-1 text-[11px] text-muted-foreground hover:text-foreground underline"
-                    >
-                      Clear fitment filter
-                    </button>
-                  </div>
-                ) : savedVehicle ? (
-                  <div className="mt-2 text-xs">
-                    <p className="text-muted-foreground text-[11px]">Saved platform:</p>
-                    <p className="font-bold text-foreground">
-                      {savedVehicle.make} {savedVehicle.model} ({savedVehicle.year})
-                    </p>
-                    <button
-                      onClick={() =>
-                        nav({
-                          search: (s: S) => ({
-                            ...s,
-                            vehicle: `${savedVehicle.make} ${savedVehicle.model}`,
-                          }),
-                        })
-                      }
-                      className="btn btn-primary mt-2 h-7 w-full text-[10px] font-bold uppercase tracking-wider"
-                    >
-                      Filter for this platform
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-1.5 text-[11px] text-muted-foreground">
-                    <p>Match lifts & spares with fleet models.</p>
-                    <Link
-                      to="/garage"
-                      className="mt-1 block text-primary hover:underline font-semibold"
-                    >
-                      + Select vehicle model
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* 3. Product Nature Filter (Equipment vs Parts) */}
+              {/* 3. Product Nature (3-way Segmented Control) */}
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
-                  <Wrench className="h-3.5 w-3.5 text-primary" /> Commercial Category
-                </h3>
-                <div className="space-y-1.5 text-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                  Product Type
+                </span>
+                <div className="grid grid-cols-3 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 text-xs">
                   {[
-                    { id: undefined, label: "All Items (Spares & Machinery)" },
-                    { id: "equipment", label: "Commercial Garage Machinery" },
-                    { id: "parts", label: "Replacement Auto Parts & Fluids" },
-                  ].map((item) => (
-                    <label
-                      key={item.label}
-                      className="flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-secondary/40 transition-colors"
-                    >
-                      <input
-                        type="radio"
-                        name="shop-type"
-                        checked={searchType === item.id}
-                        onChange={() =>
+                    { id: undefined, label: "All" },
+                    { id: "equipment", label: "Machinery" },
+                    { id: "parts", label: "Parts" },
+                  ].map((item) => {
+                    const active = searchType === item.id;
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() =>
                           nav({ search: (s: S) => ({ ...s, type: item.id }) })
                         }
-                        className="accent-[var(--color-primary)]"
-                      />
-                      <span
-                        className={
-                          searchType === item.id
-                            ? "font-bold text-foreground"
-                            : "text-foreground/80"
-                        }
+                        className={cn(
+                          "py-1 rounded-lg font-semibold transition-all cursor-pointer text-center truncate px-1 text-[11px]",
+                          active
+                            ? "bg-white dark:bg-zinc-900 text-foreground shadow-xs"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
                       >
                         {item.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. Category Filter */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  Equipment & Parts Type
-                </h3>
-                <ul className="space-y-0.5 text-xs">
-                  <li>
-                    <Link
-                      to="/shop"
-                      search={(s: S) => ({ ...s, cat: undefined })}
-                      className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 font-medium transition-colors ${
-                        !cat
-                          ? "bg-primary text-white font-bold shadow-xs"
-                          : "text-foreground hover:bg-secondary"
-                      }`}
-                    >
-                      <span>All Categories</span>
-                      <span className="text-[11px] opacity-80">{products.length}</span>
-                    </Link>
-                  </li>
-                  {categories.map((c) => {
-                    const count = products.filter((p) => p.category === c).length;
-                    const active = cat === c;
-                    return (
-                      <li key={c}>
-                        <Link
-                          to="/shop"
-                          search={(s: S) => ({ ...s, cat: c })}
-                          className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 font-medium transition-colors ${
-                            active
-                              ? "bg-primary text-white font-bold shadow-xs"
-                              : "text-foreground hover:bg-secondary"
-                          }`}
-                        >
-                          <span>{c}</span>
-                          <span
-                            className={`text-[11px] ${
-                              active
-                                ? "text-white/90"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {count}
-                          </span>
-                        </Link>
-                      </li>
+                      </button>
                     );
                   })}
-                </ul>
-              </div>
-
-              {/* 5. Brand Filter */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  Manufacturer Brands
-                </h3>
-                <div className="space-y-1 text-xs max-h-44 overflow-y-auto pr-1">
-                  <label className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-secondary/40">
-                    <input
-                      type="radio"
-                      name="shop-brand"
-                      checked={!selectedBrand}
-                      onChange={() => setSelectedBrand("")}
-                      className="accent-[var(--color-primary)]"
-                    />
-                    <span className="font-medium">All Brands</span>
-                  </label>
-                  {brands.map((b) => (
-                    <label key={b} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-secondary/40">
-                      <input
-                        type="radio"
-                        name="shop-brand"
-                        checked={selectedBrand === b}
-                        onChange={() => setSelectedBrand(b)}
-                        className="accent-[var(--color-primary)]"
-                      />
-                      <span
-                        className={
-                          selectedBrand === b ? "font-bold text-primary" : "text-foreground/80"
-                        }
-                      >
-                        {b}
-                      </span>
-                    </label>
-                  ))}
                 </div>
               </div>
 
-              {/* 6. Availability */}
-              <div className="border-t border-border pt-4">
-                <label className="flex items-center justify-between text-xs cursor-pointer">
-                  <span className="font-semibold text-foreground">In Stock Only</span>
-                  <input
-                    type="checkbox"
-                    checked={inStock}
-                    onChange={(e) => setInStock(e.target.checked)}
-                    className="h-4 w-4 rounded accent-[var(--color-primary)]"
-                  />
-                </label>
+              {/* 4. Category Dropdown (Compact, No Scroll) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="filter-cat" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Category
+                  </label>
+                  {cat && (
+                    <button
+                      onClick={() =>
+                        nav({ search: (s: S) => ({ ...s, cat: undefined }) })
+                      }
+                      className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <select
+                    id="filter-cat"
+                    value={cat || ""}
+                    onChange={(e) =>
+                      nav({ search: (s: S) => ({ ...s, cat: e.target.value || undefined }) })
+                    }
+                    className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                </div>
               </div>
 
-              {/* Commercial B2B Quotation Concierge Card */}
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-xs">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-primary">
-                  Bulk Procurement
-                </p>
-                <p className="font-bold text-foreground mt-0.5">
-                  Need Fleet or Workshop Supply?
-                </p>
-                <p className="text-muted-foreground mt-1 text-[11px] leading-relaxed">
-                  Submit items to your RFQ cart or request custom site delivery with technical installation.
-                </p>
-                <Link
-                  to="/support"
-                  className="mt-3 inline-flex items-center gap-1.5 font-bold uppercase text-primary hover:underline text-[11px]"
-                >
-                  <FileSpreadsheet className="h-3.5 w-3.5" /> Direct RFP Inquiry →
-                </Link>
+              {/* 5. Manufacturer Brand Dropdown (Compact, No Scroll) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="filter-brand" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Brand
+                  </label>
+                  {selectedBrand && (
+                    <button
+                      onClick={() => setSelectedBrand("")}
+                      className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <select
+                    id="filter-brand"
+                    value={selectedBrand}
+                    onChange={(e) => setSelectedBrand(e.target.value)}
+                    className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
+                  >
+                    <option value="">All Brands</option>
+                    {brands.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                </div>
               </div>
+
+              {/* Fleet Fitment Active Tag (if selected) */}
+              {vehicle && (
+                <div className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                  <span className="font-semibold text-primary truncate text-[11px]">{vehicle}</span>
+                  <button
+                    onClick={() =>
+                      nav({ search: (s: S) => ({ ...s, vehicle: undefined }) })
+                    }
+                    className="text-[10px] text-muted-foreground hover:text-foreground ml-2 shrink-0 cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
             </div>
           </aside>
 
@@ -560,12 +460,9 @@ export function Shop() {
           {/* RIGHT: PRODUCT RESULTS & TOP CONTROLS                    */}
           {/* ======================================================== */}
           <div>
-            {/* Top Controls Bar */}
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="font-bold text-foreground bg-secondary/80 px-2.5 py-1 rounded-full text-xs">
-                  {filteredList.length} Items Available
-                </span>
+            {/* Active Filter Chips Bar (Only shown when active filters exist) */}
+            {activeFiltersCount > 0 && (
+              <div className="mb-4 flex flex-wrap items-center gap-2 text-xs border-b border-border/70 pb-3">
                 {searchMobility && (
                   <Chip
                     label={`Platform: ${searchMobility}`}
@@ -598,7 +495,7 @@ export function Shop() {
                 )}
                 {searchType && (
                   <Chip
-                    label={`Type: ${searchType}`}
+                    label={`Type: ${searchType === "equipment" ? "Machinery" : "Parts"}`}
                     onClear={() =>
                       nav({ search: (s: S) => ({ ...s, type: undefined }) })
                     }
@@ -614,74 +511,19 @@ export function Shop() {
                   />
                 )}
               </div>
+            )}
 
-              {/* Sort & Grid/List View Toggle */}
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  <span>Sort by:</span>
-                  <select
-                    value={sort}
-                    onChange={(e) => setSort(e.target.value)}
-                    className="h-8.5 rounded-lg border border-border bg-card px-2.5 text-xs text-foreground focus:border-primary focus:outline-none shadow-xs"
-                  >
-                    <option value="featured">Featured / Best Match</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="brand">Manufacturer Brand (A-Z)</option>
-                    <option value="name">Product Name (A-Z)</option>
-                  </select>
-                </label>
-
-                {/* Grid / List toggle */}
-                <div className="hidden sm:flex items-center rounded-lg border border-border p-0.5 bg-card">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    aria-label="Grid view"
-                    className={`p-1.5 rounded-md transition-colors ${
-                      viewMode === "grid"
-                        ? "bg-foreground text-background shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <Grid className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    aria-label="List view"
-                    className={`p-1.5 rounded-md transition-colors ${
-                      viewMode === "list"
-                        ? "bg-foreground text-background shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <List className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Product List Render */}
+            {/* Product Grid Render: Guaranteed 2 Columns on Mobile */}
             {filteredList.length > 0 ? (
-              viewMode === "grid" ? (
-                <div className="grid grid-cols-2 gap-3.5 sm:gap-5 xl:grid-cols-3">
-                  {filteredList.map((p) => (
-                    <ProductCard
-                      key={p.slug}
-                      p={p}
-                      onQuote={setActiveQuoteProduct}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredList.map((p) => (
-                    <ProductListRow
-                      key={p.slug}
-                      p={p}
-                      onQuote={setActiveQuoteProduct}
-                    />
-                  ))}
-                </div>
-              )
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredList.map((p) => (
+                  <ProductCard
+                    key={p.slug}
+                    p={p}
+                    onQuote={setActiveQuoteProduct}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-border py-20 text-center bg-card/50">
                 <h3 className="display-md text-foreground">No Products Found</h3>
@@ -712,110 +554,229 @@ export function Shop() {
       {/* Mobile Filters Drawer */}
       {mobileFilterOpen && (
         <div className="fixed inset-0 z-50 flex bg-black/60 backdrop-blur-xs lg:hidden">
-          <div className="ml-auto w-full max-w-xs h-full bg-card p-6 overflow-y-auto flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider">
+          <div className="ml-auto w-full max-w-xs h-full bg-card p-5 overflow-y-auto flex flex-col justify-between shadow-2xl">
+            <div className="space-y-4">
+              {/* Drawer Header: Title + Reset + Close (No numbers) */}
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
                   Filters
                 </h3>
+                <div className="flex items-center gap-3">
+                  {(cat ||
+                    vehicle ||
+                    selectedBrand ||
+                    q ||
+                    inStock ||
+                    searchType ||
+                    searchMobility) && (
+                    <button
+                      onClick={handleClearAll}
+                      className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileFilterOpen(false)}
+                    aria-label="Close filters"
+                    className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* 1. Mobile In Stock Switch */}
+              <div className="flex items-center justify-between py-1.5 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-800">
+                <span className="text-xs font-semibold text-foreground">In Stock Only</span>
                 <button
-                  onClick={() => setMobileFilterOpen(false)}
-                  aria-label="Close filters"
+                  type="button"
+                  role="switch"
+                  aria-checked={inStock}
+                  onClick={() => setInStock(!inStock)}
+                  className={cn(
+                    "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                    inStock ? "bg-primary" : "bg-zinc-300 dark:bg-zinc-700"
+                  )}
                 >
-                  <X className="h-5 w-5" />
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out",
+                      inStock ? "translate-x-4" : "translate-x-0"
+                    )}
+                  />
                 </button>
               </div>
 
-              {/* Mobile Mobility Platform */}
-              <div className="mb-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  Vehicle Platform
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() =>
-                      nav({ search: (s: S) => ({ ...s, mobility: undefined }) })
-                    }
-                    className={`px-2.5 py-1 rounded text-xs ${
-                      !searchMobility
-                        ? "bg-primary text-primary-foreground font-bold"
-                        : "bg-secondary"
-                    }`}
-                  >
-                    All
-                  </button>
-                  {mobilitySegments.map((m) => (
+              {/* 2. Mobile Vehicle Platform (4-Column Segmented Row) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Platform
+                  </span>
+                  {searchMobility && (
                     <button
-                      key={m.id}
                       onClick={() =>
-                        nav({ search: (s: S) => ({ ...s, mobility: m.id }) })
+                        nav({ search: (s: S) => ({ ...s, mobility: undefined }) })
                       }
-                      className={`px-2.5 py-1 rounded text-xs ${
-                        searchMobility === m.id
-                          ? "bg-primary text-primary-foreground font-bold"
-                          : "bg-secondary"
-                      }`}
+                      className="text-[10px] font-semibold text-primary hover:underline"
                     >
-                      {m.id}
+                      Clear
                     </button>
-                  ))}
+                  )}
+                </div>
+                <div className="grid grid-cols-4 gap-1 text-xs">
+                  {[
+                    { id: "4-Wheeler", label: "4W", title: "4-Wheeler", icon: Car },
+                    { id: "2-Wheeler", label: "2W", title: "2-Wheeler", icon: Bike },
+                    { id: "3-Wheeler", label: "3W", title: "3-Wheeler", icon: Truck },
+                    { id: "EV", label: "EV", title: "Electric Mobility", icon: Zap },
+                  ].map((item) => {
+                    const active = searchMobility === item.id;
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        title={item.title}
+                        onClick={() =>
+                          nav({
+                            search: (s: S) => ({
+                              ...s,
+                              mobility: active ? undefined : item.id,
+                            }),
+                          })
+                        }
+                        className={cn(
+                          "flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-center font-medium transition-all cursor-pointer border text-xs gap-0.5",
+                          active
+                            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs font-bold"
+                            : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200/80 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 hover:border-zinc-300"
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            "h-3.5 w-3.5",
+                            active ? "text-primary" : "text-muted-foreground"
+                          )}
+                        />
+                        <span className="text-[10.5px] leading-tight font-semibold">{item.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Mobile Category */}
-              <div className="mb-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  Category
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() =>
-                      nav({ search: (s: S) => ({ ...s, cat: undefined }) })
-                    }
-                    className={`px-2.5 py-1 rounded text-xs ${
-                      !cat
-                        ? "bg-primary text-primary-foreground font-bold"
-                        : "bg-secondary"
-                    }`}
-                  >
-                    All
-                  </button>
-                  {categories.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() =>
-                        nav({ search: (s: S) => ({ ...s, cat: c }) })
-                      }
-                      className={`px-2.5 py-1 rounded text-xs ${
-                        cat === c
-                          ? "bg-primary text-primary-foreground font-bold"
-                          : "bg-secondary"
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
+              {/* 3. Mobile Product Nature (3-way Segmented Control) */}
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                  Product Type
+                </span>
+                <div className="grid grid-cols-3 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 text-xs">
+                  {[
+                    { id: undefined, label: "All" },
+                    { id: "equipment", label: "Machinery" },
+                    { id: "parts", label: "Parts" },
+                  ].map((item) => {
+                    const active = searchType === item.id;
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() =>
+                          nav({ search: (s: S) => ({ ...s, type: item.id }) })
+                        }
+                        className={cn(
+                          "py-1 rounded-lg font-semibold transition-all cursor-pointer text-center truncate px-1 text-[11px]",
+                          active
+                            ? "bg-white dark:bg-zinc-900 text-foreground shadow-xs"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Mobile In Stock */}
-              <label className="flex items-center gap-2 text-xs mb-6 font-semibold">
-                <input
-                  type="checkbox"
-                  checked={inStock}
-                  onChange={(e) => setInStock(e.target.checked)}
-                  className="h-4 w-4 rounded accent-[var(--color-primary)]"
-                />
-                In Stock Only
-              </label>
+              {/* 4. Mobile Category Dropdown */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="m-filter-cat" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Category
+                  </label>
+                  {cat && (
+                    <button
+                      onClick={() =>
+                        nav({ search: (s: S) => ({ ...s, cat: undefined }) })
+                      }
+                      className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <select
+                    id="m-filter-cat"
+                    value={cat || ""}
+                    onChange={(e) =>
+                      nav({ search: (s: S) => ({ ...s, cat: e.target.value || undefined }) })
+                    }
+                    className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+              </div>
+
+              {/* 5. Mobile Brand Dropdown */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="m-filter-brand" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Brand
+                  </label>
+                  {selectedBrand && (
+                    <button
+                      onClick={() => setSelectedBrand("")}
+                      className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <select
+                    id="m-filter-brand"
+                    value={selectedBrand}
+                    onChange={(e) => setSelectedBrand(e.target.value)}
+                    className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
+                  >
+                    <option value="">All Brands</option>
+                    {brands.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+              </div>
             </div>
 
-            <div className="pt-4 border-t border-border">
+            <div className="pt-4 mt-4 border-t border-border">
               <button
                 onClick={() => setMobileFilterOpen(false)}
-                className="btn btn-primary w-full h-10 text-xs font-bold uppercase"
+                className="btn btn-primary w-full h-10 text-xs font-bold uppercase rounded-xl shadow-sm cursor-pointer"
               >
-                Apply Filters ({filteredList.length} results)
+                Apply Filters
               </button>
             </div>
           </div>
@@ -845,104 +806,5 @@ function Chip({ label, onClear }: { label: string; onClear: () => void }) {
         <X className="h-3 w-3" />
       </button>
     </span>
-  );
-}
-
-// Row component for List view mode
-function ProductListRow({
-  p,
-  onQuote,
-}: {
-  p: Product;
-  onQuote?: (p: Product) => void;
-}) {
-  const { add, lines } = useCart();
-  const out = p.stock === "Out of stock";
-  const inCart = lines.some((l) => l.slug === p.slug);
-
-  return (
-    <article className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-card p-4 sm:p-5 hover:border-primary/40 hover:shadow-md transition-all">
-      <div className="flex items-center gap-4">
-        <Link
-          to="/shop/$slug"
-          params={{ slug: p.slug }}
-          className="aspect-square h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-gradient-to-b from-zinc-50 to-zinc-100/60 dark:from-zinc-900/40 dark:to-zinc-900/80 p-2 border border-zinc-200/60 dark:border-zinc-800"
-        >
-          <img
-            src={p.image}
-            alt={p.name}
-            loading="lazy"
-            className="h-full w-full object-contain mix-blend-multiply"
-          />
-        </Link>
-        <div>
-          <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            <span className="text-primary font-bold">{p.brand}</span>
-            <span>•</span>
-            <span>{p.category}</span>
-            <span>•</span>
-            <span className="font-mono">{p.sku}</span>
-            {p.mobility && p.mobility.length > 0 && (
-              <>
-                <span>•</span>
-                <span className="text-foreground">{p.mobility.join(", ")}</span>
-              </>
-            )}
-          </div>
-          <Link
-            to="/shop/$slug"
-            params={{ slug: p.slug }}
-            className="mt-1 block font-semibold text-foreground hover:text-primary transition-colors text-base leading-snug"
-          >
-            {p.name}
-          </Link>
-          <p className="mt-1 text-xs text-muted-foreground line-clamp-1 max-w-xl">
-            {p.description}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex sm:flex-col items-center sm:items-end justify-between shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-border gap-3">
-        <div className="sm:text-right">
-          <span className="block text-[9px] font-mono font-bold uppercase tracking-wider text-primary">
-            Official Pricing
-          </span>
-          <div className="font-display text-sm sm:text-base font-bold text-foreground">
-            Quotation on Request
-          </div>
-          <p
-            className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${
-              out ? "text-destructive" : "text-emerald-600"
-            }`}
-          >
-            ● {p.stock}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onQuote && (
-            <button
-              type="button"
-              onClick={() => onQuote(p)}
-              className="btn btn-outline border-primary/50 text-primary hover:bg-primary hover:text-white h-8.5 px-3.5 text-xs font-bold uppercase tracking-wider rounded-lg shadow-xs transition-all"
-            >
-              Get Quote
-            </button>
-          )}
-          <button
-            type="button"
-            disabled={out}
-            onClick={() => add(p.slug)}
-            className={`h-8.5 px-3.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-              inCart
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                : "btn btn-primary"
-            }`}
-          >
-            {inCart ? "✓ In RFQ" : "+ RFQ Cart"}
-          </button>
-        </div>
-      </div>
-    </article>
   );
 }

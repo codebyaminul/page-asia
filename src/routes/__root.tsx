@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider, useCart } from "../lib/cart";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
+import { Check } from "lucide-react";
 
 function NotFoundComponent() {
   return (
@@ -122,8 +123,28 @@ function Toast() {
   const { toast } = useCart();
   if (!toast) return null;
   return (
-    <div role="status" className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 border-l-2 border-primary bg-ink px-5 py-3 text-sm text-ink-foreground animate-in fade-in slide-in-from-bottom-2">
-      {toast}
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed bottom-6 left-1/2 z-[100] -translate-x-1/2 flex items-center gap-3.5 rounded-2xl bg-zinc-950 text-white px-4 py-3 shadow-2xl border border-white/15 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-200 max-w-[92vw] sm:max-w-md w-max"
+    >
+      <div className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+        <Check className="h-4 w-4 stroke-[2.5]" />
+      </div>
+      <div className="flex flex-col min-w-0 pr-1 text-left">
+        <span className="text-xs font-bold text-white">
+          Added to Cart
+        </span>
+        <span className="text-[11px] text-zinc-300 truncate max-w-[190px] sm:max-w-[240px]">
+          {toast}
+        </span>
+      </div>
+      <Link
+        to="/cart"
+        className="ml-auto shrink-0 rounded-xl bg-primary hover:bg-primary/90 text-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all shadow-xs"
+      >
+        View Cart
+      </Link>
     </div>
   );
 }

@@ -9,7 +9,9 @@ import {
   Minus,
   Plus,
   Send,
+  Wrench,
   X,
+  Zap,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
@@ -127,15 +129,14 @@ export function ProductPage() {
   // Key Technical Highlights (First 4-5 specs for the right-hand highlight box)
   const quickHighlights = p.specs.slice(0, 4);
 
-  // Related products
-  const related = products
-    .filter(
-      (x) =>
-        x.slug !== p.slug &&
-        (x.category === p.category || (p.isEquipment && x.isEquipment))
-    )
-    .concat(products.filter((x) => x.slug !== p.slug))
-    .slice(0, 4);
+  // Related products from same category or complementary equipment
+  const sameCategory = products.filter(
+    (x) => x.slug !== p.slug && x.category === p.category
+  );
+  const otherItems = products.filter(
+    (x) => x.slug !== p.slug && x.category !== p.category
+  );
+  const related = [...sameCategory, ...otherItems].slice(0, 4);
 
   // Vehicle compatibility match status
   const isVehicleCompatible = vehicle
@@ -192,21 +193,34 @@ export function ProductPage() {
           <div className="lg:col-span-6 space-y-4">
             {/* Main Image Stage */}
             <div className="relative aspect-square w-full rounded-2xl border border-zinc-200 bg-white p-6 sm:p-10 flex items-center justify-center overflow-hidden shadow-xs group">
-              {/* Subtle Platform Badge */}
-              <div className="absolute top-4 left-4 z-10 flex gap-2">
-                {p.mobility?.includes("EV") ? (
-                  <span className="rounded-full bg-emerald-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-xs">
-                    EV Platform
-                  </span>
-                ) : p.isEquipment ? (
-                  <span className="rounded-full bg-zinc-900 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-xs">
-                    Garage Machinery
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200 px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                    OEM Genuine
+              {/* Minimal Platform Icon Badges - More Transparent & Faded */}
+              <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-1.5">
+                {p.mobility?.includes("EV") && (
+                  <span
+                    className="grid h-6 w-6 place-items-center rounded-full bg-emerald-500/[0.04] border border-emerald-500/15 text-emerald-600/40 opacity-25 hover:opacity-80 backdrop-blur-xs transition-all cursor-help"
+                    title="EV Platform Compatible"
+                    aria-label="EV Platform Compatible"
+                  >
+                    <Zap className="h-3 w-3 stroke-[1.75] fill-none text-emerald-600/50" />
                   </span>
                 )}
+                {p.isEquipment ? (
+                  <span
+                    className="grid h-6 w-6 place-items-center rounded-full bg-zinc-900/[0.03] border border-zinc-900/10 text-zinc-600/35 opacity-25 hover:opacity-80 backdrop-blur-xs transition-all cursor-help"
+                    title="Garage Machinery Equipment"
+                    aria-label="Garage Machinery Equipment"
+                  >
+                    <Wrench className="h-3 w-3 stroke-[1.75]" />
+                  </span>
+                ) : !p.mobility?.includes("EV") ? (
+                  <span
+                    className="grid h-6 w-6 place-items-center rounded-full bg-zinc-100/30 text-zinc-500/35 border border-zinc-200/30 opacity-25 hover:opacity-80 backdrop-blur-xs transition-all cursor-help"
+                    title="OEM Genuine Replacement"
+                    aria-label="OEM Genuine Replacement"
+                  >
+                    <CheckCircle2 className="h-3 w-3 stroke-[1.75] text-primary/35" />
+                  </span>
+                ) : null}
               </div>
 
               {/* Fullscreen Zoom Trigger */}

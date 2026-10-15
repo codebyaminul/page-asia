@@ -25,10 +25,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => { localStorage.setItem("page-cart", JSON.stringify(lines)); }, [lines]);
 
-  const flash = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2200); };
+  const flash = (m: string) => { setToast(m); setTimeout(() => setToast(null), 3000); };
   const add = (slug: string, qty = 1) => {
     setLines((ls) => { const f = ls.find((l) => l.slug === slug); return f ? ls.map((l) => (l.slug === slug ? { ...l, qty: l.qty + qty } : l)) : [...ls, { slug, qty }]; });
-    flash("Added to Quotation List");
+    const p = products.find((pr) => pr.slug === slug);
+    flash(p ? p.name : "Item added to cart");
   };
   const setQty = (slug: string, qty: number) => setLines((ls) => ls.map((l) => (l.slug === slug ? { ...l, qty: Math.max(1, qty) } : l)));
   const remove = (slug: string) => setLines((ls) => ls.filter((l) => l.slug !== slug));
@@ -41,4 +42,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   return <CartCtx.Provider value={{ lines: full, count, subtotal, add, setQty, remove, clear, vehicle, setVehicle, toast }}>{children}</CartCtx.Provider>;
 }
 
-export function useCart() { const c = useContext(CartCtx); if (!c) throw new Error("useCart outside provider"); return c; }
+const defaultCartCtx: Ctx = {
+  lines: [],
+  count: 0,
+  subtotal: 0,
+  add: () => {},
+  setQty: () => {},
+  remove: () => {},
+  clear: () => {},
+  vehicle: null,
+  setVehicle: () => {},
+  toast: null,
+};
+
+export function useCart() {
+  const c = useContext(CartCtx);
+  return c ?? defaultCartCtx;
+}

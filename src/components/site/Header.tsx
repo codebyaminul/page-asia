@@ -76,6 +76,25 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   // Check if current page begins with dark hero/header
   const isDarkTopPage =
     path === "/" ||
@@ -84,26 +103,23 @@ export function Header() {
     path.startsWith("/about") ||
     path.startsWith("/service-centers");
 
-  // Show liquid glass if user has scrolled down OR if on a light-background page like /cart or /checkout
-  const isGlass = scrolled || !isDarkTopPage;
+  // Show liquid glass if user has scrolled down, if on a light-background page, or if mobile menu is open
+  const isGlass = scrolled || !isDarkTopPage || open;
 
   return (
     <>
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ease-in-out ${
           isGlass
-            ? "bg-white/80 backdrop-blur-2xl border-b border-white/80 shadow-[inset_0_1px_1.5px_0_rgba(255,255,255,1),0_12px_36px_-8px_rgba(0,0,0,0.08)] text-zinc-900"
+            ? "bg-white/90 backdrop-blur-2xl border-b border-zinc-200/80 shadow-[inset_0_1px_1.5px_0_rgba(255,255,255,1),0_12px_36px_-8px_rgba(0,0,0,0.08)] text-zinc-900"
             : "bg-gradient-to-b from-black/60 via-black/25 to-transparent border-b border-white/10 text-white"
         }`}
       >
-
-
         {/* Main Header Row */}
         <div className="container-page flex h-16 items-center justify-between gap-4 lg:h-[4.25rem]">
           <Logo scrolled={isGlass} />
 
-
-          {/* Primary Navigation Links */}
+          {/* Primary Navigation Links (Desktop) */}
           <nav aria-label="Primary" className="hidden items-center gap-4 xl:gap-6 lg:flex">
             {/* Shop Dropdown Button & Submenu */}
             <div
@@ -191,13 +207,12 @@ export function Header() {
 
           {/* Action CTAs */}
           <div className="flex items-center gap-2.5">
-
             <Link
               to="/cart"
               aria-label={`Cart, ${count} items`}
               className={`relative grid h-9.5 w-9.5 place-items-center rounded-full border transition-all ${
                 isGlass
-                  ? "border-white/80 bg-white/70 hover:bg-white text-zinc-800 shadow-xs"
+                  ? "border-zinc-200/90 bg-white/80 hover:bg-white text-zinc-800 shadow-xs"
                   : "border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
               }`}
             >
@@ -209,118 +224,174 @@ export function Header() {
               )}
             </Link>
 
-
             <button
-              onClick={() => setOpen(true)}
-              aria-label="Open mobile menu"
+              onClick={() => setOpen((v) => !v)}
+              aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={open}
               className={`grid h-9 w-9 place-items-center rounded-full border transition-all lg:hidden ${
                 isGlass
-                  ? "border-white/80 bg-white/70 hover:bg-white text-zinc-800 shadow-xs"
+                  ? "border-zinc-200/90 bg-white/80 hover:bg-white text-zinc-800 shadow-xs"
                   : "border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
               }`}
             >
-              <Menu className="h-5 w-5" />
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
+        {/* Mobile Navigation Dropdown: Clean, Professional B2B Navigation */}
+        {open && (
+          <div
+            id="mobile-navigation-dropdown"
+            className="lg:hidden border-t border-zinc-200/80 bg-white/98 backdrop-blur-2xl text-zinc-900 shadow-2xl animate-in slide-in-from-top-2 fade-in duration-200 max-h-[calc(100vh-4.25rem)] overflow-y-auto"
+          >
+            <div className="container-page py-4 space-y-4">
+              {/* Primary Navigation Links */}
+              <nav aria-label="Mobile Navigation" className="divide-y divide-zinc-100">
+                {/* Shop / Products Section */}
+                <div className="py-1">
+                  <div className="flex items-center justify-between">
+                    <Link
+                      to="/shop"
+                      onClick={() => setOpen(false)}
+                      className={`flex-1 py-3 text-base font-bold uppercase tracking-wider transition-colors ${
+                        path.startsWith("/shop")
+                          ? "text-primary"
+                          : "text-zinc-900 hover:text-primary"
+                      }`}
+                    >
+                      Shop
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setMobileShopOpen((v) => !v)}
+                      aria-label="Toggle shop categories"
+                      className="p-3 text-zinc-400 hover:text-zinc-900 transition-colors"
+                    >
+                      <ChevronDown
+                        className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                          mobileShopOpen ? "rotate-180 text-zinc-900" : ""
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {mobileShopOpen && (
+                    <div className="pl-3 pb-2 space-y-0.5 border-l-2 border-primary/20 ml-1 mt-1 animate-in fade-in duration-150">
+                      <Link
+                        to="/shop"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-between py-2 px-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-zinc-600 hover:text-primary hover:bg-zinc-50 transition-colors"
+                      >
+                        <span>All Products & Machinery</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-zinc-300" />
+                      </Link>
+                      <Link
+                        to="/shop"
+                        search={{ cat: "Garage Equipment" }}
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-between py-2 px-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-zinc-600 hover:text-primary hover:bg-zinc-50 transition-colors"
+                      >
+                        <span>Garage Equipment</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-zinc-300" />
+                      </Link>
+                      <Link
+                        to="/shop"
+                        search={{ mobility: "EV" }}
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-between py-2 px-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-zinc-600 hover:text-primary hover:bg-zinc-50 transition-colors"
+                      >
+                        <span>EV Platform & Tools</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-zinc-300" />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* Solutions */}
+                <div className="py-1">
+                  <Link
+                    to="/solutions"
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center justify-between py-3 text-base font-bold uppercase tracking-wider transition-colors ${
+                      path.startsWith("/solutions")
+                        ? "text-primary"
+                        : "text-zinc-900 hover:text-primary"
+                    }`}
+                  >
+                    <span>Solutions</span>
+                    <ChevronRight className="h-4 w-4 text-zinc-300" />
+                  </Link>
+                </div>
+
+                {/* Support */}
+                <div className="py-1">
+                  <Link
+                    to="/support"
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center justify-between py-3 text-base font-bold uppercase tracking-wider transition-colors ${
+                      path.startsWith("/support")
+                        ? "text-primary"
+                        : "text-zinc-900 hover:text-primary"
+                    }`}
+                  >
+                    <span>Support</span>
+                    <ChevronRight className="h-4 w-4 text-zinc-300" />
+                  </Link>
+                </div>
+
+                {/* About */}
+                <div className="py-1">
+                  <Link
+                    to="/about"
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center justify-between py-3 text-base font-bold uppercase tracking-wider transition-colors ${
+                      path.startsWith("/about")
+                        ? "text-primary"
+                        : "text-zinc-900 hover:text-primary"
+                    }`}
+                  >
+                    <span>About</span>
+                    <ChevronRight className="h-4 w-4 text-zinc-300" />
+                  </Link>
+                </div>
+              </nav>
+
+              {/* Bottom Quotation Cart Action */}
+              <div className="pt-2 border-t border-zinc-100">
+                <Link
+                  to="/cart"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition-all text-zinc-900 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-8.5 w-8.5 place-items-center rounded-lg bg-zinc-900 text-white shadow-xs">
+                      <ShoppingBag className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-zinc-900">
+                        Quotation Cart
+                      </div>
+                      <div className="text-[11px] text-zinc-500">
+                        {count > 0 ? `${count} items in list` : "No items selected"}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Mobile Drawer Menu with Light Liquid Glass */}
+      {/* Backdrop overlay for outside tap */}
       {open && (
         <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          className="fixed inset-0 z-[60] flex flex-col bg-white/95 backdrop-blur-2xl text-zinc-900 animate-in fade-in duration-200"
-        >
-          <div className="container-page flex h-16 items-center justify-between border-b border-zinc-200">
-            <Logo scrolled={true} />
-            <button
-              onClick={() => setOpen(false)}
-              aria-label="Close menu"
-              className="grid h-9 w-9 place-items-center rounded-full border border-zinc-200 text-zinc-900 hover:bg-zinc-100"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-
-
-          <div className="flex-1 overflow-y-auto p-4 space-y-1">
-            {/* Shop expandable item */}
-            <div className="space-y-1">
-              <div className="flex w-full items-center justify-between rounded hover:bg-zinc-100 text-sm font-bold uppercase tracking-wider text-zinc-900">
-                <Link
-                  to="/shop"
-                  onClick={() => setOpen(false)}
-                  className="flex flex-1 items-center gap-2.5 py-3 px-3 hover:text-primary transition-colors"
-                >
-                  <ShoppingBag className="h-4 w-4 text-primary" />
-                  <span>Shop</span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMobileShopOpen((v) => !v);
-                  }}
-                  aria-label="Toggle shop categories"
-                  className="p-3 text-zinc-400 hover:text-zinc-600 transition-colors"
-                >
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      mobileShopOpen ? "rotate-180 text-primary" : ""
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {mobileShopOpen && (
-                <div className="ml-3 pl-3 border-l-2 border-primary/20 space-y-1 py-1">
-                  {shopLinks.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      search={"search" in item ? item.search : {}}
-                      onClick={() => setOpen(false)}
-                      className="flex items-center justify-between py-2 px-3 rounded hover:bg-zinc-100 text-xs font-bold uppercase tracking-wider text-zinc-700 hover:text-primary"
-                    >
-                      <div className="flex items-center gap-2">
-                        <item.icon className="h-3.5 w-3.5 text-primary" />
-                        <span>{item.label}</span>
-                      </div>
-                      <ChevronRight className="h-3.5 w-3.5 text-zinc-400" />
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {navLinks.map((n) => (
-              <Link
-                key={n.label}
-                to={n.to}
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between py-3 px-3 rounded hover:bg-zinc-100 text-sm font-bold uppercase tracking-wider text-zinc-900"
-              >
-                <span>{n.label}</span>
-                <ChevronRight className="h-4 w-4 text-zinc-400" />
-              </Link>
-            ))}
-          </div>
-
-          <div className="p-4 border-t border-zinc-200 bg-white/60 backdrop-blur-md space-y-3">
-            <Link
-              to="/cart"
-              onClick={() => setOpen(false)}
-              className="btn btn-primary h-11 w-full text-xs font-bold uppercase tracking-wider shadow-lg rounded-full flex items-center justify-center gap-2"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              <span>Quotation Cart {count > 0 ? `(${count})` : ""}</span>
-            </Link>
-          </div>
-        </div>
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 top-16 bg-black/40 backdrop-blur-xs z-40 lg:hidden animate-in fade-in duration-200"
+          aria-hidden="true"
+        />
       )}
     </>
   );
