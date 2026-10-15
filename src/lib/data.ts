@@ -1347,3 +1347,29 @@ export const vehicleData = vehiclePlatformData["4-Wheeler"];
 export const years = Array.from({ length: 15 }, (_, i) => String(2024 - i));
 
 export const taka = (n: number) => "৳" + n.toLocaleString("en-IN");
+
+/**
+ * Returns all active products for the shop, pulling live products from Admin Inventory
+ * (localStorage `admin_inventory`) if present, or falling back to the base `products` catalogue.
+ * This guarantees any product added, edited, or deleted in the Admin panel instantly reflects in the frontend shop!
+ */
+export function getShopProducts(): Product[] {
+  if (typeof window === "undefined") return products;
+  try {
+    const raw = localStorage.getItem("admin_inventory");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed as Product[];
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return products;
+}
+
+export function getProductBySlug(slug: string): Product | undefined {
+  const all = getShopProducts();
+  return all.find((p) => p.slug === slug) || products.find((p) => p.slug === slug);
+}

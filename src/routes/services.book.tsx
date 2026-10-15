@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { centers } from "@/lib/data";
+import { addBooking } from "@/lib/admin-data";
 
 type S = { service?: string | undefined; center?: string | undefined };
 
@@ -190,10 +191,6 @@ export function BookConsultation() {
         >
           <Link to="/" className="hover:text-foreground">
             Home
-          </Link>
-          <span>/</span>
-          <Link to="/services" className="hover:text-foreground">
-            Services
           </Link>
           <span>/</span>
           <span className="font-semibold text-foreground">
@@ -615,7 +612,25 @@ export function BookConsultation() {
                 <button
                   type="button"
                   disabled={!canNext}
-                  onClick={() => setDone(true)}
+                  onClick={() => {
+                    try {
+                      addBooking({
+                        companyName: biz.businessName,
+                        contactName: info.contactPerson,
+                        phone: info.phone,
+                        email: info.email,
+                        serviceId: sel[0] || "consultation",
+                        serviceName: chosenServices.map((s) => s.name).join(", ") || "General Equipment Consultation",
+                        centerId: locationType === "hub" ? center : "onsite",
+                        centerName: locationType === "hub" ? (c?.name || "PAGE Equipment Hub") : `On-site: ${onsiteAddress || biz.businessName}`,
+                        preferredDate: `${day !== null ? days[day]!.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)} (${slot})`,
+                        notes: info.notes,
+                      });
+                    } catch {
+                      // Fallback gracefully
+                    }
+                    setDone(true);
+                  }}
                   className="btn btn-primary h-10 px-8 text-xs font-bold uppercase tracking-wider shadow"
                 >
                   Confirm Appointment

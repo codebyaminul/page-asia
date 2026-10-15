@@ -13,12 +13,18 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as GarageRouteImport } from './routes/garage'
+import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as ServiceCentersRouteImport } from './routes/service-centers'
 import { Route as SolutionsRouteImport } from './routes/solutions'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as VehiclesRouteImport } from './routes/vehicles'
-import { Route as ServicesIndexRouteImport } from './routes/services.index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
+import { Route as AdminInventoryRouteImport } from './routes/admin/inventory'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminQuotesRouteImport } from './routes/admin/quotes'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as ServicesBookRouteImport } from './routes/services.book'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
@@ -43,9 +49,9 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GarageRoute = GarageRouteImport.update({
-  id: '/garage',
-  path: '/garage',
+const ConsultationRoute = ConsultationRouteImport.update({
+  id: '/consultation',
+  path: '/consultation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServiceCentersRoute = ServiceCentersRouteImport.update({
@@ -68,9 +74,39 @@ const VehiclesRoute = VehiclesRouteImport.update({
   path: '/vehicles',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ServicesIndexRoute = ServicesIndexRouteImport.update({
-  id: '/services/',
-  path: '/services/',
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/admin/bookings',
+  path: '/admin/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/admin/inventory',
+  path: '/admin/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminQuotesRoute = AdminQuotesRouteImport.update({
+  id: '/admin/quotes',
+  path: '/admin/quotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesBookRoute = ServicesBookRouteImport.update({
@@ -94,14 +130,20 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
-  '/garage': typeof GarageRoute
+  '/consultation': typeof ConsultationRoute
   '/service-centers': typeof ServiceCentersRoute
   '/solutions': typeof SolutionsRoute
   '/support': typeof SupportRoute
   '/vehicles': typeof VehiclesRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/quotes': typeof AdminQuotesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/services/book': typeof ServicesBookRoute
   '/shop/$slug': typeof ShopSlugRoute
-  '/services/': typeof ServicesIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/shop/': typeof ShopIndexRoute
 }
 export interface FileRoutesByTo {
@@ -109,14 +151,20 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
-  '/garage': typeof GarageRoute
+  '/consultation': typeof ConsultationRoute
   '/service-centers': typeof ServiceCentersRoute
   '/solutions': typeof SolutionsRoute
   '/support': typeof SupportRoute
   '/vehicles': typeof VehiclesRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/quotes': typeof AdminQuotesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/services/book': typeof ServicesBookRoute
   '/shop/$slug': typeof ShopSlugRoute
-  '/services': typeof ServicesIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/shop': typeof ShopIndexRoute
 }
 export interface FileRoutesById {
@@ -125,14 +173,20 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
-  '/garage': typeof GarageRoute
+  '/consultation': typeof ConsultationRoute
   '/service-centers': typeof ServiceCentersRoute
   '/solutions': typeof SolutionsRoute
   '/support': typeof SupportRoute
   '/vehicles': typeof VehiclesRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/quotes': typeof AdminQuotesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/services/book': typeof ServicesBookRoute
   '/shop/$slug': typeof ShopSlugRoute
-  '/services/': typeof ServicesIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/shop/': typeof ShopIndexRoute
 }
 export interface FileRouteTypes {
@@ -142,14 +196,20 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/checkout'
-    | '/garage'
+    | '/consultation'
     | '/service-centers'
     | '/solutions'
     | '/support'
     | '/vehicles'
+    | '/admin/bookings'
+    | '/admin/inventory'
+    | '/admin/login'
+    | '/admin/quotes'
+    | '/admin/settings'
+    | '/admin/users'
     | '/services/book'
     | '/shop/$slug'
-    | '/services/'
+    | '/admin/'
     | '/shop/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -157,14 +217,20 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/checkout'
-    | '/garage'
+    | '/consultation'
     | '/service-centers'
     | '/solutions'
     | '/support'
     | '/vehicles'
+    | '/admin/bookings'
+    | '/admin/inventory'
+    | '/admin/login'
+    | '/admin/quotes'
+    | '/admin/settings'
+    | '/admin/users'
     | '/services/book'
     | '/shop/$slug'
-    | '/services'
+    | '/admin'
     | '/shop'
   id:
     | '__root__'
@@ -172,14 +238,20 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/checkout'
-    | '/garage'
+    | '/consultation'
     | '/service-centers'
     | '/solutions'
     | '/support'
     | '/vehicles'
+    | '/admin/bookings'
+    | '/admin/inventory'
+    | '/admin/login'
+    | '/admin/quotes'
+    | '/admin/settings'
+    | '/admin/users'
     | '/services/book'
     | '/shop/$slug'
-    | '/services/'
+    | '/admin/'
     | '/shop/'
   fileRoutesById: FileRoutesById
 }
@@ -188,14 +260,20 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
-  GarageRoute: typeof GarageRoute
+  ConsultationRoute: typeof ConsultationRoute
   ServiceCentersRoute: typeof ServiceCentersRoute
   SolutionsRoute: typeof SolutionsRoute
   SupportRoute: typeof SupportRoute
   VehiclesRoute: typeof VehiclesRoute
+  AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminQuotesRoute: typeof AdminQuotesRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   ServicesBookRoute: typeof ServicesBookRoute
   ShopSlugRoute: typeof ShopSlugRoute
-  ServicesIndexRoute: typeof ServicesIndexRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ShopIndexRoute: typeof ShopIndexRoute
 }
 
@@ -229,11 +307,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/garage': {
-      id: '/garage'
-      path: '/garage'
-      fullPath: '/garage'
-      preLoaderRoute: typeof GarageRouteImport
+    '/consultation': {
+      id: '/consultation'
+      path: '/consultation'
+      fullPath: '/consultation'
+      preLoaderRoute: typeof ConsultationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/service-centers': {
@@ -264,11 +342,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VehiclesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/services/': {
-      id: '/services/'
-      path: '/services'
-      fullPath: '/services/'
-      preLoaderRoute: typeof ServicesIndexRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/admin/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/inventory': {
+      id: '/admin/inventory'
+      path: '/admin/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/quotes': {
+      id: '/admin/quotes'
+      path: '/admin/quotes'
+      fullPath: '/admin/quotes'
+      preLoaderRoute: typeof AdminQuotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/book': {
@@ -300,14 +420,20 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
-  GarageRoute: GarageRoute,
+  ConsultationRoute: ConsultationRoute,
   ServiceCentersRoute: ServiceCentersRoute,
   SolutionsRoute: SolutionsRoute,
   SupportRoute: SupportRoute,
   VehiclesRoute: VehiclesRoute,
+  AdminBookingsRoute: AdminBookingsRoute,
+  AdminInventoryRoute: AdminInventoryRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminQuotesRoute: AdminQuotesRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
   ServicesBookRoute: ServicesBookRoute,
   ShopSlugRoute: ShopSlugRoute,
-  ServicesIndexRoute: ServicesIndexRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ShopIndexRoute: ShopIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { products, type Product } from "./data";
+import { products, getShopProducts, type Product } from "./data";
 
 type Line = { slug: string; qty: number };
 type Garage = { platform?: string; make: string; model: string; year: string; engine: string } | null;
@@ -28,7 +28,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(null), 3000); };
   const add = (slug: string, qty = 1) => {
     setLines((ls) => { const f = ls.find((l) => l.slug === slug); return f ? ls.map((l) => (l.slug === slug ? { ...l, qty: l.qty + qty } : l)) : [...ls, { slug, qty }]; });
-    const p = products.find((pr) => pr.slug === slug);
+    const p = getShopProducts().find((pr) => pr.slug === slug) || products.find((pr) => pr.slug === slug);
     flash(p ? p.name : "Item added to cart");
   };
   const setQty = (slug: string, qty: number) => setLines((ls) => ls.map((l) => (l.slug === slug ? { ...l, qty: Math.max(1, qty) } : l)));
@@ -36,7 +36,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clear = () => setLines([]);
   const setVehicle = (v: Garage) => { setVehicleState(v); localStorage.setItem("page-vehicle", JSON.stringify(v)); if (v) flash(`Saved ${v.make} ${v.model} to My Garage`); };
 
-  const full = lines.map((l) => ({ ...l, product: products.find((p) => p.slug === l.slug)! })).filter((l) => l.product);
+  const catalog = getShopProducts();
+  const full = lines
+    .map((l) => ({ ...l, product: (catalog.find((p) => p.slug === l.slug) || products.find((p) => p.slug === l.slug))! }))
+    .filter((l) => l.product);
   const count = full.reduce((s, l) => s + l.qty, 0);
   const subtotal = full.reduce((s, l) => s + l.qty * l.product.price, 0);
   return <CartCtx.Provider value={{ lines: full, count, subtotal, add, setQty, remove, clear, vehicle, setVehicle, toast }}>{children}</CartCtx.Provider>;

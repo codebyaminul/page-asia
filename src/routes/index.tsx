@@ -2,21 +2,40 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
   ArrowUpRight,
-  ShoppingBag,
+  CheckCircle2,
+  ShieldCheck,
+  Star,
   Wrench,
   Zap,
+  Calendar,
+  PenSquare,
+  Clock,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import { CinematicIntro } from "@/components/site/CinematicIntro";
 import { MobilityScrollStack } from "@/components/site/MobilityScrollStack";
 import { BrandPartners } from "@/components/site/BrandPartners";
+import { ReviewCard } from "@/components/site/ReviewCard";
+import { ConsultationBanner } from "@/components/site/ConsultationBanner";
+import { TargetSectorsSection } from "@/components/site/TargetSectorsSection";
+import {
+  IconExtensiveNetwork,
+  IconMarketPresence,
+  IconIndustryConnections,
+  IconProactiveSales,
+  IconReliablePartner,
+  IconFocusedExpertise,
+} from "@/components/icons/EngineeringIcons";
+import { ProductCard } from "@/components/site/ProductCard";
+import { QuoteModal } from "@/components/site/QuoteModal";
+import { reviewsData } from "@/lib/reviews";
 import {
   images,
   products,
   taka,
-  vehiclePlatformData,
-  years,
-  type MobilityType,
+  type Product,
 } from "@/lib/data";
 
 export const Route = createFileRoute("/")({
@@ -48,28 +67,109 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+const heroLines = [
+  { prefix: "AUTOMOTIVE", highlight: "EQUIPMENT." },
+  { prefix: "AUTOMOTIVE", highlight: "PARTS." },
+  { prefix: "WORKSHOP", highlight: "SOLUTIONS." },
+];
+
+const HeroVideo = memo(function HeroVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.play().catch(() => {});
+
+    const handleWaiting = () => {
+      video.play().catch(() => {});
+    };
+    video.addEventListener("waiting", handleWaiting);
+    return () => {
+      video.removeEventListener("waiting", handleWaiting);
+    };
+  }, []);
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden bg-black">
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        disablePictureInPicture
+        disableRemotePlayback
+        className="h-full w-full object-cover object-center opacity-90 brightness-100 pointer-events-none transform-gpu will-change-transform"
+      >
+        <source src="/1015.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+    </div>
+  );
+});
+
 function Home() {
   const navigate = useNavigate();
 
-  // Active Who We Equip interactive index
-  const [activeEquipIndex, setActiveEquipIndex] = useState<number>(0);
+  // 3-second single-line rotating hero headline
+  const [heroLineIndex, setHeroLineIndex] = useState(0);
 
-  // Streamlined Vehicle Finder State
-  const [platform, setPlatform] = useState<MobilityType>("4-Wheeler");
-  const [make, setMake] = useState<string>("Toyota");
-  const [model, setModel] = useState<string>("Corolla");
-  const [year, setYear] = useState<string>("2022");
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroLineIndex((prev) => (prev + 1) % heroLines.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
 
-  const handleFinderSubmit = (e: React.FormEvent) => {
+  // Active product for quotation modal
+  const [activeQuoteProduct, setActiveQuoteProduct] = useState<Product | null>(null);
+
+  // Review modal state (sent to admin panel)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [revRating, setRevRating] = useState(5);
+  const [revName, setRevName] = useState("");
+  const [revRole, setRevRole] = useState("");
+  const [revWorkshop, setRevWorkshop] = useState("");
+  const [revEquipment, setRevEquipment] = useState("");
+  const [revComment, setRevComment] = useState("");
+
+  const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({
-      to: "/shop",
-      search: {
-        mobility: platform,
-        vehicle: `${make} ${model}`,
-      },
-    });
+    if (!revName || !revWorkshop || !revComment) return;
+
+    const newPendingReview = {
+      id: `rev-pending-${Date.now()}`,
+      name: revName,
+      role: revRole || "Workshop Proprietor",
+      workshop: revWorkshop,
+      equipment: revEquipment || "Commercial Workshop Equipment",
+      rating: revRating,
+      comment: revComment,
+      date: "October 2026",
+      status: "PENDING_ADMIN_APPROVAL",
+      submittedAt: new Date().toISOString(),
+    };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem("page_pending_reviews") || "[]");
+      localStorage.setItem("page_pending_reviews", JSON.stringify([newPendingReview, ...existing]));
+    } catch {
+      // fallback
+    }
+
+    setReviewSubmitted(true);
+    setRevName("");
+    setRevRole("");
+    setRevWorkshop("");
+    setRevEquipment("");
+    setRevComment("");
   };
 
   // 4 Featured High-Impact Products
@@ -80,49 +180,6 @@ function Home() {
     products.find((p) => p.slug === "rotary-screw-air-compressor-10hp") || products[3],
   ];
 
-  const makes = Object.keys(vehiclePlatformData[platform] ?? {});
-  const models = make && vehiclePlatformData[platform]?.[make]
-    ? Object.keys(vehiclePlatformData[platform][make])
-    : [];
-
-  const equipSectors = [
-    {
-      num: "01",
-      title: "WORKSHOPS",
-      tag: "Independent Multi-Brand Garages",
-      desc: "Supplied with 2-post electro-hydraulic lifts, pneumatic tools, consumable spares, and daily parts distribution.",
-    },
-    {
-      num: "02",
-      title: "SERVICE CENTERS",
-      tag: "High-Throughput Authorized Hubs",
-      desc: "Turnkey multi-bay scissor lifts, computerized alignment stations, AC servicing machines, and bulk lubricant systems.",
-    },
-    {
-      num: "03",
-      title: "DEALERS",
-      tag: "OEM Dealership Service Networks",
-      desc: "OE-level diagnostic tablets, factory-calibration rigs, certified testing tools, and warranty-backed garage infrastructure.",
-    },
-    {
-      num: "04",
-      title: "DISTRIBUTORS",
-      tag: "Regional Wholesalers & Retail Stockists",
-      desc: "Pallet and container-level wholesale supply for regional spare parts merchants, battery stockists, and tool retailers.",
-    },
-    {
-      num: "05",
-      title: "FLEETS",
-      tag: "Commercial Transport & Bus Depots",
-      desc: "Heavy-duty column lifts, industrial air compressors, and rapid replenishment contracts for high-wear fleet components.",
-    },
-    {
-      num: "06",
-      title: "EV BUSINESSES",
-      tag: "Electric Mobility Specialists & Retrofitters",
-      desc: "1000V VDE insulated hand tools, high-voltage battery diagnostic stations, safety isolation barriers, and charging bays.",
-    },
-  ];
 
   return (
     <div className="bg-background text-foreground selection:bg-primary selection:text-white">
@@ -130,75 +187,53 @@ function Home() {
       <CinematicIntro />
 
       {/* ======================================================== */}
-      {/* 01 — HERO: FULL-WIDTH CINEMATIC WORKSHOP ENVIRONMENT     */}
+      {/* 01 — HERO: FULL-SCREEN CINEMATIC WORKSHOP ENVIRONMENT     */}
       {/* ======================================================== */}
-      <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center justify-start overflow-hidden bg-black text-white pt-20">
-        {/* Full-Width Workshop Photograph */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src={images.heroWorkshop}
-            alt="Commercial automotive workshop facility equipped with hydraulic vehicle lifts"
-            fetchPriority="high"
-            className="h-full w-full object-cover object-center opacity-45 brightness-90 contrast-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-        </div>
+      <section className="relative h-screen min-h-screen h-[100svh] min-h-[100svh] w-full flex items-center justify-center text-center overflow-hidden bg-black text-white pt-16 sm:pt-20">
+        {/* Full-Screen Cinematic Workshop Video (FastStart Streamed & Hardware-Accelerated) */}
+        <HeroVideo />
 
-        {/* Hero Content: Bold Typography & Essential CTAs */}
-        <div className="container-page relative z-10 py-16 lg:py-24">
-          <div className="max-w-3xl">
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-primary mb-3">
-              PAGE INTERNATIONAL · B2B AUTOMOTIVE SUPPLIER
-            </span>
+        {/* Hero Content: Centered Bold Typography */}
+        <div className="container-page relative z-10 py-16 lg:py-24 flex flex-col items-center justify-center text-center">
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+            {/* Single line headline rotating every 3 seconds */}
+            <div className="h-11 sm:h-13 md:h-15 flex items-center justify-center">
+              <h1
+                key={heroLineIndex}
+                className="font-display font-extrabold text-xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight text-white uppercase drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-2 duration-500 whitespace-nowrap"
+              >
+                <span>{heroLines[heroLineIndex].prefix} </span>
+                <span className="text-primary">{heroLines[heroLineIndex].highlight}</span>
+              </h1>
+            </div>
 
-            <h1 className="display-hero text-white leading-[0.88] tracking-tight">
-              AUTOMOTIVE <br />
-              EQUIPMENT. <br />
-              PARTS. <br />
-              <span className="text-primary">WORKSHOP SOLUTIONS.</span>
-            </h1>
-
-            <p className="mt-6 max-w-lg text-base sm:text-lg text-zinc-300 leading-relaxed font-sans">
+            <p className="mt-3 max-w-xl mx-auto text-xs sm:text-sm md:text-base text-zinc-100 leading-relaxed font-sans drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)]">
               Professional equipment, parts and workshop solutions for the businesses that keep vehicles moving.
             </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link
-                to="/shop"
-                className="btn btn-primary h-12 px-8 text-xs sm:text-sm font-bold uppercase tracking-widest shadow-xl shadow-primary/30"
-              >
-                Explore Products <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/cart"
-                className="btn btn-outline border-white/40 text-white hover:bg-white hover:text-black h-12 px-7 text-xs sm:text-sm font-bold uppercase tracking-widest inline-flex items-center gap-2"
-              >
-                <ShoppingBag className="h-4 w-4 text-primary" /> Quotation Cart
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
       {/* ======================================================== */}
-      {/* 02 — MOBILITY ECOSYSTEM / WHAT WE SUPPLY (SCROLL STACK)  */}
+      {/* 02 — FEATURED PRODUCTS & COMMERCIAL MACHINERY            */}
       {/* ======================================================== */}
-      <MobilityScrollStack />
-
-
-      {/* ======================================================== */}
-      {/* 04 — FEATURED PRODUCTS: 4 STRONG COMMODITIES             */}
-      {/* ======================================================== */}
-      <section className="py-20 lg:py-28 bg-white border-b border-border">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white border-b border-border">
         <div className="container-page">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
-            <div>
-              <span className="eyebrow text-primary">Commercial Machinery</span>
-              <h2 className="display-lg mt-1 text-foreground">
-                FEATURED EQUIPMENT
-              </h2>
-            </div>
+          {/* Upper side of that ad card */}
+          <div className="mb-6 sm:mb-8">
+            <span className="eyebrow text-primary">Commercial Machinery</span>
+            <h2 className="display-lg mt-1 text-foreground">
+              FEATURED EQUIPMENT
+            </h2>
+          </div>
+
+          {/* That Ad Card */}
+          <div className="mb-8 sm:mb-10">
+            <MobilityScrollStack />
+          </div>
+
+          {/* Top of the product cards */}
+          <div className="flex items-center justify-end mb-4 sm:mb-6">
             <Link
               to="/shop"
               search={{ cat: "Garage Equipment" }}
@@ -209,408 +244,155 @@ function Home() {
             </Link>
           </div>
 
-          {/* 4 Strong Products with Large Image Areas & Clean Information */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* 4 Strong Products matching /shop card design */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {featuredItems.map((p) => (
-              <article
+              <ProductCard
                 key={p.slug}
-                className="group flex flex-col rounded border border-border bg-card p-5 transition-all duration-200 hover:border-foreground hover:shadow-xl"
-              >
-                {/* Brand & Category */}
-                <div className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                  {p.brand} · {p.category}
-                </div>
-
-                {/* Large Product Image Canvas */}
-                <Link
-                  to="/shop/$slug"
-                  params={{ slug: p.slug }}
-                  className="relative my-4 aspect-square overflow-hidden rounded bg-zinc-100 p-4 block"
-                >
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    loading="lazy"
-                    className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-108"
-                  />
-                </Link>
-
-                {/* Product Name */}
-                <Link
-                  to="/shop/$slug"
-                  params={{ slug: p.slug }}
-                  className="font-display text-2xl font-bold uppercase text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2"
-                >
-                  {p.name}
-                </Link>
-
-                {/* Price & CTA */}
-                <div className="mt-auto pt-4 border-t border-border mt-4">
-                  <div className="font-display text-2xl font-bold text-foreground">
-                    {taka(p.price)}
-                  </div>
-
-                  <div className="mt-3 flex gap-2">
-                    <a
-                      href="#request-quote"
-                      className="btn btn-primary h-10 flex-1 text-xs font-bold uppercase tracking-wider"
-                    >
-                      Request Quote
-                    </a>
-                    <Link
-                      to="/shop/$slug"
-                      params={{ slug: p.slug }}
-                      className="btn btn-outline h-10 px-3 text-xs font-bold uppercase"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </div>
-              </article>
+                p={p}
+                onQuote={(prod) => setActiveQuoteProduct(prod)}
+              />
             ))}
           </div>
         </div>
       </section>
 
       {/* ======================================================== */}
-      {/* 06 — GARAGE EQUIPMENT: VISUAL EQUIPMENT SHOWCASE         */}
+      {/* 02B — WORKSHOP ENGINEERING CONSULTATION                  */}
       {/* ======================================================== */}
-      <section className="py-20 lg:py-28 bg-white border-b border-border">
-        <div className="container-page">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            {/* Left: Large High-Resolution Machinery Image */}
-            <div className="relative overflow-hidden rounded border border-border bg-zinc-950 p-6 flex items-center justify-center shadow-xl">
-              <div className="aspect-[4/3] w-full flex items-center justify-center">
-                <img
-                  src={images.lift}
-                  alt="Torq Heavy-Duty 2-Post Workshop Lift"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-            </div>
-
-            {/* Right: Minimal Showcase List */}
-            <div>
-              <span className="eyebrow text-primary">Machinery Portfolio</span>
-              <h2 className="display-giant text-foreground tracking-tight mt-1">
-                GARAGE EQUIPMENT
-              </h2>
-
-              <div className="mt-8 divide-y divide-border border-y border-border">
-                {[
-                  { name: "LIFTS", link: "/shop?cat=Garage+Equipment" },
-                  { name: "TYRE EQUIPMENT", link: "/shop?cat=Tyre+%26+Wheel" },
-                  { name: "DIAGNOSTICS", link: "/shop?cat=Diagnostic+Equipment" },
-                  { name: "BRAKE EQUIPMENT", link: "/shop?cat=Garage+Equipment" },
-                  { name: "COMPRESSORS", link: "/shop?cat=Garage+Equipment" },
-                  { name: "WORKSHOP TOOLS", link: "/shop?cat=Workshop+Tools" },
-                ].map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.link}
-                    className="group flex items-center justify-between py-4 transition-colors hover:text-primary"
-                  >
-                    <span className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wide text-foreground group-hover:text-primary transition-colors">
-                      {item.name}
-                    </span>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-2 group-hover:text-primary" />
-                  </Link>
-                ))}
-              </div>
-
-              <div className="mt-8">
-                <Link
-                  to="/shop"
-                  search={{ cat: "Garage Equipment" }}
-                  className="btn btn-primary h-11 px-8 text-xs font-bold uppercase tracking-wider"
-                >
-                  Explore Garage Equipment →
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+      <section className="border-b border-border bg-white">
+        <ConsultationBanner />
       </section>
 
       {/* ======================================================== */}
-      {/* 07 — EV SECTION: DARK VISUAL STORYTELLING                */}
+      {/* 08 — TARGET SECTORS: BUILT FOR THE BUSINESSES THAT MOVE  */}
       {/* ======================================================== */}
-      <section className="py-20 lg:py-28 bg-zinc-950 text-white border-b border-zinc-800">
+      <TargetSectorsSection />
+
+      {/* ======================================================== */}
+      {/* 08B — WHY CHOOSE US: THE PAGE ADVANTAGE                  */}
+      {/* ======================================================== */}
+      <section id="why-choose-us" className="py-16 sm:py-20 bg-zinc-50 border-b border-border scroll-mt-20">
         <div className="container-page">
-          <div className="max-w-2xl mb-10">
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-amber-400 mb-2">
-              Next-Gen Mobility Transition
-            </span>
-            <h2 className="display-giant text-white tracking-tight leading-[0.92]">
-              READY FOR THE NEXT <br />
-              <span className="text-amber-400">GENERATION OF MOBILITY.</span>
-            </h2>
-          </div>
-
-          {/* Large EV Workshop Visual with Typographic Selectors */}
-          <div className="relative overflow-hidden rounded border border-zinc-800 bg-zinc-900 shadow-2xl">
-            <div className="aspect-[16/9] lg:aspect-[21/9] w-full overflow-hidden">
-              <img
-                src={images.evWorkshopBay}
-                alt="Modern electric vehicle workshop bay with 1000V tools"
-                className="h-full w-full object-cover object-center opacity-65"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-            </div>
-
-            {/* Overlay: Typographic Selectors 2W · 3W · 4W */}
-            <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-              <div className="flex flex-wrap items-center gap-6 sm:gap-10">
-                <Link
-                  to="/shop"
-                  search={{ mobility: "2-Wheeler" }}
-                  className="group flex flex-col text-white hover:text-amber-400 transition-colors"
-                >
-                  <span className="font-display text-4xl sm:text-5xl font-bold tracking-tight">2W EV</span>
-                  <span className="text-xs font-mono text-zinc-400 group-hover:text-amber-300">Bikes & Scooters</span>
-                </Link>
-                <span className="text-zinc-600 font-display text-3xl">/</span>
-                <Link
-                  to="/shop"
-                  search={{ mobility: "3-Wheeler" }}
-                  className="group flex flex-col text-white hover:text-amber-400 transition-colors"
-                >
-                  <span className="font-display text-4xl sm:text-5xl font-bold tracking-tight">3W EV</span>
-                  <span className="text-xs font-mono text-zinc-400 group-hover:text-amber-300">Cargo & Rickshaws</span>
-                </Link>
-                <span className="text-zinc-600 font-display text-3xl">/</span>
-                <Link
-                  to="/shop"
-                  search={{ mobility: "EV" }}
-                  className="group flex flex-col text-white hover:text-amber-400 transition-colors"
-                >
-                  <span className="font-display text-4xl sm:text-5xl font-bold tracking-tight">4W EV</span>
-                  <span className="text-xs font-mono text-zinc-400 group-hover:text-amber-300">Cars & Vans</span>
-                </Link>
-              </div>
-
-              <Link
-                to="/shop"
-                search={{ mobility: "EV" }}
-                className="btn btn-primary h-11 px-7 text-xs font-bold uppercase tracking-wider shrink-0"
-              >
-                Explore EV Workshop →
-              </Link>
-            </div>
-          </div>
-
-          {/* Extremely Concise Capabilities Bar */}
-          <div className="mt-8 grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-zinc-800 border-y border-zinc-800 py-4 text-center text-xs font-bold uppercase tracking-widest text-zinc-400">
-            <span className="py-2 hover:text-white transition-colors">BATTERY EQUIPMENT</span>
-            <span className="py-2 hover:text-white transition-colors">DIAGNOSTICS</span>
-            <span className="py-2 hover:text-white transition-colors">CHARGING STATIONS</span>
-            <span className="py-2 hover:text-white transition-colors">HV TESTING</span>
-            <span className="py-2 hover:text-white transition-colors">1000V VDE SAFETY</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ======================================================== */}
-      {/* 08 — WHO WE EQUIP: EDITORIAL VISUAL SECTION              */}
-      {/* ======================================================== */}
-      <section className="py-20 lg:py-28 bg-white border-b border-border">
-        <div className="container-page">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-            {/* Left: Large Editorial Workshop Photography */}
-            <div className="relative overflow-hidden rounded border border-border bg-zinc-950 shadow-xl sticky top-28">
-              <div className="aspect-[4/5] w-full overflow-hidden">
-                <img
-                  src={images.workshop}
-                  alt="Automotive workshop service facility"
-                  className="h-full w-full object-cover brightness-85"
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-              <div className="absolute bottom-0 inset-x-0 p-6 text-white">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                  The Company Behind The Workshop
-                </span>
-                <p className="font-display text-2xl font-bold uppercase mt-1">
-                  We Equip The Businesses That Keep Vehicles Moving.
-                </p>
-              </div>
-            </div>
-
-            {/* Right: Large Editorial Typography & Interactive Clean List */}
-            <div>
-              <span className="eyebrow text-primary">Target Sectors</span>
-              <h2 className="display-giant text-foreground tracking-tight leading-[0.92] mt-1">
-                BUILT FOR THE <br />
-                BUSINESSES THAT <br />
-                KEEP VEHICLES <br />
-                MOVING.
+          {/* Header Row */}
+          <div className="pb-8 border-b border-border">
+            <div className="max-w-3xl">
+              <span className="eyebrow text-primary">Why Choose Us?</span>
+              <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-foreground leading-tight mt-1">
+                BUILT TO PERFORM. CERTIFIED TO LAST.
               </h2>
+              <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                PAGE International Limited boasts a nationwide footprint of over 500 workshops, official industry affiliations, and dedicated on-site technical teams across Bangladesh.
+              </p>
+            </div>
+          </div>
 
-              {/* Clean Interactive List: Reveals details on hover/click without cluttering */}
-              <div className="mt-8 divide-y divide-border border-y border-border">
-                {equipSectors.map((sector, idx) => {
-                  const isActive = activeEquipIndex === idx;
-                  return (
-                    <div
-                      key={sector.num}
-                      onMouseEnter={() => setActiveEquipIndex(idx)}
-                      onClick={() => setActiveEquipIndex(idx)}
-                      className="cursor-pointer py-4 transition-colors"
-                    >
-                      <div className="flex items-baseline justify-between">
-                        <div className="flex items-baseline gap-4">
-                          <span className="font-mono text-sm font-bold text-primary">
-                            {sector.num}
-                          </span>
-                          <span
-                            className={`font-display text-2xl sm:text-3xl font-bold uppercase tracking-wide transition-colors ${
-                              isActive ? "text-primary" : "text-foreground hover:text-primary"
-                            }`}
-                          >
-                            {sector.title}
-                          </span>
-                        </div>
-                        <span className="text-xs font-mono uppercase text-muted-foreground">
-                          {sector.tag}
-                        </span>
-                      </div>
-
-                      {/* Revealed on hover/active */}
-                      {isActive && (
-                        <p className="mt-2 pl-9 text-sm text-foreground/80 leading-relaxed animate-in fade-in duration-200">
-                          {sector.desc}
-                        </p>
-                      )}
+          {/* Six Cards In A Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 xl:gap-4 pt-8">
+            {[
+              {
+                num: "01",
+                title: "Extensive Network",
+                desc: "PAGE International Limited boasts a comprehensive database of over 500 workshops strategically located throughout Bangladesh, ensuring broad reach and accessibility for clients seeking automotive solutions.",
+                icon: IconExtensiveNetwork,
+              },
+              {
+                num: "02",
+                title: "Strong Market Presence",
+                desc: "PAGE International maintains consistent and active communication channels with workshops nationwide, fostering strong relationships and staying informed of market trends and customer needs.",
+                icon: IconMarketPresence,
+              },
+              {
+                num: "03",
+                title: "Industry Connections",
+                desc: "As a member of the Dhaka and Chittagong Workshop Owner Associations, PAGE International Limited demonstrates its commitment to the automotive industry and its involvement in key industry discussions and developments.",
+                icon: IconIndustryConnections,
+              },
+              {
+                num: "04",
+                title: "Proactive Sales",
+                desc: "With a dedicated team undertaking over 100 marketing visits each month, PAGE International actively engages with potential clients, building relationships, and showcasing its products and services.",
+                icon: IconProactiveSales,
+              },
+              {
+                num: "05",
+                title: "Reliable Partner",
+                desc: "PAGE International Limited is committed to providing dependable garage equipment and training solutions, supporting its clients' operational efficiency and workforce development.",
+                icon: IconReliablePartner,
+              },
+              {
+                num: "06",
+                title: "Focused Expertise",
+                desc: "PAGE International Limited specializes in garage equipment and training equipment, allowing the company to provide deep expertise and tailored solutions to its clients within this specific niche.",
+                icon: IconFocusedExpertise,
+              },
+            ].map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.num}
+                  className="group rounded-xl border border-border bg-white p-4 sm:p-5 flex flex-col hover:border-primary/50 transition-all duration-200 shadow-xs"
+                >
+                  <div className="flex items-center justify-between mb-3.5">
+                    <div className="h-11 w-11 rounded-xl bg-zinc-50 border border-border/80 p-1.5 flex items-center justify-center group-hover:border-primary/40 group-hover:bg-primary/5 transition-all duration-300 shadow-xs">
+                      <Icon className="w-full h-full text-zinc-800" />
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-8">
-                <Link
-                  to="/shop"
-                  className="btn btn-outline h-11 px-8 text-xs font-bold uppercase tracking-wider"
-                >
-                  Explore Workshop Equipment
-                </Link>
-              </div>
-            </div>
+                    <span className="font-mono text-[11px] font-bold text-muted-foreground">
+                      {card.num}
+                    </span>
+                  </div>
+                  <h3 className="font-display text-xs sm:text-sm font-bold uppercase text-foreground tracking-tight leading-snug">
+                    {card.title}
+                  </h3>
+                  <p className="mt-2 text-[11.5px] text-muted-foreground leading-relaxed font-sans">
+                    {card.desc}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ======================================================== */}
-      {/* 09 — PRODUCT FINDER: PRECISION TOOL                      */}
+      {/* 09 — CLIENT REVIEWS & WORKSHOP TESTIMONIALS              */}
       {/* ======================================================== */}
-      <section className="py-16 lg:py-20 bg-zinc-100 border-b border-border">
-        <div className="container-page max-w-4xl">
-          <div className="text-center mb-6">
-            <span className="eyebrow text-primary">Compatibility Tool</span>
-            <h2 className="display-lg mt-1 text-foreground">
-              FIND THE RIGHT PRODUCT.
-            </h2>
+      <section className="py-16 sm:py-20 bg-zinc-50/80 border-b border-border overflow-hidden">
+        <div className="container-page mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <span className="eyebrow text-primary">Verified Feedback</span>
+              <h3 className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight text-foreground mt-0.5">
+                Audited B2B Workshop Feedback
+              </h3>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setReviewSubmitted(false);
+                setIsReviewModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-zinc-100 hover:bg-zinc-200/80 text-zinc-500 hover:text-zinc-800 text-xs font-medium transition-colors self-start sm:self-auto cursor-pointer"
+            >
+              <PenSquare className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Drop a review</span>
+            </button>
           </div>
+        </div>
 
-          <form
-            onSubmit={handleFinderSubmit}
-            className="rounded border border-border bg-card p-6 shadow-sm"
-          >
-            {/* Clean Platform Selector */}
-            <div className="grid grid-cols-4 gap-2 mb-4">
-              {(["4-Wheeler", "2-Wheeler", "3-Wheeler", "EV"] as MobilityType[]).map(
-                (p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => {
-                      setPlatform(p);
-                      const newMakes = Object.keys(vehiclePlatformData[p] ?? {});
-                      if (newMakes.length > 0) {
-                        setMake(newMakes[0]);
-                        const newModels = Object.keys(vehiclePlatformData[p][newMakes[0]] ?? {});
-                        setModel(newModels[0] ?? "");
-                      }
-                    }}
-                    className={`h-10 text-xs font-bold uppercase tracking-wider border rounded transition-colors ${
-                      platform === p
-                        ? "bg-primary text-white border-primary"
-                        : "bg-secondary text-foreground border-border hover:border-foreground"
-                    }`}
-                  >
-                    {p === "4-Wheeler" ? "4W" : p === "2-Wheeler" ? "2W" : p === "3-Wheeler" ? "3W" : "EV"}
-                  </button>
-                )
-              )}
-            </div>
-
-            {/* Inline 3 Selectors + 1 Action */}
-            <div className="grid sm:grid-cols-4 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                  Manufacturer
-                </label>
-                <select
-                  value={make}
-                  onChange={(e) => {
-                    const m = e.target.value;
-                    setMake(m);
-                    const newModels = Object.keys(vehiclePlatformData[platform]?.[m] ?? {});
-                    setModel(newModels[0] ?? "");
-                  }}
-                  className="field h-10 text-xs"
-                >
-                  {makes.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                  Model
-                </label>
-                <select
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="field h-10 text-xs"
-                >
-                  {models.map((mod) => (
-                    <option key={mod} value={mod}>
-                      {mod}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                  Year
-                </label>
-                <select
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                  className="field h-10 text-xs"
-                >
-                  {years.slice(0, 10).map((y) => (
-                    <option key={y} value={y}>
-                      {y}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  type="submit"
-                  className="btn btn-primary h-10 w-full text-xs font-bold uppercase tracking-wider"
-                >
-                  Find Products
-                </button>
-              </div>
-            </div>
-          </form>
+        {/* Seamless Infinite Slideshow Loop (Left to Right) */}
+        <div className="relative w-full overflow-hidden py-2">
+          {/* Continuous Left-to-Right Moving Track */}
+          <div className="animate-reviews-ltr flex items-center gap-5 sm:gap-6">
+            {[...reviewsData, ...reviewsData].map((rev, index) => (
+              <ReviewCard
+                key={`${rev.id}-${index}`}
+                review={rev}
+                index={index}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -628,18 +410,197 @@ function Home() {
       {/* ======================================================== */}
       {/* 11 — THINK NEXT: MASSIVE FULL-PAGE BRAND STATEMENT        */}
       {/* ======================================================== */}
-      <section className="relative w-full flex flex-col items-center justify-center bg-black text-white text-center overflow-hidden border-t border-zinc-900 px-4 sm:px-6 py-10 sm:py-14 md:py-16 select-none">
+      <section className="relative w-full flex flex-col items-center justify-center bg-black text-white text-center overflow-hidden border-t border-zinc-900 py-10 sm:py-14 md:py-18 select-none">
         {/* Ambient atmospheric backdrop */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
           <div className="h-[30vw] w-[45vw] max-w-[600px] max-h-[260px] rounded-full bg-primary/10 blur-[120px]" />
         </div>
 
-        <div className="relative z-10 w-full max-w-[95vw] mx-auto flex items-center justify-center">
-          <h2 className="text-7xl sm:text-9xl md:text-[15vw] lg:text-[18vw] font-black tracking-tighter leading-none text-white font-display uppercase whitespace-nowrap">
+        <div className="relative z-10 w-full flex items-center justify-center overflow-hidden">
+          <h2 className="font-display font-black tracking-tighter leading-none text-white uppercase whitespace-nowrap text-[14.7vw] select-none text-center">
             THINK NEXT<span className="text-primary">.</span>
           </h2>
         </div>
       </section>
+
+      {/* Review Submission Modal Dialog (Sent to Admin Panel) */}
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            <button
+              type="button"
+              onClick={() => setIsReviewModalOpen(false)}
+              className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-zinc-900 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {reviewSubmitted ? (
+              <div className="py-10 text-center animate-in fade-in zoom-in-95 duration-200">
+                <div className="h-14 w-14 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center mx-auto mb-3">
+                  <ShieldCheck className="w-7 h-7" />
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-[11px] font-mono font-bold uppercase tracking-wider mb-2">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Sent To Admin Panel For Approval</span>
+                </div>
+                <h3 className="font-display text-xl font-bold uppercase text-foreground">
+                  Review Submitted Successfully
+                </h3>
+                <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
+                  Thank you! Your feedback has been forwarded to our admin panel for verification. Once approved, it will be published to the frontend.
+                </p>
+                <div className="mt-6 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReviewSubmitted(false);
+                      setIsReviewModalOpen(false);
+                    }}
+                    className="btn btn-primary h-9 px-6 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="mb-5">
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-primary">
+                    Verified B2B Review Submission
+                  </span>
+                  <h3 className="font-display text-xl font-black uppercase text-zinc-900 mt-1">
+                    Rate Your Machinery & Experience
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Your feedback will be sent to the admin panel for verification before being displayed.
+                  </p>
+                </div>
+
+                <form onSubmit={handleReviewSubmit} className="space-y-3.5">
+                  {/* Star Rating Picker */}
+                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3.5">
+                    <label className="block text-xs font-bold uppercase text-zinc-900 mb-1">
+                      Overall Rating *
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setRevRating(s)}
+                          className="p-1 focus:outline-none cursor-pointer"
+                        >
+                          <Star
+                            className={`w-6 h-6 transition-colors ${
+                              s <= revRating
+                                ? "fill-amber-400 text-amber-400 scale-105"
+                                : "fill-zinc-200 text-zinc-300"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                      <span className="text-xs font-mono font-bold ml-2 text-zinc-900">
+                        {revRating}.0 / 5.0
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Name and Role */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                        Your Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={revName}
+                        onChange={(e) => setRevName(e.target.value)}
+                        placeholder="e.g. Engr. Tanvir Ahmed"
+                        className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-900 focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                        Role / Designation
+                      </label>
+                      <input
+                        type="text"
+                        value={revRole}
+                        onChange={(e) => setRevRole(e.target.value)}
+                        placeholder="e.g. Workshop Managing Director"
+                        className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-900 focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Workshop & Equipment */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                        Workshop / Hub Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={revWorkshop}
+                        onChange={(e) => setRevWorkshop(e.target.value)}
+                        placeholder="e.g. Apex Autocare Dhaka"
+                        className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-900 focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                        Equipment Supplied
+                      </label>
+                      <input
+                        type="text"
+                        value={revEquipment}
+                        onChange={(e) => setRevEquipment(e.target.value)}
+                        placeholder="e.g. 4.0T 2-Post Lift"
+                        className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-900 focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Detailed Comment */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                      Feedback & Performance Details *
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={revComment}
+                      onChange={(e) => setRevComment(e.target.value)}
+                      placeholder="Share your experience regarding build quality, installation certification, and after-sales support..."
+                      className="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 text-xs text-zinc-900 focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
+                    />
+                  </div>
+
+                  <div className="pt-1">
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-full h-10 text-xs font-bold uppercase tracking-wider shadow-sm cursor-pointer"
+                    >
+                      Submit Review For Verification
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Direct Product Quotation Modal */}
+      {activeQuoteProduct && (
+        <QuoteModal
+          product={activeQuoteProduct}
+          onClose={() => setActiveQuoteProduct(null)}
+        />
+      )}
     </div>
   );
 }

@@ -14,7 +14,8 @@ import {
   Zap,
 } from "lucide-react";
 import { PageHeader } from "@/components/site/PageHeader";
-import { brands, images } from "@/lib/data";
+import { BrandPartners } from "@/components/site/BrandPartners";
+import { images } from "@/lib/data";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -193,20 +194,13 @@ export function About() {
         </div>
       </section>
 
-      {/* Brand Partners */}
-      <section className="py-16 container-page">
-        <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6">
-          Distribution & Partner Brands
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2">
-          {brands.map((b) => (
-            <div
-              key={b}
-              className="rounded border border-border bg-card py-3 px-2 text-center font-display text-lg font-bold uppercase text-muted-foreground"
-            >
-              {b}
-            </div>
-          ))}
+      {/* Authorized Equipment & Component Partners */}
+      <section className="py-14 sm:py-16 bg-white dark:bg-card border-t border-border">
+        <div className="container-page">
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground mb-8 sm:mb-10">
+            Authorized Equipment & Component Partners
+          </p>
+          <BrandPartners />
         </div>
       </section>
     </div>

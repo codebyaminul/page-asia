@@ -1,20 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowRight,
   Clock,
-  Download,
-  FileSpreadsheet,
-  FileText,
-  Headphones,
   Mail,
   MapPin,
-  MessageSquare,
   Phone,
   ShieldCheck,
   Wrench,
-  Zap,
 } from "lucide-react";
-import { useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -22,7 +14,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PageHeader } from "@/components/site/PageHeader";
-import { guides } from "@/lib/data";
 
 export const Route = createFileRoute("/support")({
   head: () => ({
@@ -75,20 +66,6 @@ const faqs: [string, string][] = [
 ];
 
 export function Support() {
-  const [sent, setSent] = useState(false);
-  const [formData, setFormData] = useState({
-    businessName: "",
-    contactPerson: "",
-    phone: "",
-    email: "",
-    businessType: "Workshop",
-    location: "",
-    type: "Custom Machinery / Equipment Sourcing (Not in Shop)",
-    quantity: "1",
-    products: "",
-    details: "",
-  });
-
   return (
     <div className="bg-background text-foreground min-h-screen">
       <PageHeader
@@ -97,75 +74,19 @@ export function Support() {
         intro="Have questions regarding equipment dimensions, vehicle compatibility, or volume supply terms? Our technical applications engineers and B2B commercial advisors are ready to assist."
       />
 
-      {/* Direct Contact Cards */}
-      <section className="border-b border-border bg-secondary/40 py-8">
-        <div className="container-page grid grid-cols-2 gap-4 md:grid-cols-4">
-          <div className="rounded border border-border bg-card p-4">
-            <Phone className="h-5 w-5 text-primary mb-2" />
-            <h3 className="font-bold text-xs uppercase tracking-wider text-foreground">
-              Technical Hotline
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              +880 9612-PAGE-INTL
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Sat–Thu 8:00–20:00
-            </p>
-          </div>
 
-          <div className="rounded border border-border bg-card p-4">
-            <Mail className="h-5 w-5 text-primary mb-2" />
-            <h3 className="font-bold text-xs uppercase tracking-wider text-foreground">
-              B2B Quotations Desk
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              b2b@page-intl.com
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Official quotes within 24h
-            </p>
-          </div>
-
-          <div className="rounded border border-border bg-card p-4">
-            <ShieldCheck className="h-5 w-5 text-primary mb-2" />
-            <h3 className="font-bold text-xs uppercase tracking-wider text-foreground">
-              Machinery Warranty & AMC
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              claims@page-intl.com
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Certified engineer dispatch
-            </p>
-          </div>
-
-          <div className="rounded border border-border bg-card p-4">
-            <MapPin className="h-5 w-5 text-primary mb-2" />
-            <h3 className="font-bold text-xs uppercase tracking-wider text-foreground">
-              Equipment Demonstration Hub
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Tejgaon I/A, Dhaka
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Showroom & testing bay
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Section: Dedicated Custom Sourcing & Inquiry Hub */}
+      {/* Main Section: Custom Quotation Desk (Call / Email Direct) */}
       <section className="container-page py-14 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           {/* Left Column: Sourcing Proposition & Commercial Desk */}
           <div>
-            <span className="eyebrow text-primary">Custom Sourcing & Inquiries</span>
+            <span className="eyebrow text-primary">Custom Sourcing & Procurement</span>
             <h2 className="display-hero text-foreground leading-[0.9] mt-3">
               NEED EQUIPMENT <br />
               <span className="text-primary">NOT IN OUR SHOP?</span>
             </h2>
             <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-              Looking for specialized garage machinery, unlisted OEM replacement parts, diagnostics, or turnkey bay projects? Our commercial procurement desk sources directly from authorized global manufacturers.
+              Looking for specialized garage machinery, unlisted OEM replacement parts, diagnostics, or turnkey workshop projects? Our commercial procurement desk sources directly from authorized global manufacturers.
             </p>
 
             {/* 3 Value Pillars */}
@@ -176,10 +97,10 @@ export function Support() {
                 </div>
                 <div>
                   <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-foreground">
-                    24-Hour Quotation Turnaround
+                    Fast Quotation Turnaround
                   </h4>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Fast commercial pricing, technical datasheets, and delivery schedules.
+                    Official pro-forma invoices, technical datasheets, and delivery timelines within 2–4 business hours.
                   </p>
                 </div>
               </div>
@@ -190,10 +111,10 @@ export function Support() {
                 </div>
                 <div>
                   <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-foreground">
-                    Custom Technical Specifications
+                    Custom Technical Sizing & Power Specs
                   </h4>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Machinery sized for your workshop ceiling height, power load, and vehicle mix.
+                    Machinery configured for your workshop ceiling height, electrical load (3-phase/single-phase), and vehicle mix.
                   </p>
                 </div>
               </div>
@@ -204,27 +125,19 @@ export function Support() {
                 </div>
                 <div>
                   <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-foreground">
-                    Official Warranty & Installation
+                    Official Warranty & On-Site Installation
                   </h4>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Certified anchoring, commissioning, and technician operation training.
+                    Foundation chemical anchoring, hydraulic synchronization, and certified technician operation training.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Direct Desk Hotline */}
-            <div className="mt-8 pt-6 border-t border-border flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded bg-muted/80 px-3.5 py-2 font-mono text-xs sm:text-sm font-bold text-foreground border border-border">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Hotline: +880 9612-PAGE-INTL · b2b@page-intl.com</span>
-              </div>
-            </div>
-
             {/* Quick Link Notice */}
-            <div className="mt-4 p-3 rounded border border-border/80 bg-muted/30 text-xs text-muted-foreground flex items-center justify-between gap-2">
+            <div className="mt-8 p-3.5 rounded-lg border border-border/80 bg-muted/40 text-xs text-muted-foreground flex items-center justify-between gap-2">
               <span>
-                Looking for products in our store? Explore our{" "}
+                Looking for products in our catalog? Explore our{" "}
                 <Link to="/shop" className="text-primary font-semibold underline hover:text-primary/80">
                   Shop Catalogue
                 </Link>{" "}
@@ -237,282 +150,245 @@ export function Support() {
             </div>
           </div>
 
-          {/* Right Column: Clean, Streamlined Sourcing Form */}
-          <div className="rounded-xl border border-border bg-card p-6 sm:p-8 shadow-sm">
-            <div className="border-b border-border pb-4 mb-6">
-              <span className="eyebrow text-primary">Procurement Desk</span>
-              <h3 className="display-sm text-foreground uppercase mt-1">
-                Custom Quotation & Inquiry
+          {/* Right Column: Direct Commercial Call & Email Desk */}
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-lg space-y-6">
+            <div className="border-b border-border pb-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary uppercase tracking-wider mb-2">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                Direct Quotation Desk
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-foreground font-display">
+                Need a Custom Quotation?
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Submit details for custom equipment sourcing, unlisted parts, or general queries.
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                If custom quotation is needed, please call us or email our commercial desk directly. Our applications engineers prepare itemized formal quotes with technical drawings.
               </p>
             </div>
 
-            {sent ? (
-              <div className="rounded border border-emerald-500/40 bg-emerald-500/10 p-6 text-xs text-foreground text-center py-10">
-                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-500/20 text-emerald-600 mb-3">
-                  <ShieldCheck className="h-6 w-6" />
+            {/* Call Us Directly */}
+            <div className="rounded-xl border border-border/80 bg-secondary/50 p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-md">
+                  <Phone className="h-5 w-5" />
                 </div>
-                <h4 className="font-display text-lg uppercase text-foreground">
-                  Custom Request Received
-                </h4>
-                <p className="mt-2 text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                  Thank you, <strong>{formData.contactPerson || formData.businessName}</strong>. Your inquiry regarding <strong>{formData.type}</strong> has been logged. Our procurement team will review specifications and respond with pricing and availability within 24 business hours.
-                </p>
-                <button
-                  onClick={() => setSent(false)}
-                  className="btn btn-outline mt-6 h-9 text-xs font-bold uppercase"
-                >
-                  Submit Another Inquiry
-                </button>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    Call Commercial Hotline
+                  </span>
+                  <a
+                    href="tel:+8809612724346"
+                    className="text-base sm:text-lg font-bold text-foreground hover:text-primary transition-colors font-mono"
+                  >
+                    +880 9612-PAGE-INTL
+                  </a>
+                  <p className="text-[11px] text-muted-foreground">
+                    Direct line: +880 9612-724346 / +880 1700-000000
+                  </p>
+                </div>
               </div>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!formData.businessName || !formData.phone) return;
-                  setSent(true);
-                }}
-                className="space-y-4"
-              >
-                <div className="grid gap-3.5 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                      Business / Workshop Name *
-                    </label>
-                    <input
-                      required
-                      className="field h-10 text-xs"
-                      placeholder="e.g. Apex Auto Workshop Ltd."
-                      value={formData.businessName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, businessName: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                      Contact Person *
-                    </label>
-                    <input
-                      required
-                      className="field h-10 text-xs"
-                      placeholder="e.g. Tanvir Ahmed"
-                      value={formData.contactPerson}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          contactPerson: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-3.5 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                      Phone Number / WhatsApp *
-                    </label>
-                    <input
-                      required
-                      type="tel"
-                      className="field h-10 text-xs"
-                      placeholder="+880 17XXXXXXXX"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                      Corporate Email
-                    </label>
-                    <input
-                      type="email"
-                      className="field h-10 text-xs"
-                      placeholder="procurement@company.com"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-3.5 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                      Inquiry Category *
-                    </label>
-                    <select
-                      className="field h-10 text-xs"
-                      value={formData.type}
-                      onChange={(e) =>
-                        setFormData({ ...formData, type: e.target.value })
-                      }
-                    >
-                      <option>Custom Equipment Sourcing (Not in Shop)</option>
-                      <option>Unlisted Spare Part / OEM Part Number Request</option>
-                      <option>Turnkey Workshop Bay Setup & Machinery</option>
-                      <option>Commercial Fleet & Volume Procurement</option>
-                      <option>General Technical or Commercial Inquiry</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                      Business Type
-                    </label>
-                    <select
-                      className="field h-10 text-xs"
-                      value={formData.businessType}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          businessType: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="Workshop">Independent Workshop</option>
-                      <option value="Service Center">Service Center Hub</option>
-                      <option value="Dealer">Authorized Dealership</option>
-                      <option value="Distributor">Wholesale Distributor</option>
-                      <option value="Fleet">Commercial Fleet Depot</option>
-                      <option value="EV Business">EV Specialized Workshop</option>
-                      <option value="Other">Other Automotive Business</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                    Item Name, Model or OEM Part Number
-                  </label>
-                  <input
-                    className="field h-10 text-xs"
-                    placeholder="e.g. Hunter 3D Aligner, In-Ground Scissor Lift, Denso #..."
-                    value={formData.products}
-                    onChange={(e) =>
-                      setFormData({ ...formData, products: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-foreground mb-1">
-                    Custom Specifications, Quantities or Query Details *
-                  </label>
-                  <textarea
-                    required
-                    className="field h-24 py-2.5 text-xs"
-                    placeholder="Provide details about what you need (model number, technical specs, vehicle make/year, required quantity, or your question). Our sourcing desk will verify availability and quote you."
-                    value={formData.details}
-                    onChange={(e) =>
-                      setFormData({ ...formData, details: e.target.value })
-                    }
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary h-11 w-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 mt-2"
+              <div className="flex items-center gap-2 pt-2 border-t border-border/60">
+                <a
+                  href="tel:+8809612724346"
+                  className="btn btn-primary h-9 px-4 text-xs font-bold uppercase flex-1 text-center justify-center"
                 >
-                  <FileSpreadsheet className="h-4 w-4" />
-                  <span>Submit Custom Quote Request / Inquiry</span>
-                </button>
-              </form>
-            )}
+                  Call Hotline Now
+                </a>
+                <a
+                  href="https://wa.me/8801700000000?text=Hello%20PAGE%20International,%20I%20would%20like%20to%20request%20a%20commercial%20price%20quotation."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline h-9 px-4 text-xs font-bold uppercase flex items-center justify-center gap-1.5 border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10"
+                >
+                  <span>WhatsApp Chat</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Email Us Directly */}
+            <div className="rounded-xl border border-border/80 bg-secondary/50 p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-md">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    Official Quotation Email
+                  </span>
+                  <a
+                    href="mailto:b2b@page-intl.com?subject=Custom%20Quotation%20Request%20-%20PAGE%20International"
+                    className="text-base sm:text-lg font-bold text-foreground hover:text-primary transition-colors font-mono"
+                  >
+                    b2b@page-intl.com
+                  </a>
+                  <p className="text-[11px] text-muted-foreground">
+                    Monitored desk: sales@page-intl.com
+                  </p>
+                </div>
+              </div>
+              <div className="pt-2 border-t border-border/60">
+                <a
+                  href="mailto:b2b@page-intl.com?subject=Custom%20Quotation%20Request%20-%20PAGE%20International"
+                  className="btn btn-outline h-9 px-4 text-xs font-bold uppercase w-full flex items-center justify-center gap-2"
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                  <span>Email Quotation Request</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Response Time SLA & Checklist */}
+            <div className="rounded-xl bg-muted/40 border border-border p-4 text-xs text-muted-foreground space-y-2">
+              <div className="flex items-center gap-2 text-foreground font-semibold">
+                <Clock className="h-4 w-4 text-primary" />
+                <span>What to Include in Your Email Inquiry:</span>
+              </div>
+              <ul className="list-disc pl-4 space-y-1 text-[11px]">
+                <li>Equipment model or replacement part number</li>
+                <li>Required quantity and estimated deployment date</li>
+                <li>Workshop / garage delivery address in Bangladesh</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Dedicated Knowledge Base & FAQs Section with breathing room */}
-      <section className="border-t border-border bg-secondary/30 py-16 lg:py-20">
+      {/* Engineering Consultation Callout Banner */}
+      <section className="bg-primary text-primary-foreground py-10 border-y border-primary/20">
+        <div className="container-page flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5 text-center md:text-left">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-white/80">
+              Complimentary Engineering Session
+            </span>
+            <h3 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white font-display">
+              Need an In-Person Equipment Consultation & Trial?
+            </h3>
+            <p className="text-xs sm:text-sm text-white/90 max-w-xl">
+              Schedule a 1-on-1 session with our certified machinery engineers at our Tejgaon Hub or have our team audit your workshop premises.
+            </p>
+          </div>
+          <Link
+            to="/services/book"
+            className="btn bg-white text-zinc-900 hover:bg-white/90 h-11 px-8 text-xs font-bold uppercase tracking-wider shrink-0 shadow-lg"
+          >
+            Book Consultation & Demo →
+          </Link>
+        </div>
+      </section>
+
+      {/* Dhaka Office Location & Google Maps */}
+      <section className="border-b border-border bg-card py-16 lg:py-20">
         <div className="container-page">
-          <div className="max-w-2xl mb-12">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_1.9fr] items-center">
+            {/* Office Details */}
+            <div className="space-y-6">
+              <div>
+                <span className="eyebrow text-primary">Headquarters & Hub</span>
+                <h2 className="display-sm text-foreground uppercase mt-1">
+                  DHAKA DEMONSTRATION HUB & OFFICE
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+                  Visit our regional headquarters and equipment testing showroom in Tejgaon Industrial Area, Dhaka to inspect operational vehicle lifts, tyre changers, and diagnostic machinery in person.
+                </p>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-secondary/40">
+                  <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-foreground uppercase tracking-wider text-[11px]">
+                      Dhaka Corporate Office & Testing Facility
+                    </h4>
+                    <p className="text-muted-foreground mt-0.5 leading-snug">
+                      Tejgaon Industrial Area, Dhaka-1208, Bangladesh
+                    </p>
+                    <p className="text-[10px] text-primary font-medium mt-1">
+                      Landmark: Central Tejgaon Commercial & Automotive Belt
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-secondary/40">
+                  <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-foreground uppercase tracking-wider text-[11px]">
+                      Showroom & Office Hours
+                    </h4>
+                    <p className="text-muted-foreground mt-0.5">
+                      Saturday – Thursday: 8:00 AM – 8:00 PM
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      Friday: Emergency engineer standby available
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <a
+                  href="https://maps.google.com/?q=Tejgaon+Industrial+Area,+Dhaka,+Bangladesh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary h-10 px-5 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2"
+                >
+                  <MapPin className="h-4 w-4" />
+                  <span>Open in Google Maps</span>
+                </a>
+                <a
+                  href="tel:+8809612724346"
+                  className="btn btn-outline h-10 px-5 text-xs font-bold uppercase tracking-wider"
+                >
+                  Call Office Reception
+                </a>
+              </div>
+            </div>
+
+            {/* Google Maps Embed */}
+            <div className="rounded-2xl border border-border overflow-hidden shadow-lg aspect-[16/10] sm:aspect-[16/9] w-full relative bg-muted">
+              <iframe
+                title="PAGE International Dhaka Office Location"
+                src="https://maps.google.com/maps?q=Tejgaon%20Industrial%20Area,%20Dhaka,%20Bangladesh&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dedicated FAQs Section */}
+      <section className="border-t border-border bg-secondary/30 py-16 lg:py-20">
+        <div className="container-page max-w-4xl">
+          <div className="mb-10 text-center">
             <span className="eyebrow text-primary">Support & Documentation</span>
             <h2 className="display-md text-foreground mt-1">
-              FREQUENTLY ASKED QUESTIONS & GUIDES
+              FREQUENTLY ASKED QUESTIONS
             </h2>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
               Common questions regarding equipment delivery, installation, warranty claims, and commercial supply terms.
             </p>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
-            {/* Left: FAQs Accordion */}
-            <div>
-              <Accordion type="single" collapsible className="space-y-2.5">
-                {faqs.map(([q, a], idx) => (
-                  <AccordionItem
-                    key={idx}
-                    value={`faq-${idx}`}
-                    className="rounded-lg border border-border bg-card px-4"
-                  >
-                    <AccordionTrigger className="text-left text-xs sm:text-sm font-semibold hover:text-primary py-3.5">
-                      {q}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-xs text-muted-foreground leading-relaxed pb-4">
-                      {a}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-
-            {/* Right: Technical Guides & Catalogues */}
-            <div className="space-y-4">
-              <h3 className="font-display text-base font-bold uppercase tracking-wider text-foreground mb-4">
-                Automotive Technical Guides & Catalogues
-              </h3>
-              <div className="space-y-3">
-                {guides.map((g) => (
-                  <div
-                    key={g.slug}
-                    className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:border-primary/40 transition-colors"
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <FileText className="h-4 w-4 text-primary shrink-0" />
-                      <div>
-                        <span className="font-semibold text-xs sm:text-sm text-foreground block">
-                          {g.title}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          {g.cat} • {g.mins} min read
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold text-primary flex items-center gap-1 shrink-0">
-                      Read <ArrowRight className="h-3 w-3" />
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Technical Assistance Callout Box */}
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 sm:p-5 mt-6">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">
-                  Need Comprehensive Equipment PDF Catalogues?
-                </h4>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Our applications engineering team maintains complete dimensional CAD drawings, floor foundation specs, and wiring diagrams for turnkey bays.
-                </p>
-                <div className="mt-3 flex items-center gap-3">
-                  <a
-                    href="mailto:b2b@page-intl.com"
-                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-                  >
-                    Request Technical Datasheet Pack <ArrowRight className="h-3 w-3" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Accordion type="single" collapsible className="space-y-2.5">
+            {faqs.map(([q, a], idx) => (
+              <AccordionItem
+                key={idx}
+                value={`faq-${idx}`}
+                className="rounded-lg border border-border bg-card px-4"
+              >
+                <AccordionTrigger className="text-left text-xs sm:text-sm font-semibold hover:text-primary py-3.5">
+                  {q}
+                </AccordionTrigger>
+                <AccordionContent className="text-xs text-muted-foreground leading-relaxed pb-4">
+                  {a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
     </div>

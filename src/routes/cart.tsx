@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
+import { addQuote } from "@/lib/admin-data";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -53,7 +54,44 @@ export function Cart() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.companyName || !formData.phone) return;
-    setRefId(`RFQ-${Math.floor(100000 + Math.random() * 900000)}`);
+    const generatedRef = `RFQ-${Math.floor(100000 + Math.random() * 900000)}`;
+    setRefId(generatedRef);
+
+    // Save all cart items into ONE single consolidated quotation request
+    try {
+      if (lines.length > 0) {
+        const totalUnits = lines.reduce((acc, l) => acc + l.qty, 0);
+        const firstLine = lines[0];
+        const productSummary =
+          lines.length === 1 && firstLine
+            ? `${firstLine.qty}x ${firstLine.product.name}`
+            : `${lines.length} Products: ${lines.map((l) => `${l.qty}x ${l.product.name}`).join(", ")}`;
+
+        addQuote({
+          companyName: formData.companyName,
+          contactName: formData.contactName || formData.companyName,
+          phone: formData.phone,
+          email: formData.email || "client@workshop.bd",
+          productSlug: firstLine ? firstLine.product.slug : "",
+          productName: productSummary,
+          qty: totalUnits,
+          items: lines.map((l) => ({
+            productSlug: l.product.slug,
+            productName: l.product.name,
+            qty: l.qty,
+            unitPrice: l.product.price,
+          })),
+          businessType: "Cart Multi-Item Order",
+          city: formData.city || "Dhaka",
+          notes: formData.notes
+            ? `${formData.notes} [Cart Ref: ${generatedRef}]`
+            : `Quotation Cart Ref: ${generatedRef} (${lines.length} products, ${totalUnits} total units)`,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to add quotation from cart:", err);
+    }
+
     setSubmitted(true);
   };
 

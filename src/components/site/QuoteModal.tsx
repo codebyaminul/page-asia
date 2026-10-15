@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import type { Product } from "@/lib/data";
+import { addQuote } from "@/lib/admin-data";
 
 export interface QuoteModalProps {
   product: Product | null;
@@ -37,6 +38,22 @@ export function QuoteModal({ product, onClose }: QuoteModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.companyName || !formData.phone) return;
+    try {
+      addQuote({
+        companyName: formData.companyName,
+        contactName: formData.contactName || formData.companyName,
+        phone: formData.phone,
+        email: formData.email,
+        productSlug: product.slug,
+        productName: product.name,
+        qty,
+        businessType: formData.businessType,
+        city: formData.city,
+        notes: formData.notes,
+      });
+    } catch {
+      // Fallback gracefully
+    }
     setSubmitted(true);
   };
 

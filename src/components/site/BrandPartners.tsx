@@ -296,10 +296,10 @@ export function BrandPartners() {
       {partnerBrands.map((brand) => (
         <div
           key={brand.name}
-          className="group relative flex flex-col items-center justify-center p-3 rounded-xl hover:bg-zinc-50/80 transition-all duration-300 w-full cursor-pointer"
+          className="group relative flex flex-col items-center justify-center p-3 rounded-xl hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 transition-all duration-300 w-full cursor-pointer"
           title={`${brand.name} — ${brand.category} (${brand.country})`}
         >
-          <div className="text-zinc-400 group-hover:text-zinc-900 transition-colors duration-300 grayscale group-hover:grayscale-0 flex items-center justify-center h-10 w-full">
+          <div className="text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors duration-300 grayscale group-hover:grayscale-0 flex items-center justify-center h-10 w-full">
             {brand.logo}
           </div>
           <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 truncate max-w-full text-center">

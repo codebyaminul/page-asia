@@ -327,3 +327,34 @@
 .intro-workshop-animate {
   animation: page-intro-workshop-reveal 4.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+
+@keyframes mobility-slide-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* ===== REVIEWS INFINITE SLIDESHOW LOOP (LEFT-TO-RIGHT) ===== */
+@keyframes review-marquee-ltr {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0%, 0, 0);
+  }
+}
+
+.animate-reviews-ltr {
+  display: flex;
+  width: max-content;
+  animation: review-marquee-ltr 55s linear infinite;
+  will-change: transform;
+}
+
+.animate-reviews-ltr:hover {
+  animation-play-state: paused;
+}
+

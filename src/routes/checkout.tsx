@@ -59,11 +59,11 @@ export function Checkout() {
         </p>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/garage" className="btn btn-primary h-11 px-6 text-xs font-bold uppercase">
-            View in My Garage
-          </Link>
-          <Link to="/shop" className="btn btn-outline h-11 px-6 text-xs font-bold uppercase">
+          <Link to="/shop" className="btn btn-primary h-11 px-6 text-xs font-bold uppercase">
             Continue Shopping
+          </Link>
+          <Link to="/" className="btn btn-outline h-11 px-6 text-xs font-bold uppercase">
+            Back to Home
           </Link>
         </div>
       </div>

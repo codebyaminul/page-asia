@@ -15,12 +15,13 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
-import { products, type Product } from "@/lib/data";
+import { products, getShopProducts, getProductBySlug, type Product } from "@/lib/data";
 import { useCart } from "@/lib/cart";
+import { addQuote } from "@/lib/admin-data";
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: ({ params }) => {
-    const p = products.find((x) => x.slug === params.slug);
+    const p = getProductBySlug(params.slug);
     if (!p) throw notFound();
     return { p };
   },
@@ -108,6 +109,24 @@ export function ProductPage() {
   const handleQuoteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!quoteData.businessName || !quoteData.phone) return;
+    try {
+      addQuote({
+        companyName: quoteData.businessName,
+        contactName: quoteData.contactPerson || quoteData.businessName,
+        phone: quoteData.phone,
+        email: quoteData.email || "inquiry@workshop.bd",
+        productSlug: p.slug,
+        productName: p.name,
+        qty: Math.max(1, Number(quoteData.quantity) || 1),
+        businessType: quoteData.businessType || "Workshop",
+        city: "Dhaka",
+        notes: quoteData.notes
+          ? `${quoteData.notes} [Config: ${selectedVoltage.toUpperCase()} / ${selectedArmType}]`
+          : `Config: ${selectedVoltage.toUpperCase()} / ${selectedArmType}`,
+      });
+    } catch (err) {
+      console.error("Failed to add quotation from product page:", err);
+    }
     setQuoteSent(true);
   };
 
@@ -130,10 +149,11 @@ export function ProductPage() {
   const quickHighlights = p.specs.slice(0, 4);
 
   // Related products from same category or complementary equipment
-  const sameCategory = products.filter(
+  const allCatalog = getShopProducts();
+  const sameCategory = allCatalog.filter(
     (x) => x.slug !== p.slug && x.category === p.category
   );
-  const otherItems = products.filter(
+  const otherItems = allCatalog.filter(
     (x) => x.slug !== p.slug && x.category !== p.category
   );
   const related = [...sameCategory, ...otherItems].slice(0, 4);
@@ -191,34 +211,34 @@ export function ProductPage() {
           {/* LEFT COLUMN: Clean Minimal Product Gallery Stage     */}
           {/* ==================================================== */}
           <div className="lg:col-span-6 space-y-4">
-            {/* Main Image Stage */}
-            <div className="relative aspect-square w-full rounded-2xl border border-zinc-200 bg-white p-6 sm:p-10 flex items-center justify-center overflow-hidden shadow-xs group">
-              {/* Minimal Platform Icon Badges - More Transparent & Faded */}
+            {/* Main Image Stage - Edge-to-Edge Border Cover */}
+            <div className="relative aspect-square w-full rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-xs group">
+              {/* Minimal Platform Icon Badges */}
               <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-1.5">
                 {p.mobility?.includes("EV") && (
                   <span
-                    className="grid h-6 w-6 place-items-center rounded-full bg-emerald-500/[0.04] border border-emerald-500/15 text-emerald-600/40 opacity-25 hover:opacity-80 backdrop-blur-xs transition-all cursor-help"
+                    className="grid h-7 w-7 place-items-center rounded-full bg-white/90 border border-white/60 text-emerald-600 shadow-xs backdrop-blur-md transition-all cursor-help"
                     title="EV Platform Compatible"
                     aria-label="EV Platform Compatible"
                   >
-                    <Zap className="h-3 w-3 stroke-[1.75] fill-none text-emerald-600/50" />
+                    <Zap className="h-3.5 w-3.5 stroke-[1.75] fill-none" />
                   </span>
                 )}
                 {p.isEquipment ? (
                   <span
-                    className="grid h-6 w-6 place-items-center rounded-full bg-zinc-900/[0.03] border border-zinc-900/10 text-zinc-600/35 opacity-25 hover:opacity-80 backdrop-blur-xs transition-all cursor-help"
+                    className="grid h-7 w-7 place-items-center rounded-full bg-white/90 border border-white/60 text-zinc-700 shadow-xs backdrop-blur-md transition-all cursor-help"
                     title="Garage Machinery Equipment"
                     aria-label="Garage Machinery Equipment"
                   >
-                    <Wrench className="h-3 w-3 stroke-[1.75]" />
+                    <Wrench className="h-3.5 w-3.5 stroke-[1.75]" />
                   </span>
                 ) : !p.mobility?.includes("EV") ? (
                   <span
-                    className="grid h-6 w-6 place-items-center rounded-full bg-zinc-100/30 text-zinc-500/35 border border-zinc-200/30 opacity-25 hover:opacity-80 backdrop-blur-xs transition-all cursor-help"
+                    className="grid h-7 w-7 place-items-center rounded-full bg-white/90 border border-white/60 text-primary shadow-xs backdrop-blur-md transition-all cursor-help"
                     title="OEM Genuine Replacement"
                     aria-label="OEM Genuine Replacement"
                   >
-                    <CheckCircle2 className="h-3 w-3 stroke-[1.75] text-primary/35" />
+                    <CheckCircle2 className="h-3.5 w-3.5 stroke-[1.75]" />
                   </span>
                 ) : null}
               </div>
@@ -227,20 +247,20 @@ export function ProductPage() {
               <button
                 type="button"
                 onClick={() => setZoomOpen(true)}
-                className="absolute top-4 right-4 grid h-9 w-9 place-items-center rounded-full bg-zinc-100 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200 transition-all cursor-pointer"
+                className="absolute top-3.5 right-3.5 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-zinc-950 shadow-sm border border-white/60 backdrop-blur-md transition-all cursor-pointer"
                 title="View High-Resolution Gallery"
                 aria-label="Expand image"
               >
                 <Maximize2 className="h-4 w-4" />
               </button>
 
-              {/* Product Visual */}
+              {/* Product Visual - Full Border Cover */}
               <img
                 src={activeImage}
                 alt={p.name}
                 width={700}
                 height={700}
-                className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
               />
             </div>
 
@@ -253,7 +273,7 @@ export function ProductPage() {
                     key={item.id}
                     type="button"
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`aspect-square rounded-xl border p-2 flex items-center justify-center transition-all bg-white cursor-pointer ${
+                    className={`aspect-square rounded-xl border overflow-hidden flex items-center justify-center transition-all bg-white cursor-pointer ${
                       isActive
                         ? "border-primary ring-2 ring-primary/20 shadow-xs"
                         : "border-zinc-200 hover:border-zinc-400"
@@ -262,7 +282,7 @@ export function ProductPage() {
                     <img
                       src={item.img}
                       alt={item.label}
-                      className="h-full w-full object-contain"
+                      className="h-full w-full object-cover object-center"
                     />
                     <span className="sr-only">{item.label}</span>
                   </button>
@@ -466,24 +486,7 @@ export function ProductPage() {
               </button>
             </div>
 
-            {/* Garage Platform Checker (Minimal single-line) */}
-            <div className="pt-2">
-              <div className="text-xs text-zinc-600 flex items-center justify-between p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
-                <span className="flex items-center gap-2">
-                  <Car className="h-4 w-4 text-primary shrink-0" />
-                  {vehicle ? (
-                    <span>
-                      Compatibility checked for: <strong>{vehicle.make} {vehicle.model}</strong>
-                    </span>
-                  ) : (
-                    <span>Check fit against your workshop platform?</span>
-                  )}
-                </span>
-                <Link to="/garage" className="font-bold text-primary hover:underline">
-                  {vehicle ? "Change →" : "Set Platform →"}
-                </Link>
-              </div>
-            </div>
+
 
             {/* Minimal Guarantees */}
             <div className="pt-3 border-t border-zinc-200/80 grid grid-cols-3 gap-2 text-[11px] sm:text-xs text-zinc-600 font-medium text-center">

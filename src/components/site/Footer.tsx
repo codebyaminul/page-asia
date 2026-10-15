@@ -230,6 +230,13 @@ export function Footer() {
             <Link to="/support" className="hover:text-ink-foreground">
               Equipment Warranty Policy
             </Link>
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-1 rounded bg-white/5 px-2 py-0.5 text-[11px] font-medium text-ink-muted hover:bg-primary/20 hover:text-primary transition-colors border border-white/10"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Admin Portal
+            </Link>
           </div>
         </div>
       </div>

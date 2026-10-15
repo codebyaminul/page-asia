@@ -13,15 +13,23 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
 import { cn } from "@/lib/utils";
 import { QuoteModal } from "@/components/site/QuoteModal";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   brands,
   categories,
   mobilitySegments,
   products,
+  getShopProducts,
   type MobilityType,
   type Product,
 } from "@/lib/data";
@@ -87,9 +95,27 @@ export function Shop() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [activeQuoteProduct, setActiveQuoteProduct] = useState<Product | null>(null);
 
+  // Live products list: seamlessly pulls admin additions from localStorage
+  const [allProducts, setAllProducts] = useState<Product[]>(() => getShopProducts());
+
+  useEffect(() => {
+    setAllProducts(getShopProducts());
+
+    function onInventoryChange() {
+      setAllProducts(getShopProducts());
+    }
+
+    window.addEventListener("inventory_updated", onInventoryChange);
+    window.addEventListener("storage", onInventoryChange);
+    return () => {
+      window.removeEventListener("inventory_updated", onInventoryChange);
+      window.removeEventListener("storage", onInventoryChange);
+    };
+  }, []);
+
   // Filter application
   const filteredList = useMemo(() => {
-    return products.filter((p) => {
+    return allProducts.filter((p) => {
       // Mobility Platform filter (4-Wheeler, 2-Wheeler, 3-Wheeler, EV)
       if (searchMobility && searchMobility !== "All") {
         if (!p.mobility.includes(searchMobility as MobilityType)) return false;
@@ -134,6 +160,7 @@ export function Shop() {
       return true;
     });
   }, [
+    allProducts,
     q,
     cat,
     vehicle,
@@ -551,237 +578,234 @@ export function Shop() {
         </div>
       </section>
 
-      {/* Mobile Filters Drawer */}
-      {mobileFilterOpen && (
-        <div className="fixed inset-0 z-50 flex bg-black/60 backdrop-blur-xs lg:hidden">
-          <div className="ml-auto w-full max-w-xs h-full bg-card p-5 overflow-y-auto flex flex-col justify-between shadow-2xl">
-            <div className="space-y-4">
-              {/* Drawer Header: Title + Reset + Close (No numbers) */}
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
+      {/* Mobile Filters Drawer (Slides from the left) */}
+      <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
+        <SheetContent
+          side="left"
+          className="w-[310px] max-w-[88vw] h-full bg-card p-5 flex flex-col justify-between overflow-y-auto"
+        >
+          <div className="space-y-4">
+            {/* Drawer Header: Title + Reset (Close button is rendered top-right by SheetContent) */}
+            <SheetHeader className="border-b border-border pb-3 pr-8 text-left space-y-0">
+              <div className="flex items-center justify-between">
+                <SheetTitle className="text-sm font-bold uppercase tracking-wider text-foreground">
                   Filters
-                </h3>
-                <div className="flex items-center gap-3">
-                  {(cat ||
-                    vehicle ||
-                    selectedBrand ||
-                    q ||
-                    inStock ||
-                    searchType ||
-                    searchMobility) && (
-                    <button
-                      onClick={handleClearAll}
-                      className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                    >
-                      Reset
-                    </button>
-                  )}
+                </SheetTitle>
+                {(cat ||
+                  vehicle ||
+                  selectedBrand ||
+                  q ||
+                  inStock ||
+                  searchType ||
+                  searchMobility) && (
                   <button
-                    onClick={() => setMobileFilterOpen(false)}
-                    aria-label="Close filters"
-                    className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer"
+                    onClick={handleClearAll}
+                    className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    Reset
                   </button>
-                </div>
+                )}
               </div>
+              <SheetDescription className="sr-only">
+                Filter catalogue by platform, stock, category, brand, and type
+              </SheetDescription>
+            </SheetHeader>
 
-              {/* 1. Mobile In Stock Switch */}
-              <div className="flex items-center justify-between py-1.5 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-800">
-                <span className="text-xs font-semibold text-foreground">In Stock Only</span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={inStock}
-                  onClick={() => setInStock(!inStock)}
-                  className={cn(
-                    "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                    inStock ? "bg-primary" : "bg-zinc-300 dark:bg-zinc-700"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out",
-                      inStock ? "translate-x-4" : "translate-x-0"
-                    )}
-                  />
-                </button>
-              </div>
-
-              {/* 2. Mobile Vehicle Platform (4-Column Segmented Row) */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Platform
-                  </span>
-                  {searchMobility && (
-                    <button
-                      onClick={() =>
-                        nav({ search: (s: S) => ({ ...s, mobility: undefined }) })
-                      }
-                      className="text-[10px] font-semibold text-primary hover:underline"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-                <div className="grid grid-cols-4 gap-1 text-xs">
-                  {[
-                    { id: "4-Wheeler", label: "4W", title: "4-Wheeler", icon: Car },
-                    { id: "2-Wheeler", label: "2W", title: "2-Wheeler", icon: Bike },
-                    { id: "3-Wheeler", label: "3W", title: "3-Wheeler", icon: Truck },
-                    { id: "EV", label: "EV", title: "Electric Mobility", icon: Zap },
-                  ].map((item) => {
-                    const active = searchMobility === item.id;
-                    const Icon = item.icon;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        title={item.title}
-                        onClick={() =>
-                          nav({
-                            search: (s: S) => ({
-                              ...s,
-                              mobility: active ? undefined : item.id,
-                            }),
-                          })
-                        }
-                        className={cn(
-                          "flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-center font-medium transition-all cursor-pointer border text-xs gap-0.5",
-                          active
-                            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs font-bold"
-                            : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200/80 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 hover:border-zinc-300"
-                        )}
-                      >
-                        <Icon
-                          className={cn(
-                            "h-3.5 w-3.5",
-                            active ? "text-primary" : "text-muted-foreground"
-                          )}
-                        />
-                        <span className="text-[10.5px] leading-tight font-semibold">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 3. Mobile Product Nature (3-way Segmented Control) */}
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">
-                  Product Type
-                </span>
-                <div className="grid grid-cols-3 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 text-xs">
-                  {[
-                    { id: undefined, label: "All" },
-                    { id: "equipment", label: "Machinery" },
-                    { id: "parts", label: "Parts" },
-                  ].map((item) => {
-                    const active = searchType === item.id;
-                    return (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() =>
-                          nav({ search: (s: S) => ({ ...s, type: item.id }) })
-                        }
-                        className={cn(
-                          "py-1 rounded-lg font-semibold transition-all cursor-pointer text-center truncate px-1 text-[11px]",
-                          active
-                            ? "bg-white dark:bg-zinc-900 text-foreground shadow-xs"
-                            : "text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 4. Mobile Category Dropdown */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="m-filter-cat" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Category
-                  </label>
-                  {cat && (
-                    <button
-                      onClick={() =>
-                        nav({ search: (s: S) => ({ ...s, cat: undefined }) })
-                      }
-                      className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <select
-                    id="m-filter-cat"
-                    value={cat || ""}
-                    onChange={(e) =>
-                      nav({ search: (s: S) => ({ ...s, cat: e.target.value || undefined }) })
-                    }
-                    className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
-                  >
-                    <option value="">All Categories</option>
-                    {categories.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                </div>
-              </div>
-
-              {/* 5. Mobile Brand Dropdown */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="m-filter-brand" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Brand
-                  </label>
-                  {selectedBrand && (
-                    <button
-                      onClick={() => setSelectedBrand("")}
-                      className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <select
-                    id="m-filter-brand"
-                    value={selectedBrand}
-                    onChange={(e) => setSelectedBrand(e.target.value)}
-                    className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
-                  >
-                    <option value="">All Brands</option>
-                    {brands.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-border">
+            {/* 1. Mobile In Stock Switch */}
+            <div className="flex items-center justify-between py-1.5 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-800">
+              <span className="text-xs font-semibold text-foreground">In Stock Only</span>
               <button
-                onClick={() => setMobileFilterOpen(false)}
-                className="btn btn-primary w-full h-10 text-xs font-bold uppercase rounded-xl shadow-sm cursor-pointer"
+                type="button"
+                role="switch"
+                aria-checked={inStock}
+                onClick={() => setInStock(!inStock)}
+                className={cn(
+                  "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                  inStock ? "bg-primary" : "bg-zinc-300 dark:bg-zinc-700"
+                )}
               >
-                Apply Filters
+                <span
+                  className={cn(
+                    "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out",
+                    inStock ? "translate-x-4" : "translate-x-0"
+                  )}
+                />
               </button>
             </div>
+
+            {/* 2. Mobile Vehicle Platform (4-Column Segmented Row) */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Platform
+                </span>
+                {searchMobility && (
+                  <button
+                    onClick={() =>
+                      nav({ search: (s: S) => ({ ...s, mobility: undefined }) })
+                    }
+                    className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-4 gap-1 text-xs">
+                {[
+                  { id: "4-Wheeler", label: "4W", title: "4-Wheeler", icon: Car },
+                  { id: "2-Wheeler", label: "2W", title: "2-Wheeler", icon: Bike },
+                  { id: "3-Wheeler", label: "3W", title: "3-Wheeler", icon: Truck },
+                  { id: "EV", label: "EV", title: "Electric Mobility", icon: Zap },
+                ].map((item) => {
+                  const active = searchMobility === item.id;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      title={item.title}
+                      onClick={() =>
+                        nav({
+                          search: (s: S) => ({
+                            ...s,
+                            mobility: active ? undefined : item.id,
+                          }),
+                        })
+                      }
+                      className={cn(
+                        "flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-center font-medium transition-all cursor-pointer border text-xs gap-0.5",
+                        active
+                          ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-zinc-950 dark:border-white shadow-xs font-bold"
+                          : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200/80 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 hover:border-zinc-300"
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "h-3.5 w-3.5",
+                          active ? "text-primary" : "text-muted-foreground"
+                        )}
+                      />
+                      <span className="text-[10.5px] leading-tight font-semibold">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Mobile Product Nature (3-way Segmented Control) */}
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                Product Type
+              </span>
+              <div className="grid grid-cols-3 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 text-xs">
+                {[
+                  { id: undefined, label: "All" },
+                  { id: "equipment", label: "Machinery" },
+                  { id: "parts", label: "Parts" },
+                ].map((item) => {
+                  const active = searchType === item.id;
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() =>
+                        nav({ search: (s: S) => ({ ...s, type: item.id }) })
+                      }
+                      className={cn(
+                        "py-1 rounded-lg font-semibold transition-all cursor-pointer text-center truncate px-1 text-[11px]",
+                        active
+                          ? "bg-white dark:bg-zinc-900 text-foreground shadow-xs"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 4. Mobile Category Dropdown */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="m-filter-cat" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Category
+                </label>
+                {cat && (
+                  <button
+                    onClick={() =>
+                      nav({ search: (s: S) => ({ ...s, cat: undefined }) })
+                    }
+                    className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <select
+                  id="m-filter-cat"
+                  value={cat || ""}
+                  onChange={(e) =>
+                    nav({ search: (s: S) => ({ ...s, cat: e.target.value || undefined }) })
+                  }
+                  className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+            </div>
+
+            {/* 5. Mobile Brand Dropdown */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="m-filter-brand" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Brand
+                </label>
+                {selectedBrand && (
+                  <button
+                    onClick={() => setSelectedBrand("")}
+                    className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <select
+                  id="m-filter-brand"
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  className="w-full h-8.5 pl-3 pr-8 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
+                >
+                  <option value="">All Brands</option>
+                  {brands.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="pt-4 mt-4 border-t border-border">
+            <button
+              onClick={() => setMobileFilterOpen(false)}
+              className="btn btn-primary w-full h-10 text-xs font-bold uppercase rounded-xl shadow-sm cursor-pointer"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Direct Product Quotation Modal */}
       {activeQuoteProduct && (
