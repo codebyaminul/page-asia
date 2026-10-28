@@ -11,7 +11,8 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getCurrentCustomerFn } from "@/lib/server-api";
 import { centers } from "@/lib/data";
 import { addBooking } from "@/lib/admin-data";
 
@@ -124,6 +125,29 @@ export function BookConsultation() {
     notes: "",
   });
 
+  const [customer, setCustomer] = useState<any>(null);
+
+  useEffect(() => {
+    getCurrentCustomerFn()
+      .then((c) => {
+        if (c) {
+          setCustomer(c);
+          setBiz((prev) => ({
+            ...prev,
+            businessName: c.companyName || prev.businessName,
+            businessType: c.businessType || prev.businessType,
+          }));
+          setInfo((prev) => ({
+            ...prev,
+            contactPerson: c.fullName || prev.contactPerson,
+            phone: c.phone || prev.phone,
+            email: c.email || prev.email,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const canNext = [
     sel.length > 0,
     !!biz.businessName,
@@ -164,9 +188,15 @@ export function BookConsultation() {
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
+            to="/account"
+            className="btn btn-primary h-11 px-6 text-xs font-bold uppercase tracking-wider"
+          >
+            View in Client Portal
+          </Link>
+          <Link
             to="/shop"
             search={{ cat: "Garage Equipment" }}
-            className="btn btn-primary h-11 px-6 text-xs font-bold uppercase tracking-wider"
+            className="btn btn-outline h-11 px-6 text-xs font-bold uppercase tracking-wider"
           >
             Explore Equipment Catalogue
           </Link>
@@ -211,6 +241,20 @@ export function BookConsultation() {
             Book a demonstration of workshop lifts, tyre changers, and diagnostic computers at our regional equipment hubs, or schedule an on-site engineer visit to your garage facility.
           </p>
         </div>
+
+        {customer && (
+          <div className="mt-6 flex items-center justify-between rounded-lg border border-primary/30 bg-primary/5 p-4 text-xs">
+            <div className="flex items-center gap-2.5">
+              <Building2 className="h-4 w-4 text-primary" />
+              <span>
+                Authenticated as <strong className="text-foreground">{customer.companyName || customer.fullName}</strong> ({customer.email}) &bull; Pre-filled your client details.
+              </span>
+            </div>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-primary font-bold">
+              Linked Account
+            </span>
+          </div>
+        )}
 
         {/* Step Progress Tracker */}
         <ol className="mt-8 grid grid-cols-5 gap-2" aria-label="Progress">
@@ -619,10 +663,16 @@ export function BookConsultation() {
                         contactName: info.contactPerson,
                         phone: info.phone,
                         email: info.email,
+                        businessType: biz.businessType,
+                        bayCount: biz.bays,
+                        equipmentInterest: biz.equipmentInterest,
                         serviceId: sel[0] || "consultation",
+                        serviceIds: sel,
                         serviceName: chosenServices.map((s) => s.name).join(", ") || "General Equipment Consultation",
+                        locationType: locationType,
                         centerId: locationType === "hub" ? center : "onsite",
                         centerName: locationType === "hub" ? (c?.name || "PAGE Equipment Hub") : `On-site: ${onsiteAddress || biz.businessName}`,
+                        onsiteAddress: locationType === "onsite" ? onsiteAddress : undefined,
                         preferredDate: `${day !== null ? days[day]!.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)} (${slot})`,
                         notes: info.notes,
                       });

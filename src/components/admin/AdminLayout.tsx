@@ -20,6 +20,7 @@ import { getAdminStats, getAuthAdminUser, logoutAdmin, type AdminUser } from "@/
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true },
+  { to: "/admin/orders", icon: ShoppingBag, label: "Orders" },
   { to: "/admin/inventory", icon: Package, label: "Inventory" },
   { to: "/admin/users", icon: Users, label: "Users" },
   { to: "/admin/quotes", icon: FileText, label: "Quotations" },
@@ -153,6 +154,11 @@ export function AdminLayout({
                   }`}
                 />
                 {!collapsed && <span className="truncate">{item.label}</span>}
+                {!collapsed && item.label === "Orders" && (stats as any).pendingOrders > 0 && (
+                  <span className="ml-auto text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">
+                    {(stats as any).pendingOrders}
+                  </span>
+                )}
                 {!collapsed && item.label === "Quotations" && stats.pendingQuotes > 0 && (
                   <span className="ml-auto text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full font-bold">
                     {stats.pendingQuotes}

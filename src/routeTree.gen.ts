@@ -11,17 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as ServiceCentersRouteImport } from './routes/service-centers'
 import { Route as SolutionsRouteImport } from './routes/solutions'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as VehiclesRouteImport } from './routes/vehicles'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as AdminInventoryRouteImport } from './routes/admin/inventory'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminOrdersRouteImport } from './routes/admin/orders'
 import { Route as AdminQuotesRouteImport } from './routes/admin/quotes'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
@@ -37,6 +40,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -69,6 +77,11 @@ const SupportRoute = SupportRouteImport.update({
   path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VehiclesRoute = VehiclesRouteImport.update({
   id: '/vehicles',
   path: '/vehicles',
@@ -92,6 +105,11 @@ const AdminInventoryRoute = AdminInventoryRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminQuotesRoute = AdminQuotesRouteImport.update({
@@ -128,16 +146,19 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/consultation': typeof ConsultationRoute
   '/service-centers': typeof ServiceCentersRoute
   '/solutions': typeof SolutionsRoute
   '/support': typeof SupportRoute
+  '/track': typeof TrackRoute
   '/vehicles': typeof VehiclesRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/quotes': typeof AdminQuotesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -149,16 +170,19 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/consultation': typeof ConsultationRoute
   '/service-centers': typeof ServiceCentersRoute
   '/solutions': typeof SolutionsRoute
   '/support': typeof SupportRoute
+  '/track': typeof TrackRoute
   '/vehicles': typeof VehiclesRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/quotes': typeof AdminQuotesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -171,16 +195,19 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/consultation': typeof ConsultationRoute
   '/service-centers': typeof ServiceCentersRoute
   '/solutions': typeof SolutionsRoute
   '/support': typeof SupportRoute
+  '/track': typeof TrackRoute
   '/vehicles': typeof VehiclesRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/quotes': typeof AdminQuotesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -194,16 +221,19 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/account'
     | '/cart'
     | '/checkout'
     | '/consultation'
     | '/service-centers'
     | '/solutions'
     | '/support'
+    | '/track'
     | '/vehicles'
     | '/admin/bookings'
     | '/admin/inventory'
     | '/admin/login'
+    | '/admin/orders'
     | '/admin/quotes'
     | '/admin/settings'
     | '/admin/users'
@@ -215,16 +245,19 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/account'
     | '/cart'
     | '/checkout'
     | '/consultation'
     | '/service-centers'
     | '/solutions'
     | '/support'
+    | '/track'
     | '/vehicles'
     | '/admin/bookings'
     | '/admin/inventory'
     | '/admin/login'
+    | '/admin/orders'
     | '/admin/quotes'
     | '/admin/settings'
     | '/admin/users'
@@ -236,16 +269,19 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/account'
     | '/cart'
     | '/checkout'
     | '/consultation'
     | '/service-centers'
     | '/solutions'
     | '/support'
+    | '/track'
     | '/vehicles'
     | '/admin/bookings'
     | '/admin/inventory'
     | '/admin/login'
+    | '/admin/orders'
     | '/admin/quotes'
     | '/admin/settings'
     | '/admin/users'
@@ -258,16 +294,19 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountRoute: typeof AccountRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ConsultationRoute: typeof ConsultationRoute
   ServiceCentersRoute: typeof ServiceCentersRoute
   SolutionsRoute: typeof SolutionsRoute
   SupportRoute: typeof SupportRoute
+  TrackRoute: typeof TrackRoute
   VehiclesRoute: typeof VehiclesRoute
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   AdminQuotesRoute: typeof AdminQuotesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -291,6 +330,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -335,6 +381,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vehicles': {
       id: '/vehicles'
       path: '/vehicles'
@@ -368,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/quotes': {
@@ -418,16 +478,19 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountRoute: AccountRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ConsultationRoute: ConsultationRoute,
   ServiceCentersRoute: ServiceCentersRoute,
   SolutionsRoute: SolutionsRoute,
   SupportRoute: SupportRoute,
+  TrackRoute: TrackRoute,
   VehiclesRoute: VehiclesRoute,
   AdminBookingsRoute: AdminBookingsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   AdminQuotesRoute: AdminQuotesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,

@@ -32,7 +32,8 @@ import {
   Eye,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getQuotesFn } from "@/lib/server-api";
 import {
   QuotationEmailModal,
   generateQuotationEmailHtml,
@@ -48,6 +49,17 @@ export const Route = createFileRoute("/admin/quotes")({
 
 function AdminQuotes() {
   const [quotes, setQuotes] = useState(() => getQuotes());
+
+  useEffect(() => {
+    getQuotesFn()
+      .then((data) => {
+        if (data && data.length) {
+          setQuotes(data);
+          saveQuotes(data);
+        }
+      })
+      .catch((err) => console.warn("Failed to fetch live quotes from DB:", err));
+  }, []);
   const [inventory] = useState(() => getInventory());
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

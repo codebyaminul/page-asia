@@ -11,9 +11,10 @@ import {
   User,
   Wallet,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { taka } from "@/lib/data";
 import { useCart } from "@/lib/cart";
+import { createOrderFn, getCurrentCustomerFn } from "@/lib/server-api";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -33,11 +34,57 @@ export function Checkout() {
   const [pay, setPay] = useState("cod");
   const [isBusiness, setIsBusiness] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customer, setCustomer] = useState<any>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    getCurrentCustomerFn()
+      .then((c) => {
+        if (c) {
+          setCustomer(c);
+          if (c.companyName || c.businessType) {
+            setIsBusiness(true);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const id = "PG-" + Math.floor(100000 + Math.random() * 900000);
     setOrderId(id);
+
+    const fd = new FormData(e.currentTarget);
+    const orderPayload = {
+      id,
+      customerId: customer?.id || null,
+      accountType: isBusiness ? "business" : "personal",
+      fullName: (fd.get("fullName") as string) || "Customer",
+      phone: (fd.get("phone") as string) || "",
+      email: (fd.get("email") as string) || null,
+      companyName: isBusiness ? (fd.get("companyName") as string) : null,
+      binVatNumber: isBusiness ? (fd.get("binVatNumber") as string) : null,
+      streetAddress: (fd.get("streetAddress") as string) || "Dhaka",
+      city: (fd.get("city") as string) || "Dhaka",
+      deliveryNotes: (fd.get("deliveryNotes") as string) || null,
+      paymentMethod: pay,
+      subtotal,
+      deliveryCharge: 0,
+      vatAmount: 0,
+      total: subtotal,
+      lines,
+    };
+
+    try {
+      await createOrderFn({ data: orderPayload });
+    } catch (err) {
+      console.warn("Could not save order to database:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+
     clear();
     setDone(true);
   };
@@ -94,6 +141,22 @@ export function Checkout() {
         <form onSubmit={handleSubmit} className="grid gap-10 lg:grid-cols-[1fr_380px]">
           {/* Left Form Details */}
           <div className="space-y-8">
+            {/* Authenticated Customer Notice */}
+            {customer && (
+              <div className="flex items-center justify-between rounded-lg border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 text-xs text-emerald-300 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>
+                    Authenticated as <strong>{customer.companyName || customer.fullName}</strong> ({customer.email}).
+                    This order will link to your client account portal.
+                  </span>
+                </div>
+                <Link to="/account" className="font-bold underline hover:text-white shrink-0 ml-2">
+                  View Account
+                </Link>
+              </div>
+            )}
+
             {/* Account Type Toggle */}
             <div className="rounded border border-border bg-card p-5">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-3">
@@ -136,14 +199,31 @@ export function Checkout() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
                     Full Name *
                   </label>
-                  <input required placeholder="Your full legal name" className="field" autoComplete="name" />
+                  <input
+                    name="fullName"
+                    required
+                    key={customer ? customer.id + "-name" : "anon-name"}
+                    defaultValue={customer?.fullName || ""}
+                    placeholder="Your full legal name"
+                    className="field"
+                    autoComplete="name"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
                     Phone Number *
                   </label>
-                  <input required type="tel" placeholder="+880 1..." className="field" autoComplete="tel" />
+                  <input
+                    name="phone"
+                    required
+                    type="tel"
+                    key={customer ? customer.id + "-phone" : "anon-phone"}
+                    defaultValue={customer?.phone || ""}
+                    placeholder="+880 1..."
+                    className="field"
+                    autoComplete="tel"
+                  />
                 </div>
 
                 {isBusiness && (
@@ -152,13 +232,26 @@ export function Checkout() {
                       <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
                         Company / Workshop Name *
                       </label>
-                      <input required placeholder="e.g. Apex Garage Ltd." className="field" />
+                      <input
+                        name="companyName"
+                        required
+                        key={customer ? customer.id + "-comp" : "anon-comp"}
+                        defaultValue={customer?.companyName || ""}
+                        placeholder="e.g. Apex Garage Ltd."
+                        className="field"
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
                         BIN / VAT Registration # (Optional)
                       </label>
-                      <input placeholder="For commercial tax invoice" className="field" />
+                      <input
+                        name="binVatNumber"
+                        key={customer ? customer.id + "-vat" : "anon-vat"}
+                        defaultValue={customer?.binVatNumber || ""}
+                        placeholder="For commercial tax invoice"
+                        className="field"
+                      />
                     </div>
                   </>
                 )}
@@ -168,7 +261,10 @@ export function Checkout() {
                     Street Address & Area *
                   </label>
                   <input
+                    name="streetAddress"
                     required
+                    key={customer ? customer.id + "-street" : "anon-street"}
+                    defaultValue={customer?.streetAddress || ""}
                     placeholder="House/Plot #, Road/Avenue, Industrial Zone"
                     className="field"
                     autoComplete="street-address"
@@ -179,14 +275,29 @@ export function Checkout() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
                     City / District *
                   </label>
-                  <input required defaultValue="Dhaka" className="field" autoComplete="address-level2" />
+                  <input
+                    name="city"
+                    required
+                    key={customer ? customer.id + "-city" : "anon-city"}
+                    defaultValue={customer?.city || "Dhaka"}
+                    className="field"
+                    autoComplete="address-level2"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
                     Email Address (For Invoicing)
                   </label>
-                  <input type="email" placeholder="billing@domain.com" className="field" autoComplete="email" />
+                  <input
+                    name="email"
+                    type="email"
+                    key={customer ? customer.id + "-email" : "anon-email"}
+                    defaultValue={customer?.email || ""}
+                    placeholder="billing@domain.com"
+                    className="field"
+                    autoComplete="email"
+                  />
                 </div>
 
                 <div className="sm:col-span-2">
@@ -194,6 +305,7 @@ export function Checkout() {
                     Special Unloading or Vehicle Notes (Optional)
                   </label>
                   <textarea
+                    name="deliveryNotes"
                     placeholder="e.g., Heavy equipment unloading instructions, preferred time window, gate clearance"
                     className="field h-20 py-2.5"
                   />

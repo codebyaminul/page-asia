@@ -11,7 +11,11 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:migrate": "node db/cli/migrate.cjs",
+    "db:status": "node db/cli/status.cjs",
+    "db:seed": "node db/cli/seed.cjs",
+    "test:db": "node scratch/run_all_tests.cjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -53,9 +57,12 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^18.0.8",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",
+    "postgres": "^3.4.9",
+    "puppeteer-core": "^25.16.0",
     "react": "^19.2.0",
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.2.0",

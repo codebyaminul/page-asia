@@ -5,6 +5,7 @@ import {
   updateInventoryItem,
   addInventoryItem,
   deleteInventoryItem,
+  saveInventory,
   getQuotes,
   replyToQuoteWithDetails,
   openGmailQuotationDraft,
@@ -36,7 +37,8 @@ import {
   Mail,
   Eye,
 } from "lucide-react";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { getProductsFn } from "@/lib/server-api";
 import {
   QuotationEmailModal,
   generateQuotationEmailHtml,
@@ -67,6 +69,17 @@ const PRESET_GALLERY = [
 
 function AdminInventory() {
   const [inventory, setInventory] = useState(() => getInventory());
+
+  useEffect(() => {
+    getProductsFn()
+      .then((data) => {
+        if (data && data.length) {
+          setInventory(data as InventoryItem[]);
+          saveInventory(data as InventoryItem[]);
+        }
+      })
+      .catch((err) => console.warn("Failed to fetch live inventory from DB:", err));
+  }, []);
   const [quotes, setQuotes] = useState(() => getQuotes());
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");

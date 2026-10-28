@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { getAdminStats, getQuotes, getBookings } from "@/lib/admin-data";
+import { getAdminStats, getQuotes, getBookings, getOrders, type AdminOrder } from "@/lib/admin-data";
+import { getAdminStatsFn, getQuotesFn, getBookingsFn, getAdminOrdersFn } from "@/lib/server-api";
+import { useState, useEffect } from "react";
 import { taka } from "@/lib/data";
 import {
   Package,
@@ -95,12 +97,28 @@ function StatCard({
 }
 
 function AdminDashboard() {
-  const stats = getAdminStats();
-  const quotes = getQuotes();
-  const bookings = getBookings();
+  const [stats, setStats] = useState<any>(() => getAdminStats());
+  const [quotes, setQuotes] = useState(() => getQuotes());
+  const [bookings, setBookings] = useState(() => getBookings());
+  const [orders, setOrders] = useState<AdminOrder[]>(() => getOrders());
+
+  useEffect(() => {
+    Promise.allSettled([
+      getAdminStatsFn(),
+      getQuotesFn(),
+      getBookingsFn(),
+      getAdminOrdersFn(),
+    ]).then(([sRes, qRes, bRes, oRes]) => {
+      if (sRes.status === "fulfilled" && sRes.value) setStats(sRes.value);
+      if (qRes.status === "fulfilled" && qRes.value) setQuotes(qRes.value);
+      if (bRes.status === "fulfilled" && bRes.value) setBookings(bRes.value);
+      if (oRes.status === "fulfilled" && oRes.value) setOrders(oRes.value as AdminOrder[]);
+    });
+  }, []);
 
   const recentQuotes = quotes.slice(0, 5);
   const recentBookings = bookings.slice(0, 5);
+  const recentOrders = orders.slice(0, 5);
 
   return (
     <AdminLayout activeRoute="/admin">
@@ -116,7 +134,7 @@ function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           <StatCard
             icon={Package}
             label="Total Products"
@@ -151,6 +169,15 @@ function AdminDashboard() {
             trend="+8.7%"
             trendUp
             color="#8b5cf6"
+          />
+          <StatCard
+            icon={ShoppingBag}
+            label="Customer Orders"
+            value={stats.totalOrders || orders.length}
+            sub={`${stats.pendingOrders || 0} pending fulfillment`}
+            trend="+18.4%"
+            trendUp
+            color="#06b6d4"
           />
         </div>
 
@@ -263,7 +290,51 @@ function AdminDashboard() {
         </div>
 
         {/* Tables Row */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          {/* Recent Orders */}
+          <div className="bg-[#232323] border border-white/[0.06] rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+              <h3 className="text-[14px] font-semibold text-white">Recent Customer Orders</h3>
+              <a
+                href="/admin/orders"
+                className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
+              >
+                View all →
+              </a>
+            </div>
+            <div className="divide-y divide-white/[0.04]">
+              {recentOrders.map((o) => (
+                <div key={o.id} className="px-5 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium text-zinc-200 truncate">
+                      {o.companyName || o.fullName}
+                    </p>
+                    <p className="text-[11px] text-zinc-500 truncate font-mono">
+                      #{o.id} &bull; {taka(o.total)}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                      o.status === "pending"
+                        ? "bg-amber-500/15 text-amber-400"
+                        : o.status === "confirmed"
+                        ? "bg-blue-500/15 text-blue-400"
+                        : o.status === "dispatched"
+                        ? "bg-purple-500/15 text-purple-400"
+                        : o.status === "delivered"
+                        ? "bg-emerald-500/15 text-emerald-400"
+                        : "bg-red-500/15 text-red-400"
+                    }`}
+                  >
+                    {o.status}
+                  </span>
+                </div>
+              ))}
+              {recentOrders.length === 0 && (
+                <p className="text-zinc-600 text-[12px] text-center py-8">No customer orders yet</p>
+              )}
+            </div>
+          </div>
           {/* Recent Quotes */}
           <div className="bg-[#232323] border border-white/[0.06] rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">

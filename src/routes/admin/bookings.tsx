@@ -19,7 +19,9 @@ import {
   Calendar,
   Wrench,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getBookingsFn } from "@/lib/server-api";
+import { saveBookings } from "@/lib/admin-data";
 
 export const Route = createFileRoute("/admin/bookings")({
   component: AdminBookings,
@@ -30,6 +32,17 @@ export const Route = createFileRoute("/admin/bookings")({
 
 function AdminBookings() {
   const [bookings, setBookings] = useState(() => getBookings());
+
+  useEffect(() => {
+    getBookingsFn()
+      .then((data) => {
+        if (data && data.length) {
+          setBookings(data);
+          saveBookings(data);
+        }
+      })
+      .catch((err) => console.warn("Failed to fetch live bookings from DB:", err));
+  }, []);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 

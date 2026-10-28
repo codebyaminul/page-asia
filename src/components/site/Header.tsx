@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Menu,
   ShoppingBag,
+  User,
   Wrench,
   X,
   Zap,
@@ -36,6 +37,7 @@ const shopLinks = [
 
 const navLinks = [
   { to: "/solutions", label: "Solutions" },
+  { to: "/track", label: "Track" },
   { to: "/support", label: "Support" },
   { to: "/about", label: "About" },
 ] as const;
@@ -208,6 +210,19 @@ export function Header() {
           {/* Action CTAs */}
           <div className="flex items-center gap-2.5">
             <Link
+              to="/account"
+              aria-label="Workshop Account & Portal"
+              title="Workshop Account & Portal"
+              className={`relative grid h-9.5 w-9.5 place-items-center rounded-full border transition-all ${
+                isGlass
+                  ? "border-zinc-200/90 bg-white/80 hover:bg-white text-zinc-800 shadow-xs"
+                  : "border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
+              }`}
+            >
+              <User className="h-4 w-4" />
+            </Link>
+
+            <Link
               to="/cart"
               aria-label={`Cart, ${count} items`}
               className={`relative grid h-9.5 w-9.5 place-items-center rounded-full border transition-all ${
@@ -374,6 +389,27 @@ export function Header() {
                       </div>
                       <div className="text-[11px] text-zinc-500">
                         {count > 0 ? `${count} items in list` : "No items selected"}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  to="/account"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between p-3 mt-2 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 transition-all text-zinc-900 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-8.5 w-8.5 place-items-center rounded-lg bg-red-600 text-white shadow-xs">
+                      <User className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-zinc-900">
+                        Workshop Account
+                      </div>
+                      <div className="text-[11px] text-zinc-500">
+                        Orders, RFQ quotes & demo bookings
                       </div>
                     </div>
                   </div>

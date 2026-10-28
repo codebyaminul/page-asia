@@ -18,6 +18,7 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { products, getShopProducts, getProductBySlug, type Product } from "@/lib/data";
 import { useCart } from "@/lib/cart";
 import { addQuote } from "@/lib/admin-data";
+import { getCurrentCustomerFn } from "@/lib/server-api";
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: ({ params }) => {
@@ -105,6 +106,25 @@ export function ProductPage() {
     quantity: String(qty),
     notes: "",
   });
+  const [customer, setCustomer] = useState<any>(null);
+
+  useEffect(() => {
+    getCurrentCustomerFn()
+      .then((c) => {
+        if (c) {
+          setCustomer(c);
+          setQuoteData((prev) => ({
+            ...prev,
+            businessName: c.companyName || prev.businessName,
+            contactPerson: c.fullName || prev.contactPerson,
+            phone: c.phone || prev.phone,
+            email: c.email || prev.email,
+            businessType: c.businessType || prev.businessType,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleQuoteSubmit = (e: React.FormEvent) => {
     e.preventDefault();

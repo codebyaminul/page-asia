@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+import { getCurrentCustomerFn } from "@/lib/server-api";
 import {
   CheckCircle2,
   FileSpreadsheet,
@@ -32,6 +34,26 @@ export function QuoteModal({ product, onClose }: QuoteModalProps) {
     city: "Dhaka",
     notes: "",
   });
+  const [customer, setCustomer] = useState<any>(null);
+
+  useEffect(() => {
+    getCurrentCustomerFn()
+      .then((c) => {
+        if (c) {
+          setCustomer(c);
+          setFormData((prev) => ({
+            ...prev,
+            companyName: c.companyName || prev.companyName,
+            contactName: c.fullName || prev.contactName,
+            phone: c.phone || prev.phone,
+            email: c.email || prev.email,
+            businessType: c.businessType || prev.businessType,
+            city: c.city || prev.city,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   if (!product) return null;
 

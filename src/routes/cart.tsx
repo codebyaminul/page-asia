@@ -16,7 +16,8 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getCurrentCustomerFn } from "@/lib/server-api";
 import { useCart } from "@/lib/cart";
 import { addQuote } from "@/lib/admin-data";
 
@@ -48,6 +49,25 @@ export function Cart() {
     city: "Dhaka",
     notes: "",
   });
+  const [customer, setCustomer] = useState<any>(null);
+
+  useEffect(() => {
+    getCurrentCustomerFn()
+      .then((c) => {
+        if (c) {
+          setCustomer(c);
+          setFormData((prev) => ({
+            ...prev,
+            companyName: c.companyName || prev.companyName,
+            contactName: c.fullName || prev.contactName,
+            phone: c.phone || prev.phone,
+            email: c.email || prev.email,
+            city: c.city || prev.city,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const totalUnits = lines.reduce((acc, l) => acc + l.qty, 0);
 

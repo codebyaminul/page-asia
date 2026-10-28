@@ -1,8 +1,28 @@
 // ─── Admin Dashboard Data Layer ───────────────────────────────────────────────
-// All admin data is persisted to localStorage so edits survive refreshes.
-// In production this would connect to a real backend / Supabase instance.
+// Connected to PostgreSQL via server functions with optimistic local caching.
 
 import { products as catalogProducts, type Product } from "./data";
+import {
+  getProductsFn,
+  updateProductInventoryFn,
+  addProductFn,
+  deleteProductFn,
+  getQuotesFn,
+  createQuoteFn,
+  replyToQuoteFn,
+  updateQuoteStatusFn,
+  getBookingsFn,
+  createBookingFn,
+  updateBookingStatusFn,
+  getSiteSettingsFn,
+  updateSiteSettingsFn,
+  loginAdminFn,
+  getAdminUsersFn,
+  addAdminUserFn,
+  updateAdminUserFn,
+  deleteAdminUserFn,
+  getAdminOrdersFn,
+} from "./server-api.ts";
 
 /* ──── Types ──── */
 
@@ -50,6 +70,39 @@ export type QuoteRequest = {
   updatedAt: string;
 };
 
+export type OrderLineItem = {
+  id: number;
+  productId?: string | undefined;
+  productName: string;
+  productSku: string;
+  unitPrice: number;
+  qty: number;
+  lineTotal: number;
+};
+
+export type AdminOrder = {
+  id: string;
+  customerId?: string | null | undefined;
+  accountType: "personal" | "business";
+  fullName: string;
+  phone: string;
+  email?: string | null | undefined;
+  companyName?: string | null | undefined;
+  binVatNumber?: string | null | undefined;
+  streetAddress: string;
+  city: string;
+  deliveryNotes?: string | null | undefined;
+  paymentMethod: "cod" | "b2b" | "card";
+  subtotal: number;
+  deliveryCharge: number;
+  vatAmount: number;
+  total: number;
+  status: "pending" | "confirmed" | "dispatched" | "delivered" | "cancelled";
+  createdAt: string;
+  updatedAt: string;
+  items: OrderLineItem[];
+};
+
 export type ConsultBooking = {
   id: string;
   companyName: string;
@@ -63,6 +116,12 @@ export type ConsultBooking = {
   preferredDate: string;
   notes: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
+  businessType?: string | undefined;
+  bayCount?: string | undefined;
+  equipmentInterest?: string | undefined;
+  serviceIds?: string[] | undefined;
+  locationType?: "hub" | "onsite" | undefined;
+  onsiteAddress?: string | undefined;
   createdAt: string;
   updatedAt: string;
 };
@@ -289,17 +348,27 @@ export function saveUsers(users: AdminUser[]) {
 }
 export function addUser(user: Omit<AdminUser, "id" | "createdAt" | "lastLogin">): AdminUser {
   const users = getUsers();
+  const orders = getOrders();
   const newUser: AdminUser = { ...user, id: uid(), createdAt: now(), lastLogin: "Never" };
   users.push(newUser);
   saveUsers(users);
+  try {
+    addAdminUserFn({ data: newUser }).catch((err) => console.warn("DB user sync failed:", err));
+  } catch (e) {}
   return newUser;
 }
 export function updateUser(id: string, patch: Partial<AdminUser>) {
   const users = getUsers().map((u) => (u.id === id ? { ...u, ...patch } : u));
   saveUsers(users);
+  try {
+    updateAdminUserFn({ data: { id, patch } }).catch((err) => console.warn("DB user sync failed:", err));
+  } catch (e) {}
 }
 export function deleteUser(id: string) {
   saveUsers(getUsers().filter((u) => u.id !== id));
+  try {
+    deleteAdminUserFn({ data: id }).catch((err) => console.warn("DB user delete sync failed:", err));
+  } catch (e) {}
 }
 
 // Inventory
@@ -325,6 +394,9 @@ export function saveInventory(inv: InventoryItem[]) {
 export function updateInventoryItem(slug: string, patch: Partial<InventoryItem>) {
   const inv = getInventory().map((i) => (i.slug === slug ? { ...i, ...patch } : i));
   saveInventory(inv);
+  try {
+    updateProductInventoryFn({ data: { slug, patch } }).catch((err) => console.warn("DB inventory sync failed:", err));
+  } catch (e) {}
 }
 
 export function addInventoryItem(item: Omit<InventoryItem, "lastRestocked"> & { lastRestocked?: string }): InventoryItem {
@@ -335,12 +407,18 @@ export function addInventoryItem(item: Omit<InventoryItem, "lastRestocked"> & { 
   };
   inv.unshift(newItem);
   saveInventory(inv);
+  try {
+    addProductFn({ data: newItem }).catch((err) => console.warn("DB add product sync failed:", err));
+  } catch (e) {}
   return newItem;
 }
 
 export function deleteInventoryItem(slug: string) {
   const inv = getInventory().filter((i) => i.slug !== slug);
   saveInventory(inv);
+  try {
+    deleteProductFn({ data: slug }).catch((err) => console.warn("DB delete product sync failed:", err));
+  } catch (e) {}
 }
 
 // Quotes
@@ -361,6 +439,9 @@ export function addQuote(quote: Omit<QuoteRequest, "id" | "status" | "createdAt"
   };
   quotes.unshift(newQuote);
   saveQuotes(quotes);
+  try {
+    createQuoteFn({ data: newQuote }).catch((err) => console.warn("DB quote sync failed:", err));
+  } catch (e) {}
   return newQuote;
 }
 export function replyToQuote(id: string, reply: string, status: QuoteRequest["status"] = "replied") {
@@ -368,6 +449,9 @@ export function replyToQuote(id: string, reply: string, status: QuoteRequest["st
     q.id === id ? { ...q, reply, status, updatedAt: now() } : q
   );
   saveQuotes(quotes);
+  try {
+    replyToQuoteFn({ data: { id, reply, status } }).catch((err) => console.warn("DB quote reply sync failed:", err));
+  } catch (e) {}
 }
 export function replyToQuoteWithDetails(
   id: string,
@@ -397,12 +481,25 @@ export function replyToQuoteWithDetails(
       : q
   );
   saveQuotes(quotes);
+  try {
+    replyToQuoteFn({
+      data: {
+        id,
+        reply: details.reply,
+        status: details.status || "replied",
+        quotedPrice: finalQuotedPrice,
+      },
+    }).catch((err) => console.warn("DB quote details sync failed:", err));
+  } catch (e) {}
 }
 export function updateQuoteStatus(id: string, status: QuoteRequest["status"]) {
   const quotes = getQuotes().map((q) =>
     q.id === id ? { ...q, status, updatedAt: now() } : q
   );
   saveQuotes(quotes);
+  try {
+    updateQuoteStatusFn({ data: { id, status } }).catch((err) => console.warn("DB quote status sync failed:", err));
+  } catch (e) {}
 }
 
 // Bookings
@@ -423,6 +520,9 @@ export function addBooking(booking: Omit<ConsultBooking, "id" | "status" | "crea
   };
   bookings.unshift(newBooking);
   saveBookings(bookings);
+  try {
+    createBookingFn({ data: newBooking }).catch((err) => console.warn("DB booking sync failed:", err));
+  } catch (e) {}
   return newBooking;
 }
 export function updateBookingStatus(id: string, status: ConsultBooking["status"]) {
@@ -430,6 +530,26 @@ export function updateBookingStatus(id: string, status: ConsultBooking["status"]
     b.id === id ? { ...b, status, updatedAt: now() } : b
   );
   saveBookings(bookings);
+  try {
+    updateBookingStatusFn({ data: { id, status } }).catch((err) => console.warn("DB booking status sync failed:", err));
+  } catch (e) {}
+}
+
+// Orders
+export function getOrders(): AdminOrder[] {
+  return load(LS_KEYS.orders, []);
+}
+export function saveOrders(orders: AdminOrder[]) {
+  save(LS_KEYS.orders, orders);
+}
+export function updateOrderStatus(id: string, status: AdminOrder["status"]) {
+  const orders = getOrders().map((o) =>
+    o.id === id ? { ...o, status, updatedAt: now() } : o
+  );
+  saveOrders(orders);
+  try {
+    updateOrderStatusFn({ data: { id, status } }).catch((err) => console.warn("DB order status sync failed:", err));
+  } catch (e) {}
 }
 
 // Settings
@@ -438,6 +558,50 @@ export function getSettings(): SiteSetting {
 }
 export function saveSettings(settings: SiteSetting) {
   save(LS_KEYS.settings, settings);
+  try {
+    updateSiteSettingsFn({ data: settings }).catch((err) => console.warn("DB settings sync failed:", err));
+  } catch (e) {}
+}
+
+// Background Full DB Synchronization
+export async function syncWithDatabase() {
+  if (typeof window === "undefined") return;
+  try {
+    const [inv, quotes, bookings, settings, users, orders] = await Promise.allSettled([
+      getAdminOrdersFn(),
+      getProductsFn(),
+      getQuotesFn(),
+      getBookingsFn(),
+      getSiteSettingsFn(),
+      getAdminUsersFn(),
+    ]);
+
+    if (inv.status === "fulfilled" && inv.value && inv.value.length) {
+      save(LS_KEYS.inventory, inv.value);
+      window.dispatchEvent(new CustomEvent("inventory_updated", { detail: inv.value }));
+    }
+    if (quotes.status === "fulfilled" && quotes.value) {
+      save(LS_KEYS.quotes, quotes.value);
+    }
+    if (bookings.status === "fulfilled" && bookings.value) {
+      save(LS_KEYS.bookings, bookings.value);
+    }
+    if (settings.status === "fulfilled" && settings.value) {
+      save(LS_KEYS.settings, settings.value);
+    }
+    if (users.status === "fulfilled" && users.value && users.value.length) {
+      save(LS_KEYS.users, users.value);
+    }
+  } catch (err) {
+    console.warn("Background DB sync notice:", err);
+  }
+}
+
+// Auto-sync once on client load
+if (typeof window !== "undefined") {
+  setTimeout(() => {
+    syncWithDatabase();
+  }, 250);
 }
 
 /* ──── Admin Authentication ──── */
@@ -466,6 +630,17 @@ export function loginAdmin(
     updateUser(found.id, { lastLogin: now() });
     const updatedUser: AdminUser = { ...found, lastLogin: now() };
     save(LS_KEYS.auth, updatedUser);
+
+    try {
+      loginAdminFn({ data: { email: cleanEmail, password: password || "admin123" } })
+        .then((res) => {
+          if (res.token && typeof window !== "undefined") {
+            localStorage.setItem("admin_auth_token", res.token);
+          }
+        })
+        .catch(() => {});
+    } catch (e) {}
+
     return { success: true, user: updatedUser };
   }
 
@@ -478,6 +653,15 @@ export function loginAdmin(
     const adminUser = users[0] || seedUsers[0];
     if (adminUser) {
       save(LS_KEYS.auth, adminUser);
+      try {
+        loginAdminFn({ data: { email: adminUser.email, password: password || "admin123" } })
+          .then((res) => {
+            if (res.token && typeof window !== "undefined") {
+              localStorage.setItem("admin_auth_token", res.token);
+            }
+          })
+          .catch(() => {});
+      } catch (e) {}
       return { success: true, user: adminUser };
     }
   }
@@ -650,6 +834,10 @@ export function getAdminStats() {
     totalBookings: bookings.length,
     totalUsers: users.length,
     activeUsers: users.filter((u) => u.status === "active").length,
+    totalOrders: orders.length,
+    pendingOrders: orders.filter((o) => o.status === "pending").length,
+    deliveredOrders: orders.filter((o) => o.status === "delivered").length,
+    totalRevenue: orders.filter((o) => o.status !== "cancelled").reduce((acc, o) => acc + o.total, 0),
     // Revenue simulation
     revenueData: [
       { month: "May", revenue: 1250000 },
