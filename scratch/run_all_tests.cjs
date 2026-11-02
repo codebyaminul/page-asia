@@ -11,7 +11,7 @@ const suites = [
   { name: "Admin Orders Management", script: "scratch/test_phase6_admin_orders.cjs", expected: 11 },
   { name: "Customer Profile & Password", script: "scratch/test_phase8_customer_profile.cjs", expected: 10 },
   { name: "Public Tracking Console", script: "scratch/test_phase9_public_tracking.cjs", expected: 9 },
-  { name: "Security & Reliability Architecture", script: "scratch/test_security_reliability.cjs", expected: 40 },
+  { name: "Security & Reliability Architecture", script: "scratch/test_security_reliability.cjs", expected: 45 },
 ];
 
 console.log("\n==========================================================================");

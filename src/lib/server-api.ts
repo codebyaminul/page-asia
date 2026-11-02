@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { sql, checkDatabaseHealth } from "./db.ts";
 import type { Product } from "./data";
 import type { AdminUser, QuoteRequest, ConsultBooking, SiteSetting, InventoryItem } from "./admin-data";
@@ -1135,7 +1136,19 @@ export const getSystemHealthFn = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const dbHealth = await checkDatabaseHealth();
     const expectedToken = process.env.HEALTHCHECK_TOKEN || "page_secret_health_2026";
-    const isAuthorized = Boolean(data?.token && data.token === expectedToken);
+
+    // 1. Prefer Authorization: Bearer <TOKEN> header (avoids writing secrets in plain text to CDN/proxy access logs)
+    let bearerToken: string | undefined;
+    try {
+      const authHeader = getRequestHeader("authorization");
+      if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+        bearerToken = authHeader.slice(7).trim();
+      }
+    } catch {}
+
+    // 2. Query parameter (?token=...) supported as secondary fallback
+    const incomingToken = bearerToken || data?.token;
+    const isAuthorized = Boolean(incomingToken && incomingToken === expectedToken);
 
     // Unauthenticated: minimal status without infrastructure internals
     if (!isAuthorized) {

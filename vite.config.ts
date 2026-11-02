@@ -16,7 +16,7 @@ const SECURITY_HEADERS = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "Content-Security-Policy":
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https: ws: wss:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com https:; connect-src 'self' https: ws: wss: https://*.supabase.co wss://*.supabase.co; frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
 };
 
 export default defineConfig(({ command }) => ({
@@ -39,6 +39,17 @@ export default defineConfig(({ command }) => ({
     headers: SECURITY_HEADERS,
   },
   plugins: [
+    {
+      name: "security-headers",
+      configureServer(server) {
+        server.middlewares.use((_req, res, next) => {
+          for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+            res.setHeader(key, value);
+          }
+          next();
+        });
+      },
+    },
     tailwindcss(),
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     tanstackStart({

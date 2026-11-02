@@ -210,6 +210,37 @@ async function run() {
   await sql`DELETE FROM orders WHERE id = ${orderId}`;
   await sql`UPDATE products SET warehouse_qty = 20 WHERE slug = 'heavy-duty-2-post-lift-4t'`;
 
+  // Deterministic Lock Ordering: Concurrent orders locking items in reverse order
+  const orderAId = `PG-DLK-A-${Date.now()}`;
+  const orderBId = `PG-DLK-B-${Date.now()}`;
+  const [resA, resB] = await Promise.all([
+    createDbOrder({
+      id: orderAId,
+      fullName: "Concurrent Buyer A",
+      phone: "+8801700000001",
+      streetAddress: "A Lane",
+      lines: [
+        { product: { slug: "pro-tyre-changer-assist-arm" }, qty: 1 },
+        { product: { slug: "heavy-duty-2-post-lift-4t" }, qty: 1 },
+      ],
+    }),
+    createDbOrder({
+      id: orderBId,
+      fullName: "Concurrent Buyer B",
+      phone: "+8801700000002",
+      streetAddress: "B Lane",
+      lines: [
+        { product: { slug: "heavy-duty-2-post-lift-4t" }, qty: 1 },
+        { product: { slug: "pro-tyre-changer-assist-arm" }, qty: 1 },
+      ],
+    }),
+  ]);
+  assert(resA.success && resB.success, "Deterministic lock ordering prevented PostgreSQL deadlock (40P01) on concurrent reversed orders");
+
+  // Clean up concurrent orders & reset stock
+  await sql`DELETE FROM orders WHERE id IN (${orderAId}, ${orderBId})`;
+  await sql`UPDATE products SET warehouse_qty = 20 WHERE slug IN ('heavy-duty-2-post-lift-4t', 'pro-tyre-changer-assist-arm')`;
+
   // ---------------------------------------------------------------------------
   // 5. DATABASE RESILIENCE & RETRY BACKOFF
   // ---------------------------------------------------------------------------
@@ -254,6 +285,20 @@ async function run() {
     const authHtml = await authRes.text();
     assert(authHtml.includes("tablesOnline"), "Authenticated health endpoint returns live database table metrics");
     assert(authHtml.includes("nodeVersion"), "Authenticated health endpoint returns system diagnostic telemetry");
+
+    // Bearer token authentication test (prevents token leakage in query strings)
+    const bearerRes = await fetch("http://localhost:8080/api/health", {
+      headers: { Authorization: "Bearer page_secret_health_2026" },
+    });
+    const bearerHtml = await bearerRes.text();
+    assert(bearerHtml.includes("tablesOnline"), "Authorization: Bearer header successfully authenticates telemetry");
+    assert(bearerHtml.includes("nodeVersion"), "Authorization: Bearer header returns system telemetry without URL exposure");
+
+    // Content-Security-Policy header verification
+    const homeRes = await fetch("http://localhost:8080/");
+    const csp = homeRes.headers.get("content-security-policy") || "";
+    assert(csp.includes("https://fonts.googleapis.com"), "CSP style-src permits Google Fonts stylesheet origin");
+    assert(csp.includes("https://fonts.gstatic.com"), "CSP font-src permits Google Fonts webfonts origin");
   } catch (err) {
     console.warn("Server not reachable on :8080, skipping HTTP telemetry test");
   }

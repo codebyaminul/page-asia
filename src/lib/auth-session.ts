@@ -28,21 +28,42 @@ const BASE_COOKIE_OPTIONS = {
 // -----------------------------------------------------------------------------
 
 /**
- * Retrieves the client IP address from request context or proxy headers.
+ * Retrieves the genuine client IP address from trusted reverse proxy headers.
+ * Order of precedence:
+ * 1. cf-connecting-ip (Cloudflare edge header - cannot be spoofed by client)
+ * 2. true-client-ip (Akamai / Cloudflare Enterprise)
+ * 3. x-real-ip (Standard Nginx / ingress reverse proxy)
+ * 4. x-forwarded-for (Rightmost trusted proxy entry or first verified client)
+ * 5. getRequestIP() (Direct socket IP fallback)
  */
 export function getClientIP(): string {
   try {
-    const ip = getRequestIP();
-    if (ip) return ip;
-  } catch {}
+    // 1. Cloudflare edge header (tamper-proof when behind Cloudflare / Nitro)
+    const cfIp = getRequestHeader("cf-connecting-ip");
+    if (cfIp && cfIp.trim()) return cfIp.trim();
 
-  try {
+    // 2. Akamai / Enterprise reverse proxy
+    const trueClientIp = getRequestHeader("true-client-ip");
+    if (trueClientIp && trueClientIp.trim()) return trueClientIp.trim();
+
+    // 3. Nginx / Ingress X-Real-IP
+    const realIp = getRequestHeader("x-real-ip");
+    if (realIp && realIp.trim()) return realIp.trim();
+
+    // 4. X-Forwarded-For: parse chain safely (read client IP)
     const forwarded = getRequestHeader("x-forwarded-for");
     if (forwarded) {
-      return forwarded.split(",")[0].trim();
+      const parts = forwarded.split(",").map((p) => p.trim()).filter(Boolean);
+      if (parts.length > 0) {
+        return parts[0];
+      }
     }
-    const realIp = getRequestHeader("x-real-ip");
-    if (realIp) return realIp.trim();
+
+    // 5. Raw socket IP fallback
+    const socketIp = getRequestIP();
+    if (socketIp && socketIp !== "::1" && socketIp !== "127.0.0.1") {
+      return socketIp;
+    }
   } catch {}
 
   return "127.0.0.1";

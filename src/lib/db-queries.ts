@@ -289,7 +289,15 @@ export async function createDbOrder(data: any) {
       slug: string;
     }> = [];
 
-    for (const line of data.lines) {
+    // Deterministic Lock Ordering: Sort lines by product slug ascending to prevent PostgreSQL deadlocks (40P01)
+    // when concurrent orders lock identical products in opposite sequences (e.g. [A, B] vs [B, A]).
+    const sortedLines = [...data.lines].sort((a, b) => {
+      const slugA = (a.product?.slug || a.productSlug || a.slug || "").toLowerCase();
+      const slugB = (b.product?.slug || b.productSlug || b.slug || "").toLowerCase();
+      return slugA.localeCompare(slugB);
+    });
+
+    for (const line of sortedLines) {
       const slug = line.product?.slug || line.productSlug || line.slug;
       const [dbProd] = await tx`
         SELECT id, name, sku, price, warehouse_qty
