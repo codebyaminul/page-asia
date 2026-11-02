@@ -289,9 +289,23 @@ export async function createDbOrder(data: any) {
       slug: string;
     }> = [];
 
+    // Coalesce duplicate line entries for identical product slugs (summing quantities)
+    const coalescedMap = new Map<string, { product?: any; productSlug?: string; slug?: string; qty: number }>();
+    for (const line of data.lines || []) {
+      const slugKey = (line.product?.slug || line.productSlug || line.slug || "").toLowerCase().trim();
+      if (!slugKey) continue;
+      if (coalescedMap.has(slugKey)) {
+        const existing = coalescedMap.get(slugKey)!;
+        existing.qty += Number(line.qty) || 1;
+      } else {
+        coalescedMap.set(slugKey, { ...line, qty: Number(line.qty) || 1 });
+      }
+    }
+    const coalescedLines = Array.from(coalescedMap.values());
+
     // Deterministic Lock Ordering: Sort lines by product slug ascending to prevent PostgreSQL deadlocks (40P01)
     // when concurrent orders lock identical products in opposite sequences (e.g. [A, B] vs [B, A]).
-    const sortedLines = [...data.lines].sort((a, b) => {
+    const sortedLines = coalescedLines.sort((a, b) => {
       const slugA = (a.product?.slug || a.productSlug || a.slug || "").toLowerCase();
       const slugB = (b.product?.slug || b.productSlug || b.slug || "").toLowerCase();
       return slugA.localeCompare(slugB);

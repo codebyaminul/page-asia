@@ -241,6 +241,24 @@ async function run() {
   await sql`DELETE FROM orders WHERE id IN (${orderAId}, ${orderBId})`;
   await sql`UPDATE products SET warehouse_qty = 20 WHERE slug IN ('heavy-duty-2-post-lift-4t', 'pro-tyre-changer-assist-arm')`;
 
+  // Coalesce duplicate slugs in cart payload
+  const coalesceOrderId = `PG-COAL-${Date.now()}`;
+  const coalRes = await createDbOrder({
+    id: coalesceOrderId,
+    fullName: "Coalesce Buyer",
+    phone: "+8801700000003",
+    streetAddress: "Coalesce Way",
+    lines: [
+      { product: { slug: "heavy-duty-2-post-lift-4t" }, qty: 1 },
+      { product: { slug: "heavy-duty-2-post-lift-4t" }, qty: 2 },
+    ],
+  });
+  assert(coalRes.success, "Order with duplicate line slugs processed successfully");
+  const storedItems = await sql`SELECT qty, unit_price FROM order_items WHERE order_id = ${coalesceOrderId}`;
+  assert(storedItems.length === 1 && Number(storedItems[0].qty) === 3, "Coalesced duplicate cart slugs into a single item with summed quantity (3)");
+  await sql`DELETE FROM orders WHERE id = ${coalesceOrderId}`;
+  await sql`UPDATE products SET warehouse_qty = 20 WHERE slug = 'heavy-duty-2-post-lift-4t'`;
+
   // ---------------------------------------------------------------------------
   // 5. DATABASE RESILIENCE & RETRY BACKOFF
   // ---------------------------------------------------------------------------
