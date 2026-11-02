@@ -37,7 +37,7 @@ async function run() {
   console.log(bold("=======================================================\n"));
 
   // Ensure test stock available
-  await sql`UPDATE products SET warehouse_qty = 20 WHERE slug = 'heavy-duty-2-post-lift-4t'`;
+  await sql`UPDATE products SET warehouse_qty = 20 WHERE slug IN ('heavy-duty-2-post-lift-4t', 'pro-tyre-changer-assist-arm')`;
 
   // 1. Verify Cookie Names & Security Architecture
   console.log(bold("1. Cookie Standard & Security Specs"));
