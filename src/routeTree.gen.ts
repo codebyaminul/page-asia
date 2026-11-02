@@ -28,6 +28,7 @@ import { Route as AdminOrdersRouteImport } from './routes/admin/orders'
 import { Route as AdminQuotesRouteImport } from './routes/admin/quotes'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as ServicesBookRouteImport } from './routes/services.book'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
@@ -127,6 +128,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesBookRoute = ServicesBookRouteImport.update({
   id: '/services/book',
   path: '/services/book',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/admin/quotes': typeof AdminQuotesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/services/book': typeof ServicesBookRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/admin/quotes': typeof AdminQuotesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/services/book': typeof ServicesBookRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/admin/quotes': typeof AdminQuotesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/health': typeof ApiHealthRoute
   '/services/book': typeof ServicesBookRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin/quotes'
     | '/admin/settings'
     | '/admin/users'
+    | '/api/health'
     | '/services/book'
     | '/shop/$slug'
     | '/admin/'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/admin/quotes'
     | '/admin/settings'
     | '/admin/users'
+    | '/api/health'
     | '/services/book'
     | '/shop/$slug'
     | '/admin'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/quotes'
     | '/admin/settings'
     | '/admin/users'
+    | '/api/health'
     | '/services/book'
     | '/shop/$slug'
     | '/admin/'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   AdminQuotesRoute: typeof AdminQuotesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ServicesBookRoute: typeof ServicesBookRoute
   ShopSlugRoute: typeof ShopSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -451,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services/book': {
       id: '/services/book'
       path: '/services/book'
@@ -494,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminQuotesRoute: AdminQuotesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ServicesBookRoute: ServicesBookRoute,
   ShopSlugRoute: ShopSlugRoute,
   AdminIndexRoute: AdminIndexRoute,

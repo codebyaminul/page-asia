@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { sql } from "./db.ts";
+import { sql, checkDatabaseHealth } from "./db.ts";
 import type { Product } from "./data";
 import type { AdminUser, QuoteRequest, ConsultBooking, SiteSetting, InventoryItem } from "./admin-data";
 import type { Review } from "./reviews";
@@ -11,6 +11,8 @@ import {
   clearCustomerSessionCookie,
   getCustomerAuthContext,
   getUnifiedAuthContext,
+  getClientIP,
+  isOriginValid,
 } from "./auth-session.ts";
 import {
   registerDbCustomer,
@@ -22,8 +24,23 @@ import {
   getDbCustomerBookings,
   updateDbCustomerProfile,
   changeDbCustomerPassword,
+  createDbOrder,
   type CustomerProfile,
 } from "./db-queries.ts";
+import {
+  checkRateLimit,
+  clearRateLimit,
+  checkReferenceLockout,
+  recordFailedReferenceAttempt,
+  clearReferenceLockout,
+} from "./rate-limiter.ts";
+import {
+  customerLoginSchema,
+  customerRegisterSchema,
+  changePasswordSchema,
+  customerProfileUpdateSchema,
+  publicTrackingSchema,
+} from "./validation-schemas.ts";
 
 // Helper to map DB product row to frontend Product type
 function mapDbProduct(row: any): InventoryItem {
@@ -164,6 +181,18 @@ export const getQuotesFn = createServerFn({ method: "GET" }).handler(async () =>
 export const createQuoteFn = createServerFn({ method: "POST" })
   .validator((payload: any) => payload)
   .handler(async ({ data }) => {
+    if (!isOriginValid()) {
+      throw new Error("Invalid request origin. Cross-site submissions are forbidden.");
+    }
+    const clientIp = getClientIP();
+    const rateCheck = checkRateLimit(`quote:ip:${clientIp}`, 10, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        error: `Quotation rate limit exceeded. Please wait ${rateCheck.retryAfterSec} seconds before submitting again.`,
+        rateLimited: true,
+      };
+    }
     const quoteId = data.id || `q-${Math.random().toString(36).slice(2, 9)}`;
     const currentCustomer = await getCustomerAuthContext();
     const effectiveCustomerId = data.customerId || currentCustomer?.id || null;
@@ -270,6 +299,18 @@ export const getBookingsFn = createServerFn({ method: "GET" }).handler(async () 
 export const createBookingFn = createServerFn({ method: "POST" })
   .validator((b: any) => b)
   .handler(async ({ data: b }) => {
+    if (!isOriginValid()) {
+      throw new Error("Invalid request origin. Cross-site submissions are forbidden.");
+    }
+    const clientIp = getClientIP();
+    const rateCheck = checkRateLimit(`booking:ip:${clientIp}`, 10, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        error: `Booking rate limit exceeded. Please wait ${rateCheck.retryAfterSec} seconds before submitting again.`,
+        rateLimited: true,
+      };
+    }
     const bookingId = b.id || `b-${Math.random().toString(36).slice(2, 9)}`;
     const currentCustomer = await getCustomerAuthContext();
     const effectiveCustomerId = b.customerId || currentCustomer?.id || null;
@@ -326,54 +367,18 @@ export const updateBookingStatusFn = createServerFn({ method: "POST" })
 export const createOrderFn = createServerFn({ method: "POST" })
   .validator((payload: any) => payload)
   .handler(async ({ data }) => {
-    const orderId = data.id || `PG-${Math.floor(100000 + Math.random() * 900000)}`;
+    if (!isOriginValid()) {
+      throw new Error("Invalid request origin. Cross-site submissions are forbidden.");
+    }
     const currentCustomer = await getCustomerAuthContext();
     const effectiveCustomerId = data.customerId || currentCustomer?.id || null;
 
-    await sql.begin(async (tx) => {
-      await tx`
-        INSERT INTO orders (
-          id, customer_id, account_type, full_name, phone, email,
-          company_name, bin_vat_number, street_address, city, delivery_notes,
-          payment_method, subtotal, delivery_charge, vat_amount, total, status
-        ) VALUES (
-          ${orderId}, ${effectiveCustomerId}, ${data.accountType || "personal"}, ${data.fullName}, ${data.phone},
-          ${data.email || null}, ${data.companyName || null}, ${data.binVatNumber || null},
-          ${data.streetAddress}, ${data.city || "Dhaka"}, ${data.deliveryNotes || null},
-          ${data.paymentMethod || "cod"}, ${data.subtotal}, ${data.deliveryCharge || 0},
-          ${data.vatAmount || 0}, ${data.total}, 'pending'
-        )
-      `;
-
-      for (const line of data.lines) {
-        await tx`
-          INSERT INTO order_items (
-            order_id, product_id, product_name, product_sku, unit_price, qty
-          ) VALUES (
-            ${orderId},
-            (SELECT id FROM products WHERE slug = ${line.product.slug} LIMIT 1),
-            ${line.product.name},
-            ${line.product.sku},
-            ${line.product.price},
-            ${line.qty}
-          )
-        `;
-
-        // Atomic inventory deduction with strict stock check
-        const updateRes = await tx`
-          UPDATE products
-          SET warehouse_qty = warehouse_qty - ${line.qty}
-          WHERE slug = ${line.product.slug} AND warehouse_qty >= ${line.qty}
-          RETURNING warehouse_qty
-        `;
-
-        if (updateRes.length === 0) {
-          throw new Error(`Insufficient stock for "${line.product.name}". Requested ${line.qty} unit(s).`);
-        }
-      }
+    const res = await createDbOrder({
+      ...data,
+      customerId: effectiveCustomerId,
     });
 
-    return { success: true, orderId };
+    return { success: true, orderId: res.orderId, deduplicated: res.deduplicated };
   });
 
 export const getAdminOrdersFn = createServerFn({ method: "GET" }).handler(async () => {
@@ -834,18 +839,21 @@ export const getAdminStatsFn = createServerFn({ method: "GET" }).handler(async (
 // -----------------------------------------------------------------------------
 
 export const registerCustomerFn = createServerFn({ method: "POST" })
-  .validator((data: {
-    email: string;
-    password: string;
-    fullName: string;
-    phone: string;
-    companyName?: string;
-    binVatNumber?: string;
-    businessType?: string;
-    streetAddress?: string;
-    city?: string;
-  }) => data)
+  .validator((data: any) => customerRegisterSchema.parse(data))
   .handler(async ({ data }) => {
+    if (!isOriginValid()) {
+      throw new Error("Invalid request origin. Cross-site submissions are forbidden.");
+    }
+    const clientIp = getClientIP();
+    const rateCheck = checkRateLimit(`auth:register:ip:${clientIp}`, 5, 60 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        error: `Account registration rate limit exceeded. Please wait ${rateCheck.retryAfterSec} seconds.`,
+        rateLimited: true,
+      };
+    }
+
     const res = await registerDbCustomer(data);
     if (res.success && res.token) {
       setCustomerSessionCookie(res.token);
@@ -854,10 +862,28 @@ export const registerCustomerFn = createServerFn({ method: "POST" })
   });
 
 export const loginCustomerFn = createServerFn({ method: "POST" })
-  .validator((credentials: { email: string; password: string }) => credentials)
+  .validator((credentials: { email: string; password: string }) => customerLoginSchema.parse(credentials))
   .handler(async ({ data: { email, password } }) => {
+    if (!isOriginValid()) {
+      throw new Error("Invalid request origin. Cross-site submissions are forbidden.");
+    }
+    const clientIp = getClientIP();
+    const ipCheck = checkRateLimit(`auth:login:ip:${clientIp}`, 15, 15 * 60 * 1000);
+    const accCheck = checkRateLimit(`auth:login:acc:${email.toLowerCase()}`, 5, 15 * 60 * 1000);
+
+    if (!ipCheck.allowed || !accCheck.allowed) {
+      const retryAfter = Math.max(ipCheck.retryAfterSec, accCheck.retryAfterSec);
+      return {
+        success: false,
+        error: `Too many login attempts. Account temporarily locked for security. Please try again in ${retryAfter} seconds.`,
+        rateLimited: true,
+        retryAfterSec: retryAfter,
+      };
+    }
+
     const res = await loginDbCustomer(email, password);
     if (res.success && res.token) {
+      clearRateLimit(`auth:login:acc:${email.toLowerCase()}`);
       setCustomerSessionCookie(res.token);
     }
     return { success: res.success, customer: res.customer, error: res.error };
@@ -897,37 +923,65 @@ export const getCustomerBookingsFn = createServerFn({ method: "GET" }).handler(a
 });
 
 export const updateCustomerProfileFn = createServerFn({ method: "POST" })
-  .validator((data: {
-    fullName?: string;
-    phone?: string;
-    companyName?: string;
-    binVatNumber?: string;
-    businessType?: string;
-    streetAddress?: string;
-    city?: string;
-  }) => data)
+  .validator((data: any) => customerProfileUpdateSchema.parse(data))
   .handler(async ({ data }) => {
+    if (!isOriginValid()) {
+      throw new Error("Invalid request origin. Cross-site submissions are forbidden.");
+    }
     const currentCustomer = await getCustomerAuthContext();
     if (!currentCustomer) throw new Error("Unauthorized. Please log in.");
     return await updateDbCustomerProfile(currentCustomer.id, data);
   });
 
 export const changeCustomerPasswordFn = createServerFn({ method: "POST" })
-  .validator((data: { currentPassword: string; newPassword: string }) => data)
+  .validator((data: { currentPassword: string; newPassword: string }) => changePasswordSchema.parse(data))
   .handler(async ({ data }) => {
+    if (!isOriginValid()) {
+      throw new Error("Invalid request origin. Cross-site submissions are forbidden.");
+    }
     const currentCustomer = await getCustomerAuthContext();
     if (!currentCustomer) throw new Error("Unauthorized. Please log in.");
+
+    const limit = checkRateLimit(`auth:pwd:${currentCustomer.id}`, 5, 15 * 60 * 1000);
+    if (!limit.allowed) {
+      return {
+        success: false,
+        error: `Too many password change attempts. Please wait ${limit.retryAfterSec} seconds.`,
+      };
+    }
+
     return await changeDbCustomerPassword(currentCustomer.id, data.currentPassword, data.newPassword);
   });
 
 export const lookupPublicOrderOrQuoteFn = createServerFn({ method: "POST" })
-  .validator((data: { referenceId: string; phone: string }) => data)
+  .validator((data: { referenceId: string; phone: string }) => publicTrackingSchema.parse(data))
   .handler(async ({ data }) => {
     const rawRef = (data.referenceId || "").trim().replace(/^#/, "");
     const rawPhoneDigits = (data.phone || "").replace(/\D/g, "");
     const phoneSuffix = rawPhoneDigits.slice(-7);
 
+    const clientIp = getClientIP();
+    const ipLimit = checkRateLimit(`lookup:ip:${clientIp}`, 15, 60 * 1000);
+    if (!ipLimit.allowed) {
+      return {
+        success: false,
+        error: `Tracking lookup rate limit reached. Please wait ${ipLimit.retryAfterSec} seconds.`,
+        rateLimited: true,
+      };
+    }
+
+    const lockout = checkReferenceLockout(rawRef);
+    if (lockout.locked) {
+      return {
+        success: false,
+        error: `This reference is temporarily locked due to repeated verification failures. Please try again in ${lockout.remainingSeconds} seconds.`,
+        locked: true,
+        retryAfterSec: lockout.remainingSeconds,
+      };
+    }
+
     if (!rawRef || phoneSuffix.length < 5) {
+      recordFailedReferenceAttempt(rawRef, 10, 30 * 60 * 1000);
       return {
         success: false,
         error: "Please provide a valid Reference ID and at least 6 digits of your contact phone number.",
@@ -974,6 +1028,7 @@ export const lookupPublicOrderOrQuoteFn = createServerFn({ method: "POST" })
     `;
 
     if (orders.length > 0) {
+      clearReferenceLockout(rawRef);
       const o = orders[0];
       return {
         success: true,
@@ -1034,6 +1089,7 @@ export const lookupPublicOrderOrQuoteFn = createServerFn({ method: "POST" })
     `;
 
     if (quotes.length > 0) {
+      clearReferenceLockout(rawRef);
       const q = quotes[0];
       return {
         success: true,
@@ -1056,8 +1112,54 @@ export const lookupPublicOrderOrQuoteFn = createServerFn({ method: "POST" })
       };
     }
 
+    const fail = recordFailedReferenceAttempt(rawRef, 10, 30 * 60 * 1000);
+    if (fail.locked) {
+      return {
+        success: false,
+        error: `Too many failed attempts. Reference "${rawRef}" has been locked for 30 minutes for security.`,
+        locked: true,
+      };
+    }
+
     return {
       success: false,
-      error: "No matching order or quotation was found for the specified Reference ID and contact phone number. Please check your reference code.",
+      error: `No matching order or quotation was found for the specified Reference ID and contact phone number. (${fail.remainingAttempts} attempt(s) remaining)`,
+    };
+  });
+
+// -----------------------------------------------------------------------------
+// 10. SYSTEM HEALTH & TELEMETRY RPC (Redacted by default, Token-protected)
+// -----------------------------------------------------------------------------
+export const getSystemHealthFn = createServerFn({ method: "GET" })
+  .validator((data?: { token?: string }) => data || {})
+  .handler(async ({ data }) => {
+    const dbHealth = await checkDatabaseHealth();
+    const expectedToken = process.env.HEALTHCHECK_TOKEN || "page_secret_health_2026";
+    const isAuthorized = Boolean(data?.token && data.token === expectedToken);
+
+    // Unauthenticated: minimal status without infrastructure internals
+    if (!isAuthorized) {
+      return {
+        status: dbHealth.healthy ? "healthy" : "unhealthy",
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // Authenticated: full diagnostics for BetterStack / Uptime monitors
+    return {
+      status: dbHealth.healthy ? "healthy" : "unhealthy",
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: dbHealth.healthy,
+        latencyMs: dbHealth.latencyMs,
+        tablesOnline: dbHealth.tablesOnline,
+        migrationsApplied: dbHealth.migrationsApplied,
+        error: dbHealth.error,
+      },
+      system: {
+        nodeVersion: process.version,
+        uptimeSeconds: Math.floor(process.uptime()),
+        memoryUsageMb: Number((process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)),
+      },
     };
   });

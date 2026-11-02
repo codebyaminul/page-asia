@@ -11,6 +11,7 @@ const suites = [
   { name: "Admin Orders Management", script: "scratch/test_phase6_admin_orders.cjs", expected: 11 },
   { name: "Customer Profile & Password", script: "scratch/test_phase8_customer_profile.cjs", expected: 10 },
   { name: "Public Tracking Console", script: "scratch/test_phase9_public_tracking.cjs", expected: 9 },
+  { name: "Security & Reliability Architecture", script: "scratch/test_security_reliability.cjs", expected: 40 },
 ];
 
 console.log("\n==========================================================================");
@@ -57,7 +58,7 @@ console.table(results);
 
 console.log(`Total Automated Tests: ${totalPassed} / ${totalExpected} Passing`);
 console.log(`Total Execution Time:  ${totalTime}s`);
-console.log(`Final System Status:   ${failedSuites === 0 ? '\x1b[32mALL 7 TEST SUITES PASSED (100% COVERAGE)\x1b[0m' : '\x1b[31mFAILURES DETECTED\x1b[0m'}`);
+console.log(`Final System Status:   ${failedSuites === 0 ? '\x1b[32mALL 8 TEST SUITES PASSED (100% COVERAGE)\x1b[0m' : '\x1b[31mFAILURES DETECTED\x1b[0m'}`);
 console.log("==========================================================================\n");
 
 if (failedSuites > 0) {

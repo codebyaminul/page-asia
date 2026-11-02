@@ -9,6 +9,16 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "SAMEORIGIN",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+  "Content-Security-Policy":
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https: ws: wss:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
+};
+
 export default defineConfig(({ command }) => ({
   resolve: {
     alias: {
@@ -26,6 +36,7 @@ export default defineConfig(({ command }) => ({
   server: {
     host: "::",
     port: 8080,
+    headers: SECURITY_HEADERS,
   },
   plugins: [
     tailwindcss(),
@@ -36,6 +47,11 @@ export default defineConfig(({ command }) => ({
     command === "build"
       ? nitro({
           defaultPreset: "cloudflare-module",
+          routeRules: {
+            "/**": {
+              headers: SECURITY_HEADERS,
+            },
+          },
         })
       : null,
     viteReact(),

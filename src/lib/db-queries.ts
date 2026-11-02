@@ -264,12 +264,67 @@ export async function updateDbBookingStatus(id: string, status: ConsultBooking["
 }
 
 // -----------------------------------------------------------------------------
-// ORDERS & CHECKOUT
+// ORDERS & CHECKOUT (Server-Authoritative Pricing & Idempotency Protection)
 // -----------------------------------------------------------------------------
 export async function createDbOrder(data: any) {
   const orderId = data.id || `PG-${Math.floor(100000 + Math.random() * 900000)}`;
 
+  // Idempotency check: if order with this ID already exists, return cleanly
+  const [existingOrder] = await sql`
+    SELECT id FROM orders WHERE id = ${orderId} LIMIT 1
+  `;
+  if (existingOrder) {
+    return { success: true, orderId: existingOrder.id, deduplicated: true };
+  }
+
   await sql.begin(async (tx) => {
+    // 1. Fetch authoritative catalog prices & verify inventory with row locks
+    let calculatedSubtotal = 0;
+    const validatedLines: Array<{
+      productId: string;
+      productName: string;
+      productSku: string;
+      unitPrice: number;
+      qty: number;
+      slug: string;
+    }> = [];
+
+    for (const line of data.lines) {
+      const slug = line.product?.slug || line.productSlug || line.slug;
+      const [dbProd] = await tx`
+        SELECT id, name, sku, price, warehouse_qty
+        FROM products
+        WHERE slug = ${slug}
+        FOR UPDATE
+      `;
+
+      if (!dbProd) {
+        throw new Error(`Product "${slug}" does not exist in catalog.`);
+      }
+
+      if (dbProd.warehouse_qty < line.qty) {
+        throw new Error(`Insufficient stock for "${dbProd.name}". Requested ${line.qty} unit(s).`);
+      }
+
+      // Server-authoritative unit price (ignores any client-submitted price)
+      const unitPrice = Number(dbProd.price);
+      calculatedSubtotal += unitPrice * line.qty;
+
+      validatedLines.push({
+        productId: dbProd.id,
+        productName: dbProd.name,
+        productSku: dbProd.sku,
+        unitPrice,
+        qty: line.qty,
+        slug,
+      });
+    }
+
+    const deliveryCharge = Number(data.deliveryCharge) || 0;
+    const vatAmount = Number(data.vatAmount) || 0;
+    const calculatedTotal = calculatedSubtotal + deliveryCharge + vatAmount;
+
+    // 2. Insert order with server-computed authoritative totals
     await tx`
       INSERT INTO orders (
         id, customer_id, account_type, full_name, phone, email,
@@ -279,35 +334,31 @@ export async function createDbOrder(data: any) {
         ${orderId}, ${data.customerId || null}, ${data.accountType || "personal"}, ${data.fullName}, ${data.phone},
         ${data.email || null}, ${data.companyName || null}, ${data.binVatNumber || null},
         ${data.streetAddress}, ${data.city || "Dhaka"}, ${data.deliveryNotes || null},
-        ${data.paymentMethod || "cod"}, ${data.subtotal}, ${data.deliveryCharge || 0},
-        ${data.vatAmount || 0}, ${data.total}, 'pending'
+        ${data.paymentMethod || "cod"}, ${calculatedSubtotal}, ${deliveryCharge},
+        ${vatAmount}, ${calculatedTotal}, 'pending'
       )
     `;
 
-    for (const line of data.lines) {
+    // 3. Insert line items with authoritative prices & decrement warehouse stock
+    for (const item of validatedLines) {
       await tx`
         INSERT INTO order_items (
           order_id, product_id, product_name, product_sku, unit_price, qty
         ) VALUES (
           ${orderId},
-          (SELECT id FROM products WHERE slug = ${line.product.slug} LIMIT 1),
-          ${line.product.name},
-          ${line.product.sku},
-          ${line.product.price},
-          ${line.qty}
+          ${item.productId},
+          ${item.productName},
+          ${item.productSku},
+          ${item.unitPrice},
+          ${item.qty}
         )
       `;
 
-      const updateRes = await tx`
+      await tx`
         UPDATE products
-        SET warehouse_qty = warehouse_qty - ${line.qty}
-        WHERE slug = ${line.product.slug} AND warehouse_qty >= ${line.qty}
-        RETURNING warehouse_qty
+        SET warehouse_qty = warehouse_qty - ${item.qty}
+        WHERE id = ${item.productId}
       `;
-
-      if (updateRes.length === 0) {
-        throw new Error(`Insufficient stock for "${line.product.name}". Requested ${line.qty} unit(s).`);
-      }
     }
   });
 

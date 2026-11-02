@@ -1,4 +1,4 @@
-import { getCookie, setCookie, deleteCookie, getRequestIP } from "@tanstack/react-start/server";
+import { getCookie, setCookie, deleteCookie, getRequestIP, getRequestHeader } from "@tanstack/react-start/server";
 import { sql } from "./db.ts";
 import type { AdminUser } from "./admin-data.ts";
 import type { CustomerProfile } from "./db-queries.ts";
@@ -14,26 +14,80 @@ const isProd = process.env.NODE_ENV === "production";
 /**
  * Standard cookie configuration for enterprise security.
  * - HttpOnly: Inaccessible to document.cookie (prevents XSS theft)
- * - SameSite=Lax: Prevents cross-site request forgery
  * - Secure: True in production (HTTPS only)
  * - Path=/: Available across all routes
  */
-const DEFAULT_COOKIE_OPTIONS = {
+const BASE_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: isProd,
-  sameSite: "lax" as const,
   path: "/",
 };
 
 // -----------------------------------------------------------------------------
-// ADMIN SESSION COOKIE MANAGEMENT
+// CALLER IDENTIFICATION & CSRF ORIGIN CHECK
+// -----------------------------------------------------------------------------
+
+/**
+ * Retrieves the client IP address from request context or proxy headers.
+ */
+export function getClientIP(): string {
+  try {
+    const ip = getRequestIP();
+    if (ip) return ip;
+  } catch {}
+
+  try {
+    const forwarded = getRequestHeader("x-forwarded-for");
+    if (forwarded) {
+      return forwarded.split(",")[0].trim();
+    }
+    const realIp = getRequestHeader("x-real-ip");
+    if (realIp) return realIp.trim();
+  } catch {}
+
+  return "127.0.0.1";
+}
+
+/**
+ * Validates that an incoming state-mutating request matches the host origin
+ * to mitigate Cross-Site Request Forgery (CSRF).
+ */
+export function isOriginValid(): boolean {
+  try {
+    const host = getRequestHeader("host");
+    const origin = getRequestHeader("origin");
+    const referer = getRequestHeader("referer");
+
+    if (!host) return true; // Local development or test runner context
+
+    if (origin) {
+      const originHost = origin.replace(/^https?:\/\//, "").split(":")[0];
+      const hostOnly = host.split(":")[0];
+      return originHost === hostOnly;
+    }
+
+    if (referer) {
+      const refererHost = referer.replace(/^https?:\/\//, "").split("/")[0].split(":")[0];
+      const hostOnly = host.split(":")[0];
+      return refererHost === hostOnly;
+    }
+
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// ADMIN SESSION COOKIE MANAGEMENT (8-Hour TTL, SameSite=Strict)
 // -----------------------------------------------------------------------------
 
 export function setAdminSessionCookie(token: string) {
   try {
     setCookie(COOKIE_NAMES.admin, token, {
-      ...DEFAULT_COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      ...BASE_COOKIE_OPTIONS,
+      sameSite: "strict",
+      maxAge: 8 * 60 * 60, // 8 hours (High Security)
     });
   } catch (err) {
     console.warn("setAdminSessionCookie outside request context:", err);
@@ -87,13 +141,14 @@ export async function getAdminAuthContext(): Promise<AdminUser | null> {
 }
 
 // -----------------------------------------------------------------------------
-// CUSTOMER SESSION COOKIE MANAGEMENT
+// CUSTOMER SESSION COOKIE MANAGEMENT (30-Day TTL, SameSite=Lax)
 // -----------------------------------------------------------------------------
 
 export function setCustomerSessionCookie(token: string) {
   try {
     setCookie(COOKIE_NAMES.customer, token, {
-      ...DEFAULT_COOKIE_OPTIONS,
+      ...BASE_COOKIE_OPTIONS,
+      sameSite: "lax",
       maxAge: 30 * 24 * 60 * 60, // 30 days
     });
   } catch (err) {
